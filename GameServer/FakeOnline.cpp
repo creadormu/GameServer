@@ -1530,28 +1530,33 @@ void CFakeOnline::QuayLaiToaDoGoc(int aIndex) {
 	OFFEXP_DATA *info = this->GetOffExpInfo(lpObj); 
 	if (info != 0 && lpObj->Socket == INVALID_SOCKET) {
 		if (lpObj->State == OBJECT_DELCMD || lpObj->DieRegen != 0 || lpObj->Teleport != 0) { return; }
+		// Calculate actual distance from bot to hunting coordinates
 		int PhamViDiTrain = (int)sqrt(pow(((float)lpObj->X - (float)info->MapX), 2) + pow(((float)lpObj->Y - (float)info->MapY), 2));
 
-			if ((GetTickCount() >= static_cast<DWORD>(lpObj->IsFakeTimeLag) + 30000) &&
-				(GetTickCount() >= static_cast<DWORD>(lpObj->AttackCustomDelay) + 30000) &&
-				lpObj->IsFakeRegen &&
-				(GetTickCount() >= static_cast<DWORD>(lpObj->m_OfflineMoveDelay) + 30000)) {
+		// FIX: Lag detection - reset timers WITHOUT manipulating distance
+		if ((GetTickCount() >= static_cast<DWORD>(lpObj->IsFakeTimeLag) + 60000) &&
+			(GetTickCount() >= static_cast<DWORD>(lpObj->AttackCustomDelay) + 60000) &&
+			lpObj->IsFakeRegen &&
+			(GetTickCount() >= static_cast<DWORD>(lpObj->m_OfflineMoveDelay) + 60000)) {
 			
+			// Just reset the state, don't fake the distance!
 			lpObj->IsFakeRegen = false;
 			lpObj->IsFakeTimeLag = GetTickCount();
 			lpObj->m_OfflineMoveDelay = GetTickCount();
 			lpObj->AttackCustomDelay = GetTickCount();
-			PhamViDiTrain = (lpObj->IsFakeMoveRange + 10); 
-			LogAdd(LOG_BLUE, "[FakeOnline][%s] Fix Lag Reset Move", lpObj->Name);
+			LogAdd(LOG_BLUE, "[FakeOnline][%s] Lag timeout - resetting to search for target", lpObj->Name);
 		}
 
-		if (gGate.MapIsInGate(lpObj, info->GateNumber) == 0 || (PhamViDiTrain >= 100 && !lpObj->IsFakeRegen)) {
+		// FIX: Only teleport to gate if bot is REALLY far away or not in correct map
+		if (gGate.MapIsInGate(lpObj, info->GateNumber) == 0 || (PhamViDiTrain >= 150 && !lpObj->IsFakeRegen)) {
 			gObjMoveGate(lpObj->Index, info->GateNumber);
-			LogAdd(LOG_BLUE, "[FakeOnline][%s] Move Gate", lpObj->Name);
+			LogAdd(LOG_BLUE, "[FakeOnline][%s] Too far from hunting area, returning to Gate", lpObj->Name);
 			return;
 		}
+		
+		// FIX: Increase threshold and only trigger when bot is SIGNIFICANTLY beyond MoveRange
 		if (GetTickCount() >= lpObj->m_OfflineTimeResetMove + 2000) {
-			if ((PhamViDiTrain >= (lpObj->IsFakeMoveRange + 5) && !lpObj->IsFakeRegen) || gServerInfo.InSafeZone(lpObj->Index) == true) {
+			if ((PhamViDiTrain >= (lpObj->IsFakeMoveRange + 20) && !lpObj->IsFakeRegen) || gServerInfo.InSafeZone(lpObj->Index) == true) {
 				int DiChuyenX = lpObj->X;
 				int DiChuyenY = lpObj->Y;
 				for (int n = 0; n < 16; n++) { 
