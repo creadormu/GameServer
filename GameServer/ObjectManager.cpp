@@ -994,6 +994,25 @@ bool CObjectManager::CharacterGetRespawnLocation(LPOBJ lpObj) // OK
 
 	int gate,map,x,y,dir,level;
 
+	// FIX BUG #2: FakeOnline bots should respawn at their configured GateNumber
+	#if USE_FAKE_ONLINE == TRUE
+	if(lpObj->IsFakeOnline != 0 && lpObj->GateNumber > 0)
+	{
+		result = gGate.GetGate(lpObj->GateNumber,&gate,&map,&x,&y,&dir,&level);
+		
+		if(result != 0)
+		{
+			lpObj->Map = map;
+			lpObj->X = x;
+			lpObj->Y = y;
+			lpObj->Dir = dir;
+			LogAdd(LOG_BLUE, "[FakeOnline][%s] Respawn at configured GateNumber %d (Map:%d X:%d Y:%d)", lpObj->Name, lpObj->GateNumber, map, x, y);
+		}
+		
+		return result;
+	}
+	#endif
+
 	if(lpObj->KillAll != 0)
 	{
 		result = gEventKillAll.Respawn(lpObj,&gate,&map,&x,&y,&dir,&level);
