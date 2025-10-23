@@ -1990,14 +1990,34 @@ void CFakeOnline::TuDongDanhSkill(int aIndex)
              this->m_botPVPCombatStates[aIndex].saidInitialPVPPhrase = false; 
         }
 
-		// Handle Elf skills: FIVE_SHOT and ICE_ARROW need duration skill attack
-		if (SkillRender->m_skill == SKILL_FIVE_SHOT || SkillRender->m_skill == SKILL_ICE_ARROW) {
-			LogAdd(LOG_GREEN, "[FakeOnline][%s] Using Elf duration skill attack: %d", lpObj->Name, SkillRender->m_skill);
+		// Duration skills (single target with duration animation)
+		if (SkillRender->m_skill == SKILL_TWISTING_SLASH || SkillRender->m_skill == SKILL_ICE_STORM || 
+			SkillRender->m_skill == SKILL_FIVE_SHOT || SkillRender->m_skill == SKILL_ICE_ARROW ||
+			SkillRender->m_skill == SKILL_RED_STORM || SkillRender->m_skill == SKILL_SWORD_SLASH ||
+			SkillRender->m_skill == SKILL_LIGHTNING_STORM || SkillRender->m_skill == SKILL_DRAGON_LORE) {
+			LogAdd(LOG_GREEN, "[FakeOnline][%s] Using duration skill attack: %d", lpObj->Name, SkillRender->m_skill);
+			this->SendDurationSkillAttack(lpObj, targetIndex, SkillRender->m_index);
+		}
+		// Skills that need both GCSkillAttackSend + Duration (POWER_SLASH, BIRDS)
+		else if (SkillRender->m_skill == SKILL_POWER_SLASH || SkillRender->m_skill == SKILL_BIRDS) {
+			gSkillManager.GCSkillAttackSend(lpObj, SkillRender->m_index, targetIndex, 1);
 			this->SendDurationSkillAttack(lpObj, targetIndex, SkillRender->m_index);
 		}
 		// Multi-attack skills (area/multi-target)
-		else if (SkillRender->m_skill == SKILL_FLAME || SkillRender->m_skill == SKILL_TWISTER || SkillRender->m_skill == SKILL_EVIL_SPIRIT || SkillRender->m_skill == SKILL_HELL_FIRE || SkillRender->m_skill == SKILL_AQUA_BEAM || SkillRender->m_skill == SKILL_BLAST || SkillRender->m_skill == SKILL_INFERNO || SkillRender->m_skill == SKILL_TRIPLE_SHOT || SkillRender->m_skill == SKILL_IMPALE || SkillRender->m_skill == SKILL_MONSTER_AREA_ATTACK || SkillRender->m_skill == SKILL_PENETRATION || SkillRender->m_skill == SKILL_FIRE_SLASH || SkillRender->m_skill == SKILL_FIRE_SCREAM) {
+		else if (SkillRender->m_skill == SKILL_FLAME || SkillRender->m_skill == SKILL_TWISTER || 
+			SkillRender->m_skill == SKILL_EVIL_SPIRIT || SkillRender->m_skill == SKILL_HELL_FIRE || 
+			SkillRender->m_skill == SKILL_AQUA_BEAM || SkillRender->m_skill == SKILL_BLAST || 
+			SkillRender->m_skill == SKILL_INFERNO || SkillRender->m_skill == SKILL_TRIPLE_SHOT || 
+			SkillRender->m_skill == SKILL_IMPALE || SkillRender->m_skill == SKILL_MONSTER_AREA_ATTACK || 
+			SkillRender->m_skill == SKILL_PENETRATION || SkillRender->m_skill == SKILL_FIRE_SLASH || 
+			SkillRender->m_skill == SKILL_FIRE_SCREAM || SkillRender->m_skill == SKILL_DEATH_STAB ||
+			SkillRender->m_skill == SKILL_FIRE_BURST) {
 			this->SendMultiSkillAttack(lpObj, targetIndex, SkillRender->m_index); 
+		}
+		// Simple skill attack (FORCE, CHAIN_LIGHTNING, etc.)
+		else if (SkillRender->m_skill == SKILL_FORCE || SkillRender->m_skill == SKILL_CHAIN_LIGHTNING ||
+			SkillRender->m_skill == SKILL_LARGE_RING_BLOWER || SkillRender->m_skill == SKILL_PHOENIX_SHOT) {
+			this->SendSkillAttack(lpObj, targetIndex, SkillRender->m_index);
 		}
 		// Rage Fighter special skill
 		else if (SkillRender->m_skill == SKILL_DARK_SIDE) {
