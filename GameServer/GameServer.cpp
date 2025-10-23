@@ -1220,14 +1220,14 @@ bool CreateMultipleBotsAdvanced(int botCount, int startFrom, int gateNumber, int
 			"SkillID=\"%d\" SecondarySkillID=\"%d\" "
 			"UseBuffs_0=\"%d\" UseBuffs_1=\"%d\" UseBuffs_2=\"%d\" "
 			"GateNumber=\"%d\" Map=\"%d\" MapX=\"%d\" MapY=\"%d\" "
-			"PhamViTrain=\"%d\" MoveRange=\"%d\" TimeReturn=\"%d\" "
+			"MoveRange=\"%d\" TimeReturn=\"%d\" "
 			"TuNhatItem=\"%d\" TuDongReset=\"%d\" "
 			"PartyMode=\"%d\" PVPMode=\"%d\" PostKhiDie=\"%d\" />\n",
 			bot->account, bot->charName,
 			bot->classInfo->mainSkill, bot->classInfo->secondarySkill,
 			bot->classInfo->buff1, bot->classInfo->buff2, bot->classInfo->buff3,
 			gateNumber, mapNumber, bot->finalMapX, bot->finalMapY,
-			phamViTrain, moveRange, timeReturn,
+			moveRange, timeReturn,
 			tuNhatItem, tuDongReset,
 			partyMode, pvpMode, postKhiDie
 		);

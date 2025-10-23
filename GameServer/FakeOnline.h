@@ -23,7 +23,6 @@ struct OFFEXP_DATA
 	int Map;
 	int MapX;
 	int MapY;
-	int PhamViTrain;
 	int TimeReturn;
 	int PostKhiDie;
 	int PVPMode; 
@@ -115,14 +114,14 @@ public:
 	int AccountsRestored;
 	DWORD TimeFakeLogIn;
     std::map<int, BotActivePVPCombatState> m_botPVPCombatStates; 
-	//void CheckAutoReset(LPOBJ lpObj); // Asegúrate que esta línea exista
+	//void CheckAutoReset(LPOBJ lpObj); // Asegï¿½rate que esta lï¿½nea exista
 
 private:
 	std::string GetItemName(int itemType);
 	std::string ReplaceTradePlaceholders(const std::string& phrase, const std::string& botAccount);
 	DWORD m_dwLastCommentTick[MAX_OBJECT];
 	DWORD m_dwLastPlayerNearbyCommentTick[MAX_OBJECT]; // Nuevo cooldown
-	DWORD m_dwLastLocalChatTick[MAX_OBJECT]; // <-- AÑADE ESTA LÍNEA
+	DWORD m_dwLastLocalChatTick[MAX_OBJECT]; // <-- Aï¿½ADE ESTA Lï¿½NEA
     CRITICAL_SECTION m_BotDataMutex;
 
 };
@@ -137,7 +136,7 @@ extern std::vector<std::string> g_BotPhrasesNear;
 extern std::vector<std::string> g_BotPhrasesInParty; 
 extern std::vector<std::string> g_BotPhrasesPVP;
 extern std::vector<std::string> g_BotPhrasesTrade;
-// NUEVO: Frases según hora del día
+// NUEVO: Frases segï¿½n hora del dï¿½a
 extern std::vector<std::string> g_BotPhrasesMorning;
 extern std::vector<std::string> g_BotPhrasesAfternoon;
 extern std::vector<std::string> g_BotPhrasesNight;
@@ -150,11 +149,11 @@ extern int g_ProbNearRealPlayer;
 extern int g_ProbInParty;
 extern int g_ProbPVP;
 extern int g_ProbTrade;
-// NUEVO: Probabilidades para hora del día
+// NUEVO: Probabilidades para hora del dï¿½a
 extern int g_ProbMorning;
 extern int g_ProbAfternoon;
 extern int g_ProbNight;
-extern int g_ProbMapSpecificBase; // Probabilidad si solo aplica estar en un mapa con frases específicas
+extern int g_ProbMapSpecificBase; // Probabilidad si solo aplica estar en un mapa con frases especï¿½ficas
 
 extern CFakeOnline s_FakeOnline;
 

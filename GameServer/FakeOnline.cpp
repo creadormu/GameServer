@@ -292,7 +292,7 @@ void CFakeOnline::LoadFakeData(char* path)
 			info.MainAttackSkillID = rInfoData.attribute("SkillID").as_int(0); info.SecondaryAttackSkillID = rInfoData.attribute("SecondarySkillID").as_int(0); info.PVPMode = rInfoData.attribute("PVPMode").as_int(0);
             info.UseBuffs[0] = rInfoData.attribute("UseBuffs_0").as_int(0); info.UseBuffs[1] = rInfoData.attribute("UseBuffs_1").as_int(0); info.UseBuffs[2] = rInfoData.attribute("UseBuffs_2").as_int(0);
             info.GateNumber = rInfoData.attribute("GateNumber").as_int(0); info.MapX = rInfoData.attribute("MapX").as_int(125); info.MapY = rInfoData.attribute("MapY").as_int(125);
-            info.PhamViTrain = rInfoData.attribute("PhamViTrain").as_int(0); info.MoveRange = rInfoData.attribute("MoveRange").as_int(0); info.TimeReturn = rInfoData.attribute("TimeReturn").as_int(0);
+            info.MoveRange = rInfoData.attribute("MoveRange").as_int(0); info.TimeReturn = rInfoData.attribute("TimeReturn").as_int(0);
             info.TuNhatItem = rInfoData.attribute("TuNhatItem").as_int(0); info.TuDongReset = rInfoData.attribute("TuDongReset").as_int(0);
             info.PartyMode = rInfoData.attribute("PartyMode").as_int(0); info.PostKhiDie = rInfoData.attribute("PostKhiDie").as_int(0);
 			info.Map = rInfoData.attribute("Map").as_int(0);
@@ -1533,30 +1533,19 @@ void CFakeOnline::QuayLaiToaDoGoc(int aIndex) {
 		// Calculate actual distance from bot to hunting coordinates
 		int PhamViDiTrain = (int)sqrt(pow(((float)lpObj->X - (float)info->MapX), 2) + pow(((float)lpObj->Y - (float)info->MapY), 2));
 
-		// FIX: Lag detection - reset timers WITHOUT manipulating distance
-		if ((GetTickCount() >= static_cast<DWORD>(lpObj->IsFakeTimeLag) + 60000) &&
-			(GetTickCount() >= static_cast<DWORD>(lpObj->AttackCustomDelay) + 60000) &&
-			lpObj->IsFakeRegen &&
-			(GetTickCount() >= static_cast<DWORD>(lpObj->m_OfflineMoveDelay) + 60000)) {
-			
-			// Just reset the state, don't fake the distance!
-			lpObj->IsFakeRegen = false;
-			lpObj->IsFakeTimeLag = GetTickCount();
-			lpObj->m_OfflineMoveDelay = GetTickCount();
-			lpObj->AttackCustomDelay = GetTickCount();
-			LogAdd(LOG_BLUE, "[FakeOnline][%s] Lag timeout - resetting to search for target", lpObj->Name);
-		}
-
-		// FIX: Only teleport to gate if bot is REALLY far away or not in correct map
-		if (gGate.MapIsInGate(lpObj, info->GateNumber) == 0 || (PhamViDiTrain >= 150 && !lpObj->IsFakeRegen)) {
+		// COMPLETE FIX: Only teleport to gate if on wrong map or extremely far from hunting zone
+		// Remove the MapIsInGate check that was breaking natural walking behavior
+		if (lpObj->Map != info->Map || PhamViDiTrain >= 200) {
 			gObjMoveGate(lpObj->Index, info->GateNumber);
-			LogAdd(LOG_BLUE, "[FakeOnline][%s] Too far from hunting area, returning to Gate", lpObj->Name);
+			LogAdd(LOG_BLUE, "[FakeOnline][%s] Emergency return to Gate (Map:%d WrongMap:%d Distance:%d)", lpObj->Name, lpObj->Map, lpObj->Map != info->Map, PhamViDiTrain);
 			return;
 		}
 		
-		// FIX: Increase threshold and only trigger when bot is SIGNIFICANTLY beyond MoveRange
+		// Natural walk from gate to hunting coordinates
 		if (GetTickCount() >= lpObj->m_OfflineTimeResetMove + 2000) {
-			if ((PhamViDiTrain >= (lpObj->IsFakeMoveRange + 20) && !lpObj->IsFakeRegen) || gServerInfo.InSafeZone(lpObj->Index) == true) {
+			// Only trigger return if bot has reached hunting zone AND wandered too far
+			// Remove the safe zone check that was teleporting bots from gate
+			if (PhamViDiTrain >= (lpObj->IsFakeMoveRange + 20) && lpObj->IsFakeRegen) {
 				int DiChuyenX = lpObj->X;
 				int DiChuyenY = lpObj->Y;
 				for (int n = 0; n < 16; n++) { 
