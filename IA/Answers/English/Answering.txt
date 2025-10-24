@@ -1,0 +1,100 @@
+; Answering.txt - English
+; Keyword response system
+; Format:
+; #CATEGORY
+; keyword1
+; keyword2
+; >>>
+; response1
+; response2
+
+#GREETING
+hello
+hi
+hey
+greetings
+sup
+>>>
+Hello! How are you?
+Hey! What's up?
+Greetings warrior!
+Hi friend!
+Hey! What's going on?
+
+#PARTY
+party
+pt
+group
+team
+>>>
+Sure, send me an invite!
+Yes, let's go!
+Alright, I accept!
+OK, let's party
+With pleasure!
+
+#TRADE
+trade
+sell
+buy
+exchange
+>>>
+What are you looking for?
+Tell me what you need
+I can help you
+Check my inventory
+What do you offer?
+
+#HELP
+help
+assist
+aid
+>>>
+How can I help?
+Tell me what you need
+I'm here to help
+What's wrong?
+
+#GOODBYE
+goodbye
+bye
+cya
+see you
+later
+>>>
+See you later!
+Bye! Take care
+See you!
+Goodbye friend
+Have a good one!
+
+#LEVEL
+level
+lvl
+>>>
+I'm level {level}
+Leveling up
+Training hard
+Almost leveling up
+
+#LOCATION
+where
+location
+map
+>>>
+I'm at {map}
+Around here
+On this map
+Find me at {map}
+
+#THANKS
+thanks
+thx
+ty
+thank you
+>>>
+You're welcome!
+My pleasure!
+That's what we're here for
+No problem!
+Always happy to help

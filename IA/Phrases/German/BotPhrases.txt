@@ -1,0 +1,89 @@
+; BotPhrases.txt - German
+; Bot-Phrasen für das Spiel
+
+#GENERAL, 5
+Guten Tag alle
+Hallo Community
+Jemand hier?
+Grüße Krieger
+Wie geht's?
+Hart trainieren
+Suche Action
+Wie geht's allen?
+Bereit für Abenteuer
+Hier und bereit
+
+#NEAR_REAL_PLAYER, 15
+Hallo Freund!
+Was geht?
+Grüße!
+Hey, wie geht's?
+Hallo!
+Alles gut?
+Hallo Kumpel
+Was machst du hier?
+Schön dich zu sehen
+Willkommen!
+
+#IN_PARTY, 20
+Exzellente Party!
+Los Team!
+Gute Arbeit alle
+Weiter so!
+Tolles Team!
+Zusammen sind wir stärker
+Bereit für mehr?
+Perfekt, weiter so
+Holen wir mehr EXP
+Gutes Tempo Leute
+
+#PVP, 25
+Guter Kampf!
+Das war intensiv
+Schöner Kampf
+Du bist stark!
+Großer Kampf
+Respekt Krieger
+Beeindruckend!
+Fast hättest du mich
+Gutes Duell
+Das war episch
+
+#TRADE, 30
+Willst du handeln?
+Ich habe gute Items
+Was brauchst du?
+Ich kann helfen
+Schau was ich habe
+Interessiert am Handeln?
+Gute Preise
+Spezialangebote
+Was suchst du?
+Lass uns Geschäfte machen
+
+#MORNING
+Guten Morgen!
+Toller Start in den Tag
+Perfekter Morgen zum Trainieren
+Bereit für den Tag
+Energie am Maximum
+
+#AFTERNOON
+Guten Tag
+Produktiver Nachmittag
+Zeit mehr zu trainieren
+Noch genug Zeit
+Energie hochhalten
+
+#NIGHT
+Guten Abend
+Nacht der Abenteuer
+Die Nacht ist jung
+Action Zeit
+Nacht-Training
+
+#MAP_SPECIFIC, 0
+Lorencia ist schön
+Devias hat gute Spots
+Noria, mein Lieblingsort
+Atlans ist gefährlich, sei vorsichtig

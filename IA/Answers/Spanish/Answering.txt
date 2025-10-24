@@ -1,0 +1,100 @@
+; Answering.txt - Spanish
+; Sistema de respuestas por palabras clave
+; Formato:
+; #CATEGORIA
+; palabra_clave1
+; palabra_clave2
+; >>>
+; respuesta1
+; respuesta2
+
+#SALUDO
+hola
+hey
+buenas
+saludos
+>>>
+Hola! ¿Cómo estás?
+Hey! Qué tal?
+Saludos guerrero!
+Hola amigo!
+Buenas! ¿Qué hay?
+
+#PARTY
+party
+pt
+grupo
+team
+equipo
+>>>
+Claro, enviame invite!
+Sí, vamos!
+Dale, acepto!
+OK, hagamos party
+Con gusto!
+
+#TRADE
+trade
+cambio
+vender
+comprar
+>>>
+¿Qué buscas?
+Dime qué necesitas
+Puedo ayudarte
+Mira mi inventario
+¿Qué ofreces?
+
+#AYUDA
+ayuda
+help
+auxilio
+>>>
+¿En qué puedo ayudar?
+Dime qué necesitas
+Estoy aquí para ayudar
+¿Qué te pasa?
+
+#DESPEDIDA
+adiós
+chao
+bye
+nos vemos
+>>>
+Hasta luego!
+Chao! Cuídate
+Nos vemos!
+Adiós amigo
+Que te vaya bien!
+
+#LEVEL
+level
+nivel
+lvl
+>>>
+Voy nivel {level}
+Subiendo de nivel
+Entrenando duro
+Casi subo de nivel
+
+#LOCATION
+donde
+ubicación
+map
+mapa
+>>>
+Estoy en {map}
+Por aquí cerca
+En este mapa
+Buscame en {map}
+
+#AGRADECIMIENTO
+gracias
+thx
+thanks
+>>>
+De nada!
+Con gusto!
+Para eso estamos
+No hay problema!
+Siempre a la orden

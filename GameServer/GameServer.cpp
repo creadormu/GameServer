@@ -41,6 +41,7 @@
 #include "Path.h"
 #include "ClassConfig.h"
 #include "NameManager.h"
+#include "PhraseManager.h"
 
 
 TCHAR szTitle[MAX_LOADSTRING];
@@ -79,6 +80,8 @@ int APIENTRY WinMain(HINSTANCE hInstance,HINSTANCE hPrevInstance,LPSTR lpCmdLine
 	g_ClassConfigManager.Initialize();
 	// Initialize name manager
 	g_NameManager.Initialize();
+	// Initialize phrase manager
+	g_PhraseManager.Initialize();
 
 	#if(PROTECT_STATE==1)
 
@@ -919,19 +922,33 @@ INT_PTR CALLBACK CreateBotsDialogProc(HWND hDlg, UINT message, WPARAM wParam, LP
 	}
 	else if (LOWORD(wParam) == IDC_COMBO_LANGUAGE && HIWORD(wParam) == CBN_SELCHANGE)
 	{
-		// Language selection changed - reload names
+		// Language selection changed - reload names AND phrases
 		int selIdx = (int)SendMessage(hComboLanguage, CB_GETCURSEL, 0, 0);
 		if (selIdx != CB_ERR)
 		{
 			char langName[50];
 			SendMessage(hComboLanguage, CB_GETLBTEXT, selIdx, (LPARAM)langName);
-			if (g_NameManager.LoadLanguage(langName))
+			
+			bool namesOK = g_NameManager.LoadLanguage(langName);
+			bool phrasesOK = g_PhraseManager.LoadLanguage(langName);
+			
+			if (namesOK || phrasesOK)
 			{
-				LogAdd(LOG_GREEN, "[CreateBots] Language changed to: %s", langName);
+				LogAdd(LOG_GREEN, "[Language] Changed to: %s (Names: %s, Phrases: %s)", 
+					langName, 
+					namesOK ? "OK" : "FALLBACK",
+					phrasesOK ? "OK" : "FALLBACK");
+				
+				// Reload bot phrases and answers with new language
+				#if USE_FAKE_ONLINE == TRUE
+				LoadBotPhrasesFromFile(g_PhraseManager.GetBotPhrasesPath());
+				LoadBotKeywordResponses(g_PhraseManager.GetAnsweringPath());
+				LogAdd(LOG_GREEN, "[Language] Bot phrases and answers reloaded");
+				#endif
 			}
 			else
 			{
-				LogAdd(LOG_RED, "[CreateBots] Failed to load language: %s", langName);
+				LogAdd(LOG_RED, "[Language] Failed to load language: %s", langName);
 			}
 		}
 		return TRUE;

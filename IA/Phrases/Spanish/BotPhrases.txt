@@ -1,0 +1,91 @@
+; BotPhrases.txt - Spanish
+; Frases que los bots dicen durante el juego
+; Formato: #CATEGORIA, probabilidad
+; Luego las frases, una por línea
+
+#GENERAL, 5
+Buen día a todos
+Hola comunidad
+¿Alguien por aquí?
+Saludos guerreros
+¿Qué tal el día?
+Entrenando duro
+Buscando acción
+¿Cómo va todo?
+Listo para la aventura
+Aquí presente
+
+#NEAR_REAL_PLAYER, 15
+Hola amigo!
+¿Qué tal?
+Saludos!
+Hey, ¿cómo estás?
+Buenas!
+¿Todo bien?
+Hola compañero
+¿Qué haces por aquí?
+Gusto en verte
+Bienvenido!
+
+#IN_PARTY, 20
+Excelente party!
+Vamos equipo!
+Buen trabajo todos
+Sigamos así!
+Gran equipo!
+Unidos somos más fuertes
+¿Listos para más?
+Perfecto, sigamos
+Vamos por más EXP
+Buen ritmo chicos
+
+#PVP, 25
+Buen combate!
+Eso estuvo intenso
+Buena pelea
+Eres fuerte!
+Gran batalla
+Respeto guerrero
+Impresionante!
+Casi me ganas
+Buen duelo
+Eso fue épico
+
+#TRADE, 30
+¿Buscas cambiar algo?
+Tengo buenos items
+¿Qué necesitas?
+Puedo ayudarte
+Mira lo que tengo
+¿Interesado en comerciar?
+Buenos precios
+Ofertas especiales
+¿Qué buscas?
+Hablemos de negocios
+
+#MORNING
+Buenos días!
+Buen inicio de día
+Mañana perfecta para entrenar
+Listo para el día
+Energía al máximo
+
+#AFTERNOON
+Buenas tardes
+Tarde productiva
+Hora de entrenar más
+Aún hay tiempo
+Sigamos con energía
+
+#NIGHT
+Buenas noches
+Noche de aventuras
+La noche es joven
+Hora de acción
+Entrenamiento nocturno
+
+#MAP_SPECIFIC, 0
+Lorencia es hermosa
+Devias tiene buenos spots
+Noria, mi lugar favorito
+Atlans es peligroso, cuidado

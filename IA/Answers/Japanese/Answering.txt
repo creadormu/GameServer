@@ -1,0 +1,67 @@
+; Answering.txt - Japanese (Romaji)
+; キーワード応答システム
+
+#GREETING
+konnichiwa
+ohayo
+konbanwa
+yaa
+>>>
+Konnichiwa! Genki?
+Yaa! Genki?
+Yoroshiku senshi!
+Konnichiwa tomodachi!
+Yaa! Nani?
+
+#PARTY
+party
+pt
+team
+>>>
+Mochiron, invite shite!
+Hai, ikou!
+OK, ukeru!
+OK, party shiyou
+Yorokonde!
+
+#TRADE
+trade
+uru
+kau
+>>>
+Nani sagashiteru?
+Nani ga hitsuyou ka oshiete
+Tetsudaeru yo
+Inventory mite
+Nani offer suru?
+
+#HELP
+help
+tasukete
+>>>
+Dou tetsudaeru?
+Nani ga hitsuyou?
+Tasukeru yo
+Doushita?
+
+#GOODBYE
+sayonara
+baibai
+ja ne
+mata ne
+>>>
+Mata ne!
+Baibai! Ki wo tsukete
+Ja ne!
+Sayonara tomodachi
+Ganbatte!
+
+#THANKS
+arigatou
+thanks
+>>>
+Dou itashimashite!
+Yorokonde!
+Sore ga watashitachi no shigoto
+Mondai nai!
+Itsumo yorokonde
