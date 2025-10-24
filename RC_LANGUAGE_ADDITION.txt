@@ -1,0 +1,64 @@
+========================================================================
+ADD THIS TO GameServer.rc - IDD_CREATEBOTS Dialog
+========================================================================
+
+LOCATION: After line 477 (after the IDC_COMBO_CLASS combobox)
+
+INSERT THESE TWO LINES:
+
+LTEXT           "Bot Names Language:", IDC_STATIC, 20, 85, 75, 8
+COMBOBOX        IDC_COMBO_LANGUAGE, 100, 83, 130, 100, CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+
+
+========================================================================
+COMPLETE SECTION SHOULD LOOK LIKE THIS:
+========================================================================
+
+LTEXT           "Class:", IDC_STATIC, 20, 70, 70, 8
+COMBOBOX        IDC_COMBO_CLASS, 100, 68, 130, 100, CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+
+LTEXT           "Bot Names Language:", IDC_STATIC, 20, 85, 75, 8
+COMBOBOX        IDC_COMBO_LANGUAGE, 100, 83, 130, 100, CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+
+GROUPBOX        "Spawn Location", IDC_STATIC, 250, 10, 240, 90
+
+========================================================================
+HOW TO ADD IT IN VISUAL STUDIO:
+========================================================================
+
+OPTION 1 - Edit .rc file directly in text editor:
+1. Close Visual Studio
+2. Open GameServer.rc with Notepad++
+3. Find line 477 (COMBOBOX IDC_COMBO_CLASS)
+4. After that line, add the two new lines above
+5. Save and reopen in Visual Studio
+
+OPTION 2 - Use Visual Studio Resource Editor:
+1. Open GameServer.rc in Visual Studio
+2. Double-click IDD_CREATEBOTS dialog
+3. From Toolbox, drag a "Static Text" control
+4. Place it at X=20, Y=85, Width=75, Height=8
+5. Set text to: "Bot Names Language:"
+6. From Toolbox, drag a "Combo Box" control
+7. Place it at X=100, Y=83, Width=130, Height=100
+8. Right-click > Properties
+9. Set ID to: IDC_COMBO_LANGUAGE
+10. Set Type to: Drop List
+11. Enable: Vertical scroll
+12. Save
+
+========================================================================
+ALTERNATIVE: Manual .rc file edit with correct coordinates
+========================================================================
+
+Position Details:
+- Label X: 20 (aligned with "Class:" label above)
+- Label Y: 85 (15 pixels below "Class:")
+- Combo X: 100 (aligned with Class combo above)
+- Combo Y: 83
+- Both in "Basic Configuration" groupbox
+
+This will add the language dropdown between Class selection and 
+the Spawn Location groupbox.
+
+========================================================================
