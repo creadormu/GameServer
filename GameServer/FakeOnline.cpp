@@ -737,38 +737,25 @@ void CFakeOnline::RestoreFakeOnline()
             LogAdd(LOG_RED, "[FakeOnline]  [TK: %s NV: %s][Cls:%d] Da Online Vao Server. PVPMode:%d. PhysiSpeed:%d. DBClass:%d", 
                    it->second.Account, it->second.Name, lpObj->Class, lpObj->IsFakePVPMode, lpObj->PhysiSpeed, lpObj->DBClass);
 		
-			// === FIX BUG #1: Bot should spawn at GateNumber, not at hunting coordinates ===
-			
-			// ASIGNA EL GATENUMBER PARA L�GICA DE MOVIMIENTO
+			// Spawn bot at hunting coordinates (ORIGINAL BEHAVIOR - WORKING)
+			lpObj->Map = it->second.Map;
+			lpObj->X = it->second.MapX;
+			lpObj->Y = it->second.MapY;
+
+			// Store GateNumber for death respawn
 			lpObj->GateNumber = it->second.GateNumber;
 
-			// Get gate spawn location (safe zone)
 			GATE_INFO gateInfo = { 0 };
 			if (gGate.GetInfo(lpObj->GateNumber, &gateInfo))
 			{
-				// Spawn bot at gate location (safe zone) - CORRECT BEHAVIOR
-				lpObj->Map = gateInfo.Map;
-				lpObj->X = gateInfo.X;
-				lpObj->Y = gateInfo.Y;
-				
-				// Store gate coordinates for respawn reference
 				lpObj->MoveRangeStartX = gateInfo.X;
 				lpObj->MoveRangeStartY = gateInfo.Y;
 				lpObj->MoveRangeEndX = gateInfo.TX;
 				lpObj->MoveRangeEndY = gateInfo.TY;
 			}
-			else
-			{
-				// Fallback: if gate not found, use configured coordinates
-				LogAdd(LOG_RED, "[FakeOnline][ERROR] GateNumber %d not found for bot %s, using Map coordinates", it->second.GateNumber, it->second.Name);
-				lpObj->Map = it->second.Map;
-				lpObj->X = it->second.MapX;
-				lpObj->Y = it->second.MapY;
-			}
 
 			gObjViewportListCreate(lpObj->Index);
 			gObjViewportListProtocolCreate(lpObj);
-
 
 			LogAdd(LOG_RED, "[FakeOnline]  [TK: %s NV: %s][Cls:%d] Online at Map:%d X:%d Y:%d Gate:%d", it->second.Account, it->second.Name, lpObj->Class, lpObj->Map, lpObj->X, lpObj->Y, lpObj->GateNumber);
 		}
