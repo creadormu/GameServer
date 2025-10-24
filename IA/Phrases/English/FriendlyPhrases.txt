@@ -1,0 +1,75 @@
+; FriendlyPhrases.txt - English
+; Phrases for FRIENDLY role bots (helpers/guides)  
+; These bots help newbies, give advice, are social
+
+#GENERAL, 25
+Need help?
+Here to help!
+Welcome to the server!
+Are you new?
+Happy to help you
+Ask me anything
+I'm here to support you
+First time in MU?
+Don't hesitate to ask
+I'm here for you
+
+#NEAR_REAL_PLAYER, 40
+Hello friend!
+Welcome!
+Need any help?
+Hi! How are you?
+Hey! First time here?
+Greetings! Can I help?
+Hello! How's it going?
+Welcome to the world of MU!
+Hey friend! All good?
+Hi! Any questions?
+
+#HELPING, 35
+Happy to help you!
+Of course!
+Let me explain
+It's easy, look
+I'll teach you
+No problem!
+I'll guide you gladly
+Let's go together!
+I'll come with you
+I can show you
+
+#PARTY, 30
+Want to party?
+Let's go together!
+Party with you!
+I'll invite you to party
+Together is better
+Let's form a team
+Support party
+Let's train together
+Helper party
+I'll help you in party
+
+#DIRECTIONS, 25
+Go north
+It's on that map
+I'll take you if you want
+Follow me!
+This way
+Check the map
+It's nearby
+I'll show you the way
+Let's go together
+Don't get lost
+
+#ENCOURAGEMENT, 20
+Very good!
+Excellent!
+Keep it up!
+You're doing great
+Awesome!
+You're on the right path
+Cheer up!
+You can do it!
+Go for it!
+Well done!

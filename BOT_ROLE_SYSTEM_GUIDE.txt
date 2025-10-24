@@ -1,0 +1,499 @@
+╔══════════════════════════════════════════════════════════════════════════╗
+║                   🎭 BOT ROLE SYSTEM - COMPLETE GUIDE 🎭                ║
+║              Warrior • Merchant • Friendly Behaviors                     ║
+╚══════════════════════════════════════════════════════════════════════════╝
+
+═══════════════════════════════════════════════════════════════════════════
+                        SYSTEM OVERVIEW
+═══════════════════════════════════════════════════════════════════════════
+
+Your bots can now have DIFFERENT BEHAVIORS based on their ROLE!
+
+🗡️ WARRIOR  - Combat-focused (default)
+💰 MERCHANT - Trading-focused  
+😊 FRIENDLY - Helper-focused
+
+Each role has:
+  • Different movement patterns
+  • Different chat behaviors
+  • Different priorities
+  • Different phrases
+  • Different locations
+
+═══════════════════════════════════════════════════════════════════════════
+                        🗡️ WARRIOR ROLE
+═══════════════════════════════════════════════════════════════════════════
+
+PURPOSE: Traditional combat bot
+BEHAVIOR: Hunts monsters, levels up, does PVP
+
+┌─────────────────────────────────────────────────────────────────────────┐
+│  CHARACTERISTICS:                                                         │
+├─────────────────────────────────────────────────────────────────────────┤
+│  Time Distribution:                                                       │
+│    • 80% hunting in training zones                                       │
+│    • 20% in safe zones (resting, organizing)                            │
+│                                                                           │
+│  Abilities:                                                               │
+│    ✅ Can hunt monsters                                                  │
+│    ✅ Can do PVP (if configured)                                         │
+│    ✅ Joins parties                                                      │
+│    ✅ Uses combat skills                                                 │
+│    ✅ Levels up actively                                                 │
+│    ❌ Does NOT trade                                                     │
+│    ❌ Does NOT advertise                                                 │
+│                                                                           │
+│  Chat Behavior:                                                           │
+│    • Normal frequency (1x multiplier)                                    │
+│    • Combat-related phrases                                              │
+│    • Party coordination                                                  │
+│    • PVP taunts/respect                                                  │
+│                                                                           │
+│  Movement:                                                                │
+│    • Trains in assigned zones                                            │
+│    • Wander radius: 30 tiles                                             │
+│    • Returns to spawn after 60 minutes                                   │
+│    • Can go anywhere (no map restrictions)                               │
+└─────────────────────────────────────────────────────────────────────────┘
+
+EXAMPLE BEHAVIOR:
+  1. Spawns in Lorencia
+  2. Goes to training zone (Dungeon, Devias)
+  3. Hunts monsters for 45 minutes
+  4. Says combat phrases occasionally
+  5. Joins party if invited
+  6. Does PVP if configured
+  7. Returns to safe zone briefly
+  8. Goes back to hunting
+
+═══════════════════════════════════════════════════════════════════════════
+                        💰 MERCHANT ROLE
+═══════════════════════════════════════════════════════════════════════════
+
+PURPOSE: Trading bot for jewels
+BEHAVIOR: Advertises trades, stays in safe zones, trades jewels
+
+┌─────────────────────────────────────────────────────────────────────────┐
+│  CHARACTERISTICS:                                                         │
+├─────────────────────────────────────────────────────────────────────────┤
+│  Time Distribution:                                                       │
+│    • 80% in SAFE ZONES (Lorencia, Devias, Noria)                       │
+│    • 20% hunting (ONLY to collect jewels)                               │
+│                                                                           │
+│  Abilities:                                                               │
+│    ✅ Can trade (reads FakeBotTrade.txt)                                │
+│    ✅ Advertises trades in chat                                         │
+│    ✅ Collects jewels (inventory + jewel bank)                          │
+│    ✅ Responds to trade keywords                                        │
+│    ✅ Walks around town advertising                                     │
+│    ⚠️  Can hunt (LIMITED, only for jewels)                              │
+│    ❌ Does NOT do PVP (avoids combat)                                   │
+│    ❌ Does NOT party (focuses on trading)                               │
+│                                                                           │
+│  Chat Behavior:                                                           │
+│    • HIGH frequency (2x multiplier - CHATTY!)                           │
+│    • Trade advertisements with placeholders                              │
+│    • "Trading {jewel} for {jewel}!"                                     │
+│    • "Need {jewel}? I have it!"                                         │
+│    • Responds actively to trade keywords                                │
+│                                                                           │
+│  Movement:                                                                │
+│    • Stays in safe zone towns                                            │
+│    • Preferred maps: 0 (Lorencia), 2 (Devias), 3 (Noria)              │
+│    • Wander radius: 50 tiles (walks around town)                        │
+│    • Goes hunting for 10-15 minutes to get jewels                       │
+│    • Returns to safe zone quickly (15 min max)                          │
+│                                                                           │
+│  Trading System:                                                          │
+│    • Reads: IA/Trade/FakeBotTrade.txt                                   │
+│    • Shows required jewels → reward jewels                              │
+│    • Uses placeholders in messages                                       │
+│    • Example: "Trading Soul for Bless!"                                 │
+│    • Can trade from inventory OR jewel bank                             │
+└─────────────────────────────────────────────────────────────────────────┘
+
+EXAMPLE BEHAVIOR:
+  1. Spawns in Lorencia (safe zone)
+  2. Walks around town
+  3. Says: "Trading Soul for Bless!"
+  4. Walks to another area
+  5. Says: "Need jewels? Best prices!"
+  6. Player whispers: "trade"
+  7. Bot responds: "What do you need?"
+  8. After 15 minutes, goes hunting briefly
+  9. Collects jewels from monsters
+  10. Returns to safe zone
+  11. Continues advertising
+
+MERCHANT PHRASES:
+  • "Trading {required_jewel} for {reward_jewel}!"
+  • "Best jewel exchange here!"
+  • "Need {required_jewel}? I have it!"
+  • "Quality jewels for sale!"
+  • "Fair and fast trades!"
+
+═══════════════════════════════════════════════════════════════════════════
+                        😊 FRIENDLY ROLE
+═══════════════════════════════════════════════════════════════════════════
+
+PURPOSE: Helper/Guide bot
+BEHAVIOR: Helps newbies, welcomes players, gives directions
+
+┌─────────────────────────────────────────────────────────────────────────┐
+│  CHARACTERISTICS:                                                         │
+├─────────────────────────────────────────────────────────────────────────┤
+│  Time Distribution:                                                       │
+│    • 90% in SAFE/NEWBIE ZONES                                           │
+│    • 10% hunting (barely, only if needed)                               │
+│                                                                           │
+│  Abilities:                                                               │
+│    ✅ Welcomes new players actively                                     │
+│    ✅ Responds to help keywords (high priority)                         │
+│    ✅ Gives directions and tips                                         │
+│    ✅ Creates parties with low-level players                            │
+│    ✅ Encourages and motivates                                          │
+│    ⚠️  Defends self if attacked (doesn't initiate)                      │
+│    ❌ Does NOT hunt actively                                            │
+│    ❌ Does NOT do PVP                                                   │
+│    ❌ Does NOT trade                                                    │
+│                                                                           │
+│  Chat Behavior:                                                           │
+│    • VERY HIGH frequency (3x multiplier - VERY CHATTY!)                │
+│    • Greeting phrases constantly                                         │
+│    • Help responses                                                      │
+│    • Encouragement messages                                              │
+│    • Direction giving                                                    │
+│    • "Need help?" "I can show you!" "Let's go together!"               │
+│                                                                           │
+│  Movement:                                                                │
+│    • Stays in newbie zones                                               │
+│    • Preferred maps: 0 (Lorencia), 3 (Noria)                           │
+│    • Wander radius: 40 tiles (medium)                                   │
+│    • Returns to safe zone FAST (10 minutes)                             │
+│    • Never strays far from safe areas                                   │
+│                                                                           │
+│  Helper Behaviors:                                                        │
+│    • Detects low-level players (<150) and greets them                   │
+│    • Responds to "help", "where", "how" keywords                        │
+│    • Offers party to low-levels                                          │
+│    • Gives encouragement randomly                                        │
+│    • Says "Welcome!" to new arrivals                                    │
+└─────────────────────────────────────────────────────────────────────────┘
+
+EXAMPLE BEHAVIOR:
+  1. Spawns in Lorencia (safe zone)
+  2. Walks around newbie areas
+  3. Says: "Welcome to the server!"
+  4. Low-level player arrives
+  5. Says: "Hi! First time here?"
+  6. Player says: "yes, help"
+  7. Says: "Happy to help! What do you need?"
+  8. Player says: "where is devias"
+  9. Says: "Go north! I can show you!"
+  10. Offers party
+  11. Encourages: "You're doing great!"
+  12. Stays nearby helping
+
+FRIENDLY PHRASES:
+  • "Need help? I'm here for you!"
+  • "Welcome! Don't hesitate to ask!"
+  • "Let's go together! I'll show you!"
+  • "You can do it! Keep it up!"
+  • "First time? I can help!"
+
+═══════════════════════════════════════════════════════════════════════════
+                        COMPARISON TABLE
+═══════════════════════════════════════════════════════════════════════════
+
+┌─────────────┬─────────────┬─────────────┬─────────────┐
+│  FEATURE    │   WARRIOR   │  MERCHANT   │  FRIENDLY   │
+├─────────────┼─────────────┼─────────────┼─────────────┤
+│ Hunting     │    80%      │    20%      │    10%      │
+│ Safe Zones  │    20%      │    80%      │    90%      │
+│ Chat Freq.  │   Normal    │   High      │  Very High  │
+│ Can Trade   │     ❌      │     ✅      │     ❌      │
+│ Can PVP     │     ✅      │     ❌      │     ❌      │
+│ Can Party   │     ✅      │     ❌      │     ✅      │
+│ Advertise   │     ❌      │     ✅      │     ❌      │
+│ Help Newbs  │     ❌      │     ❌      │     ✅      │
+│ Wander      │   30 tiles  │   50 tiles  │   40 tiles  │
+│ Return Time │   60 min    │   15 min    │   10 min    │
+└─────────────┴─────────────┴─────────────┴─────────────┘
+
+═══════════════════════════════════════════════════════════════════════════
+                        CREATE BOTS DIALOG - NEW OPTIONS
+═══════════════════════════════════════════════════════════════════════════
+
+The Create Bots dialog will have a NEW section:
+
+┌─ Bot Roles (Distribution) ────────────────────────┐
+│                                                    │
+│  Warrior:   [____70____]%                         │
+│  Merchant:  [____20____]%                         │
+│  Friendly:  [____10____]%                         │
+│                                                    │
+│  Total must equal 100%                            │
+│                                                    │
+│  Example: Creating 100 bots                       │
+│    • 70 will be Warriors (combat)                │
+│    • 20 will be Merchants (trading)              │
+│    • 10 will be Friendly (helpers)               │
+│                                                    │
+└────────────────────────────────────────────────────┘
+
+HOW IT WORKS:
+1. User enters bot percentages
+2. System validates total = 100%
+3. When creating bots, assigns roles based on %
+4. Example: 50 bots, 80/10/10 split:
+   - First 40 bots = WARRIOR
+   - Next 5 bots = MERCHANT
+   - Next 5 bots = FRIENDLY
+
+═══════════════════════════════════════════════════════════════════════════
+                        IMPLEMENTATION DETAILS
+═══════════════════════════════════════════════════════════════════════════
+
+NEW FILES CREATED:
+──────────────────
+1. GameServer/BotRole.h
+   - Enum for bot roles
+   - BotRoleConfig struct
+   - Configuration functions
+
+2. GameServer/BotRole.cpp
+   - Role configurations
+   - GetBotRoleConfig() implementation
+
+3. IA/Phrases/Spanish/MerchantPhrases.txt
+   - Merchant-specific Spanish phrases
+
+4. IA/Phrases/English/MerchantPhrases.txt
+   - Merchant-specific English phrases
+
+5. IA/Phrases/Spanish/FriendlyPhrases.txt
+   - Friendly bot Spanish phrases
+
+6. IA/Phrases/English/FriendlyPhrases.txt
+   - Friendly bot English phrases
+
+MODIFIED FILES:
+───────────────
+1. FakeOnline.h - Added BotRole field to OFFEXP_DATA
+2. resource.h - Added bot role control IDs
+3. GameServer.cpp - Will add role selection controls
+4. FakeOnline.cpp - Will add role behavior logic
+
+═══════════════════════════════════════════════════════════════════════════
+                        MERCHANT BOT - DETAILED BEHAVIOR
+═══════════════════════════════════════════════════════════════════════════
+
+MERCHANT FLOW:
+
+1. INITIALIZATION
+   ├─ Spawn in safe zone (Lorencia/Devias/Noria)
+   ├─ Load FakeBotTrade.txt for available trades
+   └─ Start advertising timer
+
+2. SAFE ZONE LOOP (80% of time)
+   ├─ Walk around town (50 tile radius)
+   ├─ Every 2-5 minutes: Send advertisement
+   │  └─ "Trading {required_jewel} for {reward_jewel}!"
+   ├─ Respond to players who say "trade"
+   ├─ Check inventory + jewel bank for jewels
+   └─ After 15 minutes in safe zone → Go hunting
+
+3. HUNTING PHASE (20% of time)
+   ├─ Go to nearby hunting zone
+   ├─ Hunt monsters (focus on jewel drops)
+   ├─ Pick up jewels automatically
+   ├─ Store jewels in jewel bank when full
+   ├─ After 10-15 minutes → Return to safe zone
+   └─ Resume advertising
+
+4. TRADING INTERACTION
+   ├─ Player says "trade" or "/trade"
+   ├─ Bot responds: "What do you need?"
+   ├─ Player opens trade
+   ├─ Bot shows FakeBotTrade options
+   ├─ Player puts required jewels
+   ├─ Bot checks trade validity
+   ├─ Bot gives reward jewels (from inventory or bank)
+   ├─ Trade completes
+   └─ Bot says: "Thanks for the trade!"
+
+ADVERTISEMENT PLACEHOLDERS:
+  {required_jewel} = Jewel needed (e.g., "Soul")
+  {reward_jewel}   = Jewel given (e.g., "Bless")
+  {trade_name}     = Trade name from config
+
+EXAMPLE ADVERTISEMENTS:
+  • "Trading Soul for Bless!"
+  • "Need Chaos? I have it! Bring Life!"
+  • "Best jewel exchange: Soul → Bless!"
+  • "Trading Life for Chaos! Fair prices!"
+
+═══════════════════════════════════════════════════════════════════════════
+                        FRIENDLY BOT - DETAILED BEHAVIOR
+═══════════════════════════════════════════════════════════════════════════
+
+FRIENDLY FLOW:
+
+1. INITIALIZATION
+   ├─ Spawn in newbie zone (Lorencia/Noria)
+   ├─ Set high chat frequency
+   └─ Enable help keyword detection
+
+2. SAFE ZONE PATROL (90% of time)
+   ├─ Walk around safe/newbie areas
+   ├─ Every 1-2 minutes: Say friendly phrase
+   │  └─ "Need help?" "Welcome!" "I'm here to help!"
+   ├─ Detect nearby players
+   │  ├─ If player level < 150: Greet them
+   │  └─ "Hello friend! First time here?"
+   ├─ Monitor chat for help keywords
+   │  ├─ "help", "where", "how", "lost", etc.
+   │  └─ Respond immediately
+   └─ Offer party to low-level players
+
+3. HELP INTERACTION
+   ├─ Player says "help" or "where is X"
+   ├─ Bot responds with helpful message
+   ├─ Offers to show the way
+   ├─ If accepted, moves near player
+   ├─ Gives directions or tips
+   ├─ Encourages: "You're doing great!"
+   └─ Stays nearby for more questions
+
+4. PARTY SUPPORT
+   ├─ Detects low-level players (< level 150)
+   ├─ Sends party invite
+   ├─ If accepted, stays with party
+   ├─ Gives encouragement phrases
+   ├─ Protects party members if attacked
+   └─ Celebrates leveling up
+
+HELP KEYWORDS DETECTED:
+  • "help", "ayuda"
+  • "where", "donde"
+  • "how", "como"
+  • "lost", "perdido"
+  • "quest", "mision"
+  • "newbie", "novato"
+
+EXAMPLE INTERACTIONS:
+  Player: "help im lost"
+  Bot: "Don't worry! Where do you want to go?"
+  
+  Player: "where is devias"
+  Bot: "Devias is north of Lorencia! Follow me!"
+  
+  Player: "how do i get stronger"
+  Bot: "Train in Dungeon first! I can party with you!"
+
+═══════════════════════════════════════════════════════════════════════════
+                        RECOMMENDED DISTRIBUTIONS
+═══════════════════════════════════════════════════════════════════════════
+
+BALANCED SERVER (100 bots):
+──────────────────────────
+  • 70% Warrior (70 bots)   - Main population, looks active
+  • 20% Merchant (20 bots)  - Good trading availability
+  • 10% Friendly (10 bots)  - Helper presence
+
+PVP SERVER (100 bots):
+─────────────────────
+  • 85% Warrior (85 bots)   - Lots of combat
+  • 10% Merchant (10 bots)  - Some trading
+  • 5% Friendly (5 bots)    - Minimal helpers
+
+NEWBIE-FRIENDLY SERVER (100 bots):
+──────────────────────────────────
+  • 60% Warrior (60 bots)   - Good activity
+  • 20% Merchant (20 bots)  - Trading options
+  • 20% Friendly (20 bots)  - Lots of help!
+
+ECONOMY SERVER (100 bots):
+─────────────────────────
+  • 50% Warrior (50 bots)   - Combat presence
+  • 40% Merchant (40 bots)  - Active economy!
+  • 10% Friendly (10 bots)  - Some help
+
+═══════════════════════════════════════════════════════════════════════════
+                        NEXT STEPS TO IMPLEMENT
+═══════════════════════════════════════════════════════════════════════════
+
+PHASE 1: Core System (DONE ✅)
+────────────────────────────
+✅ Create BotRole.h/cpp
+✅ Add BotRole to OFFEXP_DATA
+✅ Create role configurations
+✅ Create merchant phrase files
+✅ Create friendly phrase files
+✅ Add resource IDs for controls
+
+PHASE 2: Dialog UI (TO DO)
+──────────────────────────
+□ Add role % controls to GameServer.rc
+□ Add role % edit boxes (3 boxes)
+□ Add validation (must equal 100%)
+□ Update CreateBotsDialogProc to read %
+□ Pass role % to bot creation function
+
+PHASE 3: Bot Creation (TO DO)
+─────────────────────────────
+□ Update CreateMultipleBotsAdvanced()
+□ Calculate role counts from %
+□ Assign roles to bots during creation
+□ Save BotRole in IA_Accounts.xml
+□ Set appropriate spawn locations per role
+
+PHASE 4: Behavior Logic (TO DO)
+───────────────────────────────
+□ Update FakeOnline.cpp AI
+□ Implement safe zone checking
+□ Implement role-based movement
+□ Implement merchant advertising
+□ Implement friendly help detection
+□ Load role-specific phrase files
+
+PHASE 5: Merchant Trading (TO DO)
+─────────────────────────────────
+□ Merchant advertising timer
+□ Placeholder replacement ({jewel})
+□ FakeBotTrade integration
+□ Safe zone preference logic
+□ Hunting phase for jewel collection
+
+PHASE 6: Friendly Helping (TO DO)
+─────────────────────────────────
+□ Low-level player detection
+□ Help keyword monitoring
+□ Auto-party invites for newbies
+□ Direction giving logic
+□ Encouragement system
+
+═══════════════════════════════════════════════════════════════════════════
+                        YOUR VISION IS BRILLIANT!
+═══════════════════════════════════════════════════════════════════════════
+
+This system will make your bots feel TRULY ALIVE:
+
+🗡️ Warriors fight and level (realistic server population)
+💰 Merchants trade and advertise (active economy)
+😊 Friendly bots help newbies (welcoming community)
+
+Players won't be able to tell which are bots! 🎭
+
+═══════════════════════════════════════════════════════════════════════════
+
+Would you like me to implement the next phases?
+
+1. Dialog UI controls for role selection?
+2. Bot creation logic with role assignment?
+3. Merchant advertising system?
+4. Friendly helper system?
+
+Let me know where to continue! 🚀
+
+═══════════════════════════════════════════════════════════════════════════

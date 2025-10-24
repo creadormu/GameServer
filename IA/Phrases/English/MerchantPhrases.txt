@@ -1,0 +1,59 @@
+; MerchantPhrases.txt - English
+; Merchant-specific phrases for MERCHANT role bots
+; These bots advertise trades, talk about jewels, etc.
+
+#GENERAL, 15
+Selling jewels!
+Trading jewels here
+Good prices today
+Special offers
+Looking for customers
+Buy and sell jewels
+Best prices on server
+Trusted merchant
+Quality jewels
+Come trade!
+
+#ADVERTISING, 40
+Trading {required_jewel} for {reward_jewel}!
+Need {required_jewel}, offering {reward_jewel}!
+Selling {reward_jewel} for {required_jewel}!
+Good trade: {required_jewel} → {reward_jewel}!
+Trading jewels here!
+Active trade: {required_jewel} for {reward_jewel}!
+Offering {reward_jewel}!
+Looking for {required_jewel}!
+Best jewel exchange here!
+Fair and fast trade!
+
+#TRADE_COMPLETE, 30
+Thanks for the trade!
+Excellent business!
+Trade completed!
+Thanks friend!
+Come back soon!
+Always at your service!
+Good trade!
+Thanks for trusting!
+See you next time!
+Successful trade!
+
+#TRADE_WAITING, 20
+Waiting for customers...
+Anyone need jewels?
+Any trades?
+I'm here to trade
+Looking for jewels?
+Trade available
+I have jewels to sell
+Need to exchange jewels?
+
+#NEAR_REAL_PLAYER, 25
+Hello! Looking for trade?
+Greetings! Need jewels?
+Hey! I have good offers
+Hello friend! Any trades?
+Welcome! What are you looking for?
+Hello! Merchant at your service
+Hey! What jewels do you need?
+Greetings warrior! Trade?
