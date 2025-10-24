@@ -289,12 +289,21 @@ void CFakeOnline::LoadFakeData(char* path)
             strncpy_s(info.Account, rInfoData.attribute("Account").as_string(""), _TRUNCATE);
             strncpy_s(info.Password, rInfoData.attribute("Password").as_string(""), _TRUNCATE);
             strncpy_s(info.Name, rInfoData.attribute("Name").as_string(""), _TRUNCATE);
-			info.MainAttackSkillID = rInfoData.attribute("SkillID").as_int(0); info.SecondaryAttackSkillID = rInfoData.attribute("SecondarySkillID").as_int(0); info.PVPMode = rInfoData.attribute("PVPMode").as_int(0);
-            info.UseBuffs[0] = rInfoData.attribute("UseBuffs_0").as_int(0); info.UseBuffs[1] = rInfoData.attribute("UseBuffs_1").as_int(0); info.UseBuffs[2] = rInfoData.attribute("UseBuffs_2").as_int(0);
-            info.GateNumber = rInfoData.attribute("GateNumber").as_int(0); info.MapX = rInfoData.attribute("MapX").as_int(125); info.MapY = rInfoData.attribute("MapY").as_int(125);
-            info.MoveRange = rInfoData.attribute("MoveRange").as_int(0); info.TimeReturn = rInfoData.attribute("TimeReturn").as_int(0);
-            info.TuNhatItem = rInfoData.attribute("TuNhatItem").as_int(0); info.TuDongReset = rInfoData.attribute("TuDongReset").as_int(0);
-            info.PartyMode = rInfoData.attribute("PartyMode").as_int(0); info.PostKhiDie = rInfoData.attribute("PostKhiDie").as_int(0);
+			info.MainAttackSkillID = rInfoData.attribute("SkillID").as_int(0); 
+			info.SecondaryAttackSkillID = rInfoData.attribute("SecondarySkillID").as_int(0); 
+			info.PVPMode = rInfoData.attribute("PVPMode").as_int(0);
+            info.UseBuffs[0] = rInfoData.attribute("UseBuffs_0").as_int(0); 
+			info.UseBuffs[1] = rInfoData.attribute("UseBuffs_1").as_int(0); 
+			info.UseBuffs[2] = rInfoData.attribute("UseBuffs_2").as_int(0);
+            info.GateNumber = rInfoData.attribute("GateNumber").as_int(0); 
+			info.MapX = rInfoData.attribute("MapX").as_int(125); 
+			info.MapY = rInfoData.attribute("MapY").as_int(125);
+            info.MoveRange = rInfoData.attribute("MoveRange").as_int(0); 
+			info.TimeReturn = rInfoData.attribute("TimeReturn").as_int(0);
+            info.TuNhatItem = rInfoData.attribute("TuNhatItem").as_int(0); 
+			info.TuDongReset = rInfoData.attribute("TuDongReset").as_int(0);
+            info.PartyMode = rInfoData.attribute("PartyMode").as_int(0); 
+			info.PostKhiDie = rInfoData.attribute("PostKhiDie").as_int(0);
 			info.Map = rInfoData.attribute("Map").as_int(0);
 			//info.MinLevel = rInfoReset.attribute("MinLevel").as_int();
 			if (strlen(info.Account) > 0) { this->m_Data.insert(std::pair<std::string, OFFEXP_DATA>(info.Account, info));}
@@ -1530,22 +1539,20 @@ void CFakeOnline::QuayLaiToaDoGoc(int aIndex) {
 	OFFEXP_DATA *info = this->GetOffExpInfo(lpObj); 
 	if (info != 0 && lpObj->Socket == INVALID_SOCKET) {
 		if (lpObj->State == OBJECT_DELCMD || lpObj->DieRegen != 0 || lpObj->Teleport != 0) { return; }
-		// Calculate actual distance from bot to hunting coordinates
-		int PhamViDiTrain = (int)sqrt(pow(((float)lpObj->X - (float)info->MapX), 2) + pow(((float)lpObj->Y - (float)info->MapY), 2));
+		
+		int DistanceToHunting = (int)sqrt(pow(((float)lpObj->X - (float)info->MapX), 2) + pow(((float)lpObj->Y - (float)info->MapY), 2));
 
-		// COMPLETE FIX: Only teleport to gate if on wrong map or extremely far from hunting zone
-		// Remove the MapIsInGate check that was breaking natural walking behavior
-		if (lpObj->Map != info->Map || PhamViDiTrain >= 200) {
+		// Emergency teleport: Only if on wrong map or 200+ tiles away
+		if (lpObj->Map != info->Map || DistanceToHunting >= 200) {
 			gObjMoveGate(lpObj->Index, info->GateNumber);
-			LogAdd(LOG_BLUE, "[FakeOnline][%s] Emergency return to Gate (Map:%d WrongMap:%d Distance:%d)", lpObj->Name, lpObj->Map, lpObj->Map != info->Map, PhamViDiTrain);
+			LogAdd(LOG_BLUE, "[FakeOnline][%s] Emergency return to Gate", lpObj->Name);
 			return;
 		}
 		
-		// Natural walk from gate to hunting coordinates
+		// Movement logic
 		if (GetTickCount() >= lpObj->m_OfflineTimeResetMove + 2000) {
-			// Only trigger return if bot has reached hunting zone AND wandered too far
-			// Remove the safe zone check that was teleporting bots from gate
-			if (PhamViDiTrain >= (lpObj->IsFakeMoveRange + 20) && lpObj->IsFakeRegen) {
+			// Return to hunting coords if bot wandered too far AND is in hunting mode
+			if (DistanceToHunting >= (lpObj->IsFakeMoveRange + 20) && lpObj->IsFakeRegen) {
 				int DiChuyenX = lpObj->X;
 				int DiChuyenY = lpObj->Y;
 				for (int n = 0; n < 16; n++) { 
@@ -1563,7 +1570,6 @@ void CFakeOnline::QuayLaiToaDoGoc(int aIndex) {
 					if ((attr & 1) == 0 && (attr & 4) == 0 && (attr & 8) == 0) { 
 						lpObj->m_OfflineTimeResetMove = GetTickCount();
 						FakeAnimationMove(lpObj->Index, DiChuyenX, DiChuyenY, false);
-						LogAdd(LOG_BLUE, "[FakeOnline][%s] Mover a ubicaci�n predeterminada (%d/%d)", lpObj->Name, DiChuyenX, DiChuyenY);
 						return;
 					}
 				}
@@ -1574,9 +1580,9 @@ void CFakeOnline::QuayLaiToaDoGoc(int aIndex) {
 			}
 		}
 
+		// Random movement within MoveRange while hunting
 		if (lpObj->IsFakeMoveRange != 0) {
 			if (GetTickCount() >= lpObj->m_OfflineTimeResetMove + 2000 && lpObj->IsFakeRegen) {
-				// FIX BUG #3: Use configured MoveRange instead of hardcoded value
 				int MoveRangeVal = lpObj->IsFakeMoveRange; 
 				int maxmoverange = MoveRangeVal * 2 + 1;
 				int searchc = 10;
@@ -1592,7 +1598,6 @@ void CFakeOnline::QuayLaiToaDoGoc(int aIndex) {
 					
 					BYTE attr = gMap[lpObj->Map].GetAttr(tpx, tpy);
 					if ((attr & 1) != 1 && (attr & 2) != 2 && (attr & 4) != 4 && (attr & 8) != 8 && GetTickCount() >= lpObj->m_OfflineMoveDelay + 2000) {
-						LogAdd(LOG_BLUE, "[FakeOnline] Rango de movimiento (%d,%d)", tpx, tpy);
 						lpObj->m_OfflineMoveDelay = GetTickCount();
 						FakeAnimationMove(lpObj->Index, tpx, tpy, false);
 						return;
@@ -1601,10 +1606,10 @@ void CFakeOnline::QuayLaiToaDoGoc(int aIndex) {
 			}
 		}
 		
+		// TimeReturn: Return to hunting coords after X minutes
 		if (lpObj->DistanceReturnOn != 0) { 
 			if (GetTickCount() >= lpObj->m_OfflineTimeResetMove + 1000 + ((lpObj->DistanceMin * 60) * 1000)) {
 				if (lpObj->m_OfflineCoordX != lpObj->X && lpObj->m_OfflineCoordY != lpObj->Y) {
-					LogAdd(LOG_BLUE, "[FakeOnline] Volver a Coordenadas de esquina (%d,%d)", lpObj->m_OfflineCoordX, lpObj->m_OfflineCoordY);
 					FakeAnimationMove(lpObj->Index, lpObj->m_OfflineCoordX, lpObj->m_OfflineCoordY, false);
 					return;
 				}

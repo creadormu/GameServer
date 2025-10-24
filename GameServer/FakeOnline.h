@@ -30,7 +30,6 @@ struct OFFEXP_DATA
 	int MoveRange;
 	int MainAttackSkillID;
 	int SecondaryAttackSkillID;
-
 };
 
 
