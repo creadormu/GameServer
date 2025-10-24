@@ -1,0 +1,44 @@
+; Spanish Female Names
+; One name per line
+; Lines starting with ; or # are comments
+
+Maria
+Ana
+Sofia
+Isabella
+Valentina
+Camila
+Victoria
+Lucia
+Elena
+Paula
+Carmen
+Laura
+Diana
+Andrea
+Natalia
+Carolina
+Gabriela
+Daniela
+Alejandra
+Fernanda
+Rosa
+Beatriz
+Clara
+Isabel
+Julia
+Mariana
+Patricia
+Veronica
+Monica
+Sandra
+Teresa
+Angela
+Adriana
+Silvia
+Pilar
+Mercedes
+Dolores
+Catalina
+Raquel
+Rocio

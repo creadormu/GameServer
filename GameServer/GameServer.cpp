@@ -40,6 +40,7 @@
 #include "Guild.h"
 #include "Path.h"
 #include "ClassConfig.h"
+#include "NameManager.h"
 
 
 TCHAR szTitle[MAX_LOADSTRING];
@@ -76,6 +77,8 @@ int APIENTRY WinMain(HINSTANCE hInstance,HINSTANCE hPrevInstance,LPSTR lpCmdLine
 	gServerInfo.ReadStartupInfo("GameServerInfo",".\\Data\\GameServerInfo - Common.dat");
 	// Initialize class configuration
 	g_ClassConfigManager.Initialize();
+	// Initialize name manager
+	g_NameManager.Initialize();
 
 	#if(PROTECT_STATE==1)
 
@@ -794,7 +797,7 @@ INT_PTR CALLBACK ConfigClassDialogProc(HWND hDlg, UINT message, WPARAM wParam, L
 
 INT_PTR CALLBACK CreateBotsDialogProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 {
-	static HWND hComboClass, hComboPartyMode, hComboPVPMode;
+	static HWND hComboClass, hComboPartyMode, hComboPVPMode, hComboLanguage;
 
 	switch (message)
 	{
@@ -862,6 +865,37 @@ INT_PTR CALLBACK CreateBotsDialogProc(HWND hDlg, UINT message, WPARAM wParam, LP
 		SendMessage(hComboPVPMode, CB_ADDSTRING, 0, (LPARAM)"2 - Attack All Players");
 		SendMessage(hComboPVPMode, CB_SETCURSEL, 1, 0);
 
+		// Language combo (NEW)
+		hComboLanguage = GetDlgItem(hDlg, IDC_COMBO_LANGUAGE);
+		if (hComboLanguage)
+		{
+			int langCount = g_NameManager.GetAvailableLanguageCount();
+			if (langCount > 0)
+			{
+				for (int i = 0; i < langCount; i++)
+				{
+					const char* langName = g_NameManager.GetLanguageName(i);
+					SendMessage(hComboLanguage, CB_ADDSTRING, 0, (LPARAM)langName);
+				}
+				// Try to select current language
+				const char* currentLang = g_NameManager.GetCurrentLanguage();
+				int selIdx = (int)SendMessage(hComboLanguage, CB_FINDSTRINGEXACT, -1, (LPARAM)currentLang);
+				if (selIdx != CB_ERR)
+				{
+					SendMessage(hComboLanguage, CB_SETCURSEL, selIdx, 0);
+				}
+				else
+				{
+					SendMessage(hComboLanguage, CB_SETCURSEL, 0, 0);
+				}
+			}
+			else
+			{
+				SendMessage(hComboLanguage, CB_ADDSTRING, 0, (LPARAM)"Default (Spanish)");
+				SendMessage(hComboLanguage, CB_SETCURSEL, 0, 0);
+			}
+		}
+
 		return TRUE;
 	}
 
@@ -879,11 +913,30 @@ INT_PTR CALLBACK CreateBotsDialogProc(HWND hDlg, UINT message, WPARAM wParam, LP
 			}
 			else
 			{
-				ShowWindow(hConfigDlg, SW_SHOW);
-			}
-			return TRUE;
+			ShowWindow(hConfigDlg, SW_SHOW);
 		}
-		else if (LOWORD(wParam) == IDC_BTN_CREATEBOTS)
+		return TRUE;
+	}
+	else if (LOWORD(wParam) == IDC_COMBO_LANGUAGE && HIWORD(wParam) == CBN_SELCHANGE)
+	{
+		// Language selection changed - reload names
+		int selIdx = (int)SendMessage(hComboLanguage, CB_GETCURSEL, 0, 0);
+		if (selIdx != CB_ERR)
+		{
+			char langName[50];
+			SendMessage(hComboLanguage, CB_GETLBTEXT, selIdx, (LPARAM)langName);
+			if (g_NameManager.LoadLanguage(langName))
+			{
+				LogAdd(LOG_GREEN, "[CreateBots] Language changed to: %s", langName);
+			}
+			else
+			{
+				LogAdd(LOG_RED, "[CreateBots] Failed to load language: %s", langName);
+			}
+		}
+		return TRUE;
+	}
+	else if (LOWORD(wParam) == IDC_BTN_CREATEBOTS)
 		{
 			BOOL bSuccess;
 
@@ -1061,19 +1114,8 @@ bool CreateMultipleBotsAdvanced(int botCount, int startFrom, int gateNumber, int
 		{96, "RF",  264, 263, 266, 268, -1, 5,  4500, 4500, 4500, 2000, 0,    false}
 	};
 
-	const char* maleNames[] = {
-		"Carlos","Diego","Miguel","Juan","Pedro","Luis","Jorge","Fernando","Ricardo","Roberto",
-		"Sergio","Andres","Javier","Marco","Oscar","Daniel","Gabriel","Rafael","Adrian","Mario",
-		"Eduardo","Ernesto","Pablo","Raul","Alberto","Victor","Manuel","Felipe","Emilio","Hugo"
-	};
-
-	const char* femaleNames[] = {
-		"Maria","Ana","Sofia","Isabella","Valentina","Camila","Victoria","Lucia","Elena","Paula",
-		"Carmen","Laura","Diana","Andrea","Natalia","Carolina","Gabriela","Daniela","Alejandra","Fernanda"
-	};
-
-	int maleNamesCount = sizeof(maleNames) / sizeof(maleNames[0]);
-	int femaleNamesCount = sizeof(femaleNames) / sizeof(femaleNames[0]);
+	// Names are now loaded from external files via g_NameManager
+	// No need for hardcoded arrays anymore!
 	int classCount = sizeof(classes) / sizeof(classes[0]);
 
 	// Calculate cumulative percentages
@@ -1167,16 +1209,16 @@ bool CreateMultipleBotsAdvanced(int botCount, int startFrom, int gateNumber, int
 			return false;
 		}
 
-		// Generate character name SAFELY
+		// Generate character name from external files
 		if (selectedClassConfig->useFemaleNames)
 		{
-			int nameIdx = GetLargeRand() % femaleNamesCount;
-			sprintf_s(bot->charName, sizeof(bot->charName), "%s%d", femaleNames[nameIdx], GetLargeRand() % 90 + 10);
+			sprintf_s(bot->charName, sizeof(bot->charName), "%s%d", 
+				g_NameManager.GetRandomFemaleName(), GetLargeRand() % 90 + 10);
 		}
 		else
 		{
-			int nameIdx = GetLargeRand() % maleNamesCount;
-			sprintf_s(bot->charName, sizeof(bot->charName), "%s%d", maleNames[nameIdx], GetLargeRand() % 90 + 10);
+			sprintf_s(bot->charName, sizeof(bot->charName), "%s%d", 
+				g_NameManager.GetRandomMaleName(), GetLargeRand() % 90 + 10);
 		}
 
 		// Random level
