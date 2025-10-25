@@ -675,8 +675,25 @@ BOOL ObjBotTrader::TradeOpen(int index, int nindex)
 		// Now show bot items to player (using proper visibility function)
 		s_FakeOnline.SendBotTradeItemsToPlayer(lpObj->Index, lpBot);
 
-		// Send notice to player about what items are needed
-		gNotice.NewNoticeSend(lpObj->Index, 0, 0, 0, 0, 0, "%s: Put the required items and press OK!", lpBot->Name);
+		// Build required items message with item names
+		std::string requiredMsg = "";
+		for (size_t i = 0; i < config.requiredItems.size(); i++) {
+			if (i > 0) requiredMsg += " + ";
+			requiredMsg += s_FakeOnline.GetItemName(config.requiredItems[i].Type);
+		}
+
+		// Build reward items message with item names
+		std::string rewardMsg = "";
+		for (size_t i = 0; i < config.rewardItems.size(); i++) {
+			if (i > 0) rewardMsg += " + ";
+			rewardMsg += s_FakeOnline.GetItemName(config.rewardItems[i].Type);
+		}
+
+		// Send notice to player with actual item names
+		char tradeMsg[256];
+		sprintf_s(tradeMsg, sizeof(tradeMsg), "%s: Need %s, will give %s. Put items and press OK!", 
+			lpBot->Name, requiredMsg.c_str(), rewardMsg.c_str());
+		gNotice.NewNoticeSend(lpObj->Index, 0, 0, 0, 0, 0, tradeMsg);
 		
 		LogAdd(LOG_GREEN, "[FakeBotTrade] Trade abierto con %s (FAKE) - Bot items shown", lpBot->Name);
 		return 1;

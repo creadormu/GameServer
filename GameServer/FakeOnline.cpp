@@ -2366,11 +2366,15 @@ void CFakeOnline::ChatRecv(LPOBJ lpSender, const char* message)
 
 			if (replyOptions.empty()) continue;
 
-			std::string reply = replyOptions[rand() % replyOptions.size()];
-			//reply = ReplaceTradePlaceholders(reply, lpBot->Account);
-			size_t pos = reply.find("{player_name}");
-			if (pos != std::string::npos)
-				reply.replace(pos, 13, lpSender->Name);
+		std::string reply = replyOptions[rand() % replyOptions.size()];
+		
+		// Replace trade placeholders if bot can trade
+		reply = ReplaceTradePlaceholders(reply, lpBot->Account);
+		
+		// Replace player name placeholder
+		size_t pos = reply.find("{player_name}");
+		if (pos != std::string::npos)
+			reply.replace(pos, 13, lpSender->Name);
 
 			char msg[80] = { 0 };
 			strncpy_s(msg, reply.c_str(), _TRUNCATE);

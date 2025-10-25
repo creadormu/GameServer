@@ -109,6 +109,7 @@ public:
 	bool InitializeBotTrade(int playerIndex, LPOBJ lpBot);
 	int GetJewelBankCount(LPOBJ lpBot, int jewelType);
 	bool DecreaseBotJewelBank(LPOBJ lpBot, int jewelType, int count);
+	std::string GetItemName(int itemType);  // Made public for BotTrader to use
 
 public:
 	std::map<std::string, FAKEBOT_TRADE_ITEM> m_TradeData;
@@ -119,7 +120,6 @@ public:
 	//void CheckAutoReset(LPOBJ lpObj); // Aseg�rate que esta l�nea exista
 
 private:
-	std::string GetItemName(int itemType);
 	std::string ReplaceTradePlaceholders(const std::string& phrase, const std::string& botAccount);
 	DWORD m_dwLastCommentTick[MAX_OBJECT];
 	DWORD m_dwLastPlayerNearbyCommentTick[MAX_OBJECT]; // Nuevo cooldown
