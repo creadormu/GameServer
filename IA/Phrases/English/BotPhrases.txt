@@ -52,16 +52,24 @@ Good duel
 That was epic
 
 #TRADE, 30
+Looking for {item_required}, trade me!
+Need {item_required}, good deal waiting!
+Buying {item_required} for {item_reward}!
+Trading {item_required} -> {item_reward}!
+WTB: {item_required} = {item_reward}
+Someone have {item_required}?
+Need {item_required}, have {item_reward}!
+{item_required} wanted, {item_reward} offered!
+Trade your {item_required} here!
+Quick trade: {item_required} -> {item_reward}
 Looking to trade something?
-I have good items
-What do you need?
-I can help you
-Check what I have
-Interested in trading?
-Good prices
-Special offers
-What are you looking for?
-Let's talk business
+I have {item_reward} for your {item_required}
+What do you need? I have {item_reward}!
+Check what I have: {item_reward}
+Interested in trading? {item_required} for {item_reward}
+Good prices on {item_reward}
+Special offer: {item_required} gets you {item_reward}
+Want {item_reward}? Bring me {item_required}!
 
 #MORNING
 Good morning!

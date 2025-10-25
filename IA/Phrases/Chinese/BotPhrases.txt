@@ -51,16 +51,24 @@
 太史诗了
 
 #TRADE, 30
-想交易吗?
-我有好物品
-你需要什么?
-我可以帮你
-看看我有什么
-有兴趣交易吗?
-好价格
-特别优惠
-你在找什么?
-谈生意吧
+找{item_required}，跟我交易！
+需要{item_required}，好交易等着！
+收购{item_required}换{item_reward}！
+交易 {item_required} -> {item_reward}！
+求购：{item_required} = {item_reward}
+有人有{item_required}吗？
+需要{item_required}，有{item_reward}！
+收{item_required}，给{item_reward}！
+在这里交易你的{item_required}！
+快速交易：{item_required} -> {item_reward}
+想交易吗？
+我有{item_reward}换你的{item_required}
+你需要什么？我有{item_reward}！
+看看我有什么：{item_reward}
+有兴趣吗？{item_required}换{item_reward}
+{item_reward}好价格
+特别优惠：{item_required}换{item_reward}
+要{item_reward}吗？给我{item_required}！
 
 #MORNING
 早上好!

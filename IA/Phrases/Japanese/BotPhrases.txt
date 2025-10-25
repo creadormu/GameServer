@@ -50,16 +50,24 @@ Ii duel
 Sore wa epic datta
 
 #TRADE, 30
+{item_required} sagashiteru, trade shiyou!
+{item_required} hoshii, ii deal aru yo!
+{item_required} kau, {item_reward} ageru!
+Trade: {item_required} -> {item_reward}!
+Motomeru: {item_required} = {item_reward}
+Dareka {item_required} aru?
+{item_required} hoshii, {item_reward} aru yo!
+{item_required} motomeru, {item_reward} teikyo!
+Koko de {item_required} trade dekiru!
+Hayai trade: {item_required} -> {item_reward}
 Trade shitai?
-Ii item aru yo
-Nani ga hitsuyou?
-Tetsudaeru yo
-Mite mite
-Trade ni kyoumi aru?
-Ii nedan
-Special offer
-Nani sagashiteru?
-Business no hanashi shiyou
+{item_reward} aru, kimi no {item_required} to koukanshitai
+Nani hoshii? {item_reward} aru yo!
+Kore mite: {item_reward}
+Kyoumi aru? {item_required} de {item_reward}
+{item_reward} ii nedan da yo
+Special: {item_required} de {item_reward} moreru
+{item_reward} hoshii? {item_required} mottekite!
 
 #MORNING
 Ohayo gozaimasu!

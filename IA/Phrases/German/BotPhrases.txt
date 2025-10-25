@@ -50,16 +50,24 @@ Gutes Duell
 Das war episch
 
 #TRADE, 30
+Suche {item_required}, handel mit mir!
+Brauche {item_required}, guter Deal wartet!
+Kaufe {item_required} für {item_reward}!
+Handel {item_required} -> {item_reward}!
+Suche: {item_required} = {item_reward}
+Hat jemand {item_required}?
+Brauche {item_required}, habe {item_reward}!
+{item_required} gesucht, {item_reward} geboten!
+Handel dein {item_required} hier!
+Schneller Handel: {item_required} -> {item_reward}
 Willst du handeln?
-Ich habe gute Items
-Was brauchst du?
-Ich kann helfen
-Schau was ich habe
-Interessiert am Handeln?
-Gute Preise
-Spezialangebote
-Was suchst du?
-Lass uns Geschäfte machen
+Ich habe {item_reward} für dein {item_required}
+Was brauchst du? Ich habe {item_reward}!
+Schau was ich habe: {item_reward}
+Interessiert? {item_required} für {item_reward}
+Gute Preise für {item_reward}
+Spezialangebot: {item_required} bringt {item_reward}
+Willst {item_reward}? Bring mir {item_required}!
 
 #MORNING
 Guten Morgen!
