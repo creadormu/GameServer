@@ -1,0 +1,236 @@
+╔══════════════════════════════════════════════════════════════════════════╗
+║           📋 CREATE BOTS DIALOG - NOW WITH ROLE SELECTION! 📋           ║
+╚══════════════════════════════════════════════════════════════════════════╝
+
+═══════════════════════════════════════════════════════════════════════════
+                     UPDATED DIALOG LAYOUT
+═══════════════════════════════════════════════════════════════════════════
+
+╔══════════════════════════════════════════════════════════════════════════╗
+║  Create Bots - Advanced Configuration                                    ║
+╠══════════════════════════════════════════════════════════════════════════╣
+║                                                                           ║
+║  ┌─ Basic Configuration ─────────────────────────────────────┐           ║
+║  │                                                             │           ║
+║  │  Number of Bots:     [____50____]                          │           ║
+║  │  Start From Bot #:   [____1_____] (1 = Bot0001)           │           ║
+║  │  Class:              [All Classes (Mixed)        ▼]        │           ║
+║  │  Bot Names Language: [Spanish                    ▼]  ⭐    │           ║
+║  │                                                             │           ║
+║  └─────────────────────────────────────────────────────────────┘           ║
+║                                                                           ║
+║  ┌─ Spawn Location ────────────────────────────────────┐                 ║
+║  │  Gate Number:  [___614___] (0 = use coords)        │                 ║
+║  │  Map:          [____0____]                          │                 ║
+║  │  Map X:        [___110___]    Map Y: [___200___]    │                 ║
+║  └──────────────────────────────────────────────────────┘                 ║
+║                                                                           ║
+║  ┌─ Level Range ─────────┐                                               ║
+║  │  Min: [__250__]        │                                               ║
+║  │  Max: [__400__]        │                                               ║
+║  └────────────────────────┘                                               ║
+║                                                                           ║
+║  ┌─ Bot Behavior ──────────────────────────────┐                         ║
+║  │  PhamViTrain:  [__6__] (0-100)              │                         ║
+║  │  MoveRange:    [_30__] (0-100)              │                         ║
+║  │  TimeReturn:   [_40__] (minutes)            │                         ║
+║  │  ☑ Auto Pick Items                          │                         ║
+║  │  ☐ Auto Reset                               │                         ║
+║  └─────────────────────────────────────────────┘                         ║
+║                                                                           ║
+║  ┌─ Combat & Social ───────────────────────────┐                         ║
+║  │  Party Mode:  [1 - Accept Invites      ▼]  │                         ║
+║  │  PVP Mode:    [1 - Defend Only          ▼]  │                         ║
+║  │  ☑ Post Message When Die                    │                         ║
+║  └─────────────────────────────────────────────┘                         ║
+║                                                                           ║
+║  ┌─ Config Variations ─────────────────────────┐                         ║
+║  │  ☑ Config 1    ☐ Config 2                   │                         ║
+║  │  ☐ Config 3    ☐ Config 4                   │                         ║
+║  │  ☐ Config 5    ☐ Config 6                   │                         ║
+║  │  ☐ Config 7                                 │                         ║
+║  │  Available Configs: 1/7                     │                         ║
+║  └─────────────────────────────────────────────┘                         ║
+║                                                                           ║
+║  ┌─ Bot Role Distribution (must total 100%) ───┐  ⭐ NEW!               ║
+║  │                                               │                         ║
+║  │  Warrior (Combat):    [__70__]%              │                         ║
+║  │  Merchant (Trading):  [__20__]%              │                         ║
+║  │  Friendly (Helper):   [__10__]%              │                         ║
+║  │                                               │                         ║
+║  └───────────────────────────────────────────────┘                         ║
+║                                                                           ║
+║  [ Configure Classes... ]                                                ║
+║                                                                           ║
+║  Note: Each class must be configured. For 50+ bots may take 30 seconds.  ║
+║                                                                           ║
+║              [ Create Bots ]         [ Cancel ]                          ║
+║                                                                           ║
+╚══════════════════════════════════════════════════════════════════════════╝
+
+═══════════════════════════════════════════════════════════════════════════
+                     🎯 ROLE PERCENTAGE EXAMPLES
+═══════════════════════════════════════════════════════════════════════════
+
+BALANCED SERVER:
+────────────────
+Warrior:  70%  →  70% combat, normal population
+Merchant: 20%  →  Active economy
+Friendly: 10%  →  Helper presence
+Total:    100% ✅
+
+PVP-FOCUSED SERVER:
+───────────────────
+Warrior:  85%  →  Lots of combat!
+Merchant: 10%  →  Some trading
+Friendly: 5%   →  Minimal helpers
+Total:    100% ✅
+
+NEWBIE-FRIENDLY SERVER:
+───────────────────────
+Warrior:  60%  →  Good activity
+Merchant: 20%  →  Trading options
+Friendly: 20%  →  Lots of help!
+Total:    100% ✅
+
+ECONOMY SERVER:
+───────────────
+Warrior:  50%  →  Combat presence
+Merchant: 40%  →  VERY active economy!
+Friendly: 10%  →  Some help
+Total:    100% ✅
+
+ALL WARRIORS (Classic):
+───────────────────────
+Warrior:  100%  →  Pure combat server
+Merchant: 0%    →  No merchants
+Friendly: 0%    →  No helpers
+Total:    100% ✅
+
+═══════════════════════════════════════════════════════════════════════════
+                     ⚠️ VALIDATION RULES
+═══════════════════════════════════════════════════════════════════════════
+
+PERCENTAGES MUST TOTAL 100%:
+─────────────────────────────
+✅ VALID:   70 + 20 + 10 = 100
+✅ VALID:   50 + 30 + 20 = 100
+✅ VALID:   100 + 0 + 0 = 100
+❌ INVALID: 70 + 20 + 20 = 110  (Over 100%)
+❌ INVALID: 50 + 30 + 10 = 90   (Under 100%)
+
+ERROR MESSAGE:
+──────────────
+"Bot role percentages must total 100%!
+
+Current total: 90%
+
+Warrior: 50%
+Merchant: 30%
+Friendly: 10%"
+
+═══════════════════════════════════════════════════════════════════════════
+                     🎮 EXAMPLE USAGE
+═══════════════════════════════════════════════════════════════════════════
+
+SCENARIO: Creating 50 Spanish-speaking bots
+────────────────────────────────────────────
+
+1. Open Create Bots Dialog
+
+2. Configure:
+   Number of Bots: 50
+   Language: Spanish
+   
+   Role Distribution:
+   • Warrior: 70%  (35 bots)
+   • Merchant: 20% (10 bots)
+   • Friendly: 10% (5 bots)
+
+3. Click "Create Bots"
+
+4. Result in IA_Accounts.xml:
+   
+   Bot0001-Bot0035: BotRole="0" (Warriors)
+     • Combat enabled
+     • All hunter settings
+     • SkillID active
+   
+   Bot0036-Bot0045: BotRole="1" (Merchants)
+     • SkillID="-1"
+     • TuNhatItem="1" (picks jewels!)
+     • MoveRange="50"
+     • Will walk in safe zones
+   
+   Bot0046-Bot0050: BotRole="2" (Friendly)
+     • SkillID="-1"
+     • PartyMode="2" (sends invites!)
+     • MoveRange="40"
+     • Will help newbies
+
+5. In-Game Experience:
+   
+   WARRIORS (Bot0001-0035):
+   • Hunt in dungeons
+   • Say: "Buen día a todos"
+   • Do PVP
+   
+   MERCHANTS (Bot0036-0045):
+   • Walk in Lorencia
+   • Say: "Cambio joyas aquí!"
+   • Trade with players
+   
+   FRIENDLY (Bot0046-0050):
+   • Walk in newbie areas
+   • Say: "¿Necesitas ayuda?"
+   • Invite low-levels to party
+
+═══════════════════════════════════════════════════════════════════════════
+                     📁 FILES YOU NEED TO ADD TO PROJECT
+═══════════════════════════════════════════════════════════════════════════
+
+In Visual Studio:
+─────────────────
+GameServer Project → Add → Existing Item
+
+Add these 8 files:
+  1. NameManager.h
+  2. NameManager.cpp
+  3. PhraseManager.h
+  4. PhraseManager.cpp
+  5. BotRole.h          ⭐ NEW
+  6. BotRole.cpp        ⭐ NEW
+  7. SafeZoneManager.h  ⭐ NEW
+  8. SafeZoneManager.cpp ⭐ NEW
+
+Then Build (Ctrl+Shift+B)
+
+═══════════════════════════════════════════════════════════════════════════
+                     ✨ WHAT MAKES THIS SPECIAL
+═══════════════════════════════════════════════════════════════════════════
+
+BEFORE:
+  ❌ All bots do the same thing (hunt)
+  ❌ Boring, predictable
+  ❌ No economy interaction
+  ❌ No newbie help
+
+AFTER:
+  ✅ 3 different bot behaviors!
+  ✅ Merchants advertising trades
+  ✅ Friendly bots helping newbies
+  ✅ Warriors hunting everywhere
+  ✅ Feels like real MMORPG community!
+
+═══════════════════════════════════════════════════════════════════════════
+                     🎉 YOU'RE ALL SET!
+═══════════════════════════════════════════════════════════════════════════
+
+The Bot Role System is COMPLETE and ready to use!
+
+Compile, deploy, and watch your bots come to life with different
+personalities and behaviors!
+
+¡Disfruta, amigo! Your server is now truly world-class! 🌍🏆🚀
+
+═══════════════════════════════════════════════════════════════════════════

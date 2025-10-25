@@ -8,6 +8,8 @@
 #include "stdafx.h" 
 #include "FakeOnline.h"
 #include "PhraseManager.h"
+#include "BotRole.h"
+#include "SafeZoneManager.h"
 #include "ItemManager.h"
 #include "Map.h"
 #include "MasterSkillTree.h"
@@ -298,6 +300,8 @@ void CFakeOnline::LoadFakeData(char* path)
             info.TuNhatItem = rInfoData.attribute("TuNhatItem").as_int(0); info.TuDongReset = rInfoData.attribute("TuDongReset").as_int(0);
             info.PartyMode = rInfoData.attribute("PartyMode").as_int(0); info.PostKhiDie = rInfoData.attribute("PostKhiDie").as_int(0);
 			info.Map = rInfoData.attribute("Map").as_int(0);
+			info.BotRole = rInfoData.attribute("BotRole").as_int(0); // NEW: Bot role
+			info.LastRoleActionTick = 0; // Initialize timer
 			//info.MinLevel = rInfoReset.attribute("MinLevel").as_int();
 			if (strlen(info.Account) > 0) { this->m_Data.insert(std::pair<std::string, OFFEXP_DATA>(info.Account, info));}
         }

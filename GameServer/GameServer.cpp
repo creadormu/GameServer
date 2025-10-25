@@ -42,6 +42,8 @@
 #include "ClassConfig.h"
 #include "NameManager.h"
 #include "PhraseManager.h"
+#include "BotRole.h"
+#include "SafeZoneManager.h"
 
 
 TCHAR szTitle[MAX_LOADSTRING];
@@ -840,6 +842,11 @@ INT_PTR CALLBACK CreateBotsDialogProc(HWND hDlg, UINT message, WPARAM wParam, LP
 			"Available Configs: %d/7\n(Check multiple for variety)", availableConfigs);
 		SetDlgItemText(hDlg, IDC_STATIC_CONFIGINFO, configInfo);
 
+		// Bot Role Percentages (NEW)
+		SetDlgItemInt(hDlg, IDC_EDIT_WARRIOR_PERCENT, 70, FALSE);
+		SetDlgItemInt(hDlg, IDC_EDIT_MERCHANT_PERCENT, 20, FALSE);
+		SetDlgItemInt(hDlg, IDC_EDIT_FRIENDLY_PERCENT, 10, FALSE);
+
 		// Class combo
 		hComboClass = GetDlgItem(hDlg, IDC_COMBO_CLASS);
 		SendMessage(hComboClass, CB_ADDSTRING, 0, (LPARAM)"All Classes (Mixed)");
@@ -1015,6 +1022,23 @@ INT_PTR CALLBACK CreateBotsDialogProc(HWND hDlg, UINT message, WPARAM wParam, LP
 				return TRUE;
 			}
 
+			// Get bot role percentages (NEW)
+			int warriorPercent = GetDlgItemInt(hDlg, IDC_EDIT_WARRIOR_PERCENT, &bSuccess, FALSE);
+			int merchantPercent = GetDlgItemInt(hDlg, IDC_EDIT_MERCHANT_PERCENT, &bSuccess, FALSE);
+			int friendlyPercent = GetDlgItemInt(hDlg, IDC_EDIT_FRIENDLY_PERCENT, &bSuccess, FALSE);
+
+			// Validate percentages total = 100%
+			if (warriorPercent + merchantPercent + friendlyPercent != 100)
+			{
+				char msg[256];
+				sprintf_s(msg, sizeof(msg),
+					"Bot role percentages must total 100%%!\n\nCurrent total: %d%%\n\nWarrior: %d%%\nMerchant: %d%%\nFriendly: %d%%",
+					warriorPercent + merchantPercent + friendlyPercent,
+					warriorPercent, merchantPercent, friendlyPercent);
+				MessageBox(hDlg, msg, "Error", MB_OK | MB_ICONERROR);
+				return TRUE;
+			}
+
 			// Show progress warning for large batches
 			if (botCount > 100)
 			{
@@ -1031,10 +1055,11 @@ INT_PTR CALLBACK CreateBotsDialogProc(HWND hDlg, UINT message, WPARAM wParam, LP
 			EnableWindow(hDlg, FALSE);
 			SetCursor(LoadCursor(NULL, IDC_WAIT));
 
-			// Call creation function with config selection
+			// Call creation function with config selection and roles
 			if (CreateMultipleBotsAdvanced(botCount, startFrom, gateNumber, mapNumber, mapX, mapY,
 				minLevel, maxLevel, selectedClass, phamViTrain, moveRange, timeReturn,
-				tuNhatItem, tuDongReset, partyMode, pvpMode, postKhiDie, enabledConfigs))
+				tuNhatItem, tuDongReset, partyMode, pvpMode, postKhiDie, enabledConfigs,
+				warriorPercent, merchantPercent, friendlyPercent))
 			{
 				// Count how many configs were used
 				int configCount = 0;
@@ -1091,7 +1116,8 @@ INT_PTR CALLBACK CreateBotsDialogProc(HWND hDlg, UINT message, WPARAM wParam, LP
 // Add this parameter to the function signature:
 bool CreateMultipleBotsAdvanced(int botCount, int startFrom, int gateNumber, int mapNumber, int mapX, int mapY,
 	int minLevel, int maxLevel, int selectedClass, int phamViTrain, int moveRange, int timeReturn,
-	int tuNhatItem, int tuDongReset, int partyMode, int pvpMode, int postKhiDie, int enabledConfigs) // NEW PARAMETER
+	int tuNhatItem, int tuDongReset, int partyMode, int pvpMode, int postKhiDie, int enabledConfigs,
+	int warriorPercent, int merchantPercent, int friendlyPercent) // NEW: Role percentages
 {
 	// SAFETY CHECKS
 	if (botCount > 1000 || botCount < 1)
@@ -1144,6 +1170,14 @@ bool CreateMultipleBotsAdvanced(int botCount, int startFrom, int gateNumber, int
 		cumulativePercentages[i] = total;
 	}
 
+	// Calculate role counts based on percentages
+	int warriorCount = (botCount * warriorPercent) / 100;
+	int merchantCount = (botCount * merchantPercent) / 100;
+	int friendlyCount = botCount - warriorCount - merchantCount; // Remainder
+
+	LogAdd(LOG_BLACK, "[CreateBots] Role Distribution: Warrior=%d, Merchant=%d, Friendly=%d",
+		warriorCount, merchantCount, friendlyCount);
+
 	// Bot data structure - CRITICAL: Use heap allocation for large batches
 	struct BotData {
 		char account[11];
@@ -1152,7 +1186,8 @@ bool CreateMultipleBotsAdvanced(int botCount, int startFrom, int gateNumber, int
 		int level;
 		int finalMapX;
 		int finalMapY;
-		int configIndex; // NEW: Which config to use (1-7)
+		int configIndex; // Which config to use (1-7)
+		int botRole;     // NEW: Bot role (0=Warrior, 1=Merchant, 2=Friendly)
 	};
 
 	// CRITICAL FIX: Use dynamic allocation instead of vector for large batches
@@ -1210,6 +1245,20 @@ bool CreateMultipleBotsAdvanced(int botCount, int startFrom, int gateNumber, int
 
 		// NEW: Randomly select a config from enabled ones
 		bot->configIndex = g_ClassConfigManager.GetRandomConfigIndex(enabledConfigs);
+
+		// NEW: Assign bot role based on percentages
+		if (i < warriorCount)
+		{
+			bot->botRole = BOT_ROLE_WARRIOR;
+		}
+		else if (i < warriorCount + merchantCount)
+		{
+			bot->botRole = BOT_ROLE_MERCHANT;
+		}
+		else
+		{
+			bot->botRole = BOT_ROLE_FRIENDLY;
+		}
 
 		// Check class configuration
 		if (!g_ClassConfigManager.IsClassConfigured(selectedClassConfig->classCode, bot->configIndex))
@@ -1274,6 +1323,59 @@ bool CreateMultipleBotsAdvanced(int botCount, int startFrom, int gateNumber, int
 	{
 		const BotData* bot = &botList[i];
 
+		// Adjust config values based on bot role
+		int finalSkillID, finalSecondarySkillID;
+		int finalBuff0, finalBuff1, finalBuff2;
+		int finalPhamViTrain, finalTuNhatItem, finalTuDongReset;
+		int finalPartyMode, finalPVPMode, finalPostKhiDie;
+		int finalMoveRange, finalTimeReturn;
+
+		if (bot->botRole == BOT_ROLE_MERCHANT || bot->botRole == BOT_ROLE_FRIENDLY)
+		{
+			// Non-combat roles: disable combat-related settings
+			finalSkillID = -1;
+			finalSecondarySkillID = -1;
+			finalBuff0 = -1;
+			finalBuff1 = -1;
+			finalBuff2 = -1;
+			finalPhamViTrain = -1;  // No training range
+			finalTuNhatItem = (bot->botRole == BOT_ROLE_MERCHANT) ? 1 : -1; // Merchants pick items
+			finalTuDongReset = -1;  // No auto reset
+			finalPVPMode = -1;      // No PVP
+			finalPostKhiDie = -1;   // No death messages
+			
+			// Role-specific settings
+			if (bot->botRole == BOT_ROLE_MERCHANT)
+			{
+				finalPartyMode = -1;  // Merchants don't party
+				finalMoveRange = 50;  // Larger wander radius
+				finalTimeReturn = 15; // Return to safe zone faster
+			}
+			else // FRIENDLY
+			{
+				finalPartyMode = 2;   // Friendly bots send party invites
+				finalMoveRange = 40;  // Medium wander radius
+				finalTimeReturn = 10; // Return very fast
+			}
+		}
+		else // WARRIOR
+		{
+			// Warrior: use all configured values
+			finalSkillID = bot->classInfo->mainSkill;
+			finalSecondarySkillID = bot->classInfo->secondarySkill;
+			finalBuff0 = bot->classInfo->buff1;
+			finalBuff1 = bot->classInfo->buff2;
+			finalBuff2 = bot->classInfo->buff3;
+			finalPhamViTrain = phamViTrain;
+			finalTuNhatItem = tuNhatItem;
+			finalTuDongReset = tuDongReset;
+			finalPartyMode = partyMode;
+			finalPVPMode = pvpMode;
+			finalPostKhiDie = postKhiDie;
+			finalMoveRange = moveRange;
+			finalTimeReturn = timeReturn;
+		}
+
 		int result = fprintf(xmlFile,
 			"  <Info Account=\"%s\" Password=\"123456\" Name=\"%s\" "
 			"SkillID=\"%d\" SecondarySkillID=\"%d\" "
@@ -1281,14 +1383,16 @@ bool CreateMultipleBotsAdvanced(int botCount, int startFrom, int gateNumber, int
 			"GateNumber=\"%d\" Map=\"%d\" MapX=\"%d\" MapY=\"%d\" "
 			"PhamViTrain=\"%d\" MoveRange=\"%d\" TimeReturn=\"%d\" "
 			"TuNhatItem=\"%d\" TuDongReset=\"%d\" "
-			"PartyMode=\"%d\" PVPMode=\"%d\" PostKhiDie=\"%d\" />\n",
+			"PartyMode=\"%d\" PVPMode=\"%d\" PostKhiDie=\"%d\" "
+			"BotRole=\"%d\" />\n",
 			bot->account, bot->charName,
-			bot->classInfo->mainSkill, bot->classInfo->secondarySkill,
-			bot->classInfo->buff1, bot->classInfo->buff2, bot->classInfo->buff3,
+			finalSkillID, finalSecondarySkillID,
+			finalBuff0, finalBuff1, finalBuff2,
 			gateNumber, mapNumber, bot->finalMapX, bot->finalMapY,
-			phamViTrain, moveRange, timeReturn,
-			tuNhatItem, tuDongReset,
-			partyMode, pvpMode, postKhiDie
+			finalPhamViTrain, finalMoveRange, finalTimeReturn,
+			finalTuNhatItem, finalTuDongReset,
+			finalPartyMode, finalPVPMode, finalPostKhiDie,
+			bot->botRole
 		);
 
 		if (result < 0)
