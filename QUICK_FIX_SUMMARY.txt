@@ -1,0 +1,97 @@
+╔══════════════════════════════════════════════════════════════════════════╗
+║                  ⚡ QUICK FIX SUMMARY - DO THIS NOW! ⚡                 ║
+╚══════════════════════════════════════════════════════════════════════════╝
+
+═══════════════════════════════════════════════════════════════════════════
+                     🎯 THE PROBLEM
+═══════════════════════════════════════════════════════════════════════════
+
+Your fprintf() has TOO MANY parameters!
+• Format string expects: 20 values
+• You're providing: 31 values (duplicates!)
+• Result: All values get scrambled!
+
+═══════════════════════════════════════════════════════════════════════════
+                     ✅ THE FIX (Copy & Paste This!)
+═══════════════════════════════════════════════════════════════════════════
+
+In GameServer.cpp, find this (around line 1360):
+
+int result = fprintf(xmlFile,
+    "  <Info Account=\"%s\" Password=\"123456\" Name=\"%s\" "
+    "SkillID=\"%d\" SecondarySkillID=\"%d\" "
+    "UseBuffs_0=\"%d\" UseBuffs_1=\"%d\" UseBuffs_2=\"%d\" "
+    "GateNumber=\"%d\" Map=\"%d\" MapX=\"%d\" MapY=\"%d\" "
+    "PhamViTrain=\"%d\" MoveRange=\"%d\" TimeReturn=\"%d\" "
+    "TuNhatItem=\"%d\" TuDongReset=\"%d\" "
+    "PartyMode=\"%d\" PVPMode=\"%d\" PostKhiDie=\"%d\" "
+    "BotRole=\"%d\" />\n",
+    bot->account, bot->charName,
+    bot->classInfo->mainSkill, bot->classInfo->secondarySkillID,  // ❌ DELETE THIS LINE
+    bot->classInfo->buff1, bot->classInfo->buff2, bot->classInfo->buff3,  // ❌ DELETE THIS LINE
+    finalSkillID, finalSecondarySkillID,
+    finalBuff0, finalBuff1, finalBuff2,
+    gateNumber, mapNumber, bot->finalMapX, bot->finalMapY,
+    phamViTrain, moveRange, timeReturn,  // ❌ DELETE THIS LINE
+    tuNhatItem, tuDongReset,  // ❌ DELETE THIS LINE
+    partyMode, pvpMode, postKhiDie,  // ❌ DELETE THIS LINE
+    finalPhamViTrain, finalMoveRange, finalTimeReturn,
+    finalTuNhatItem, finalTuDongReset,
+    finalPartyMode, finalPVPMode, finalPostKhiDie,
+    bot->botRole
+);
+
+REPLACE WITH:
+
+int result = fprintf(xmlFile,
+    "  <Info Account=\"%s\" Password=\"123456\" Name=\"%s\" "
+    "SkillID=\"%d\" SecondarySkillID=\"%d\" "
+    "UseBuffs_0=\"%d\" UseBuffs_1=\"%d\" UseBuffs_2=\"%d\" "
+    "GateNumber=\"%d\" Map=\"%d\" MapX=\"%d\" MapY=\"%d\" "
+    "PhamViTrain=\"%d\" MoveRange=\"%d\" TimeReturn=\"%d\" "
+    "TuNhatItem=\"%d\" TuDongReset=\"%d\" "
+    "PartyMode=\"%d\" PVPMode=\"%d\" PostKhiDie=\"%d\" "
+    "BotRole=\"%d\" />\n",
+    bot->account, bot->charName,
+    finalSkillID, finalSecondarySkillID,
+    finalBuff0, finalBuff1, finalBuff2,
+    gateNumber, mapNumber, bot->finalMapX, bot->finalMapY,
+    finalPhamViTrain, finalMoveRange, finalTimeReturn,
+    finalTuNhatItem, finalTuDongReset,
+    finalPartyMode, finalPVPMode, finalPostKhiDie,
+    bot->botRole
+);
+
+═══════════════════════════════════════════════════════════════════════════
+                     📋 WHAT TO DELETE
+═══════════════════════════════════════════════════════════════════════════
+
+Remove these 5 lines:
+❌ bot->classInfo->mainSkill, bot->classInfo->secondarySkillID,
+❌ bot->classInfo->buff1, bot->classInfo->buff2, bot->classInfo->buff3,
+❌ phamViTrain, moveRange, timeReturn,
+❌ tuNhatItem, tuDongReset,
+❌ partyMode, pvpMode, postKhiDie,
+
+Keep these:
+✅ finalSkillID, finalSecondarySkillID,
+✅ finalBuff0, finalBuff1, finalBuff2,
+✅ finalPhamViTrain, finalMoveRange, finalTimeReturn,
+✅ finalTuNhatItem, finalTuDongReset,
+✅ finalPartyMode, finalPVPMode, finalPostKhiDie,
+
+═══════════════════════════════════════════════════════════════════════════
+                     🚀 AFTER THE FIX
+═══════════════════════════════════════════════════════════════════════════
+
+1. Build (Ctrl+Shift+B)
+2. Create new bots
+3. Check XML - should be perfect!
+
+Warriors: SkillID=9, PhamViTrain=6, etc. ✓
+Merchants: SkillID=-1, TuNhatItem=1, MoveRange=50 ✓
+Friendly: SkillID=-1, PartyMode=2, MoveRange=40 ✓
+
+THEN TEST IN-GAME! 🎮
+
+═══════════════════════════════════════════════════════════════════════════

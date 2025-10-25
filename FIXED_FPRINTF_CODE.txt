@@ -1,0 +1,46 @@
+// =====================================================
+// CORRECTED fprintf() FOR XML GENERATION
+// =====================================================
+
+int result = fprintf(xmlFile,
+    "  <Info Account=\"%s\" Password=\"123456\" Name=\"%s\" "
+    "SkillID=\"%d\" SecondarySkillID=\"%d\" "
+    "UseBuffs_0=\"%d\" UseBuffs_1=\"%d\" UseBuffs_2=\"%d\" "
+    "GateNumber=\"%d\" Map=\"%d\" MapX=\"%d\" MapY=\"%d\" "
+    "PhamViTrain=\"%d\" MoveRange=\"%d\" TimeReturn=\"%d\" "
+    "TuNhatItem=\"%d\" TuDongReset=\"%d\" "
+    "PartyMode=\"%d\" PVPMode=\"%d\" PostKhiDie=\"%d\" "
+    "BotRole=\"%d\" />\n",
+    bot->account, bot->charName,
+    finalSkillID, finalSecondarySkillID,
+    finalBuff0, finalBuff1, finalBuff2,
+    gateNumber, mapNumber, bot->finalMapX, bot->finalMapY,
+    finalPhamViTrain, finalMoveRange, finalTimeReturn,
+    finalTuNhatItem, finalTuDongReset,
+    finalPartyMode, finalPVPMode, finalPostKhiDie,
+    bot->botRole
+);
+
+// =====================================================
+// EXPLANATION OF PARAMETERS (18 total):
+// =====================================================
+// 1. bot->account              → Account name
+// 2. bot->charName             → Character name
+// 3. finalSkillID              → Main skill (adjusted per role)
+// 4. finalSecondarySkillID     → Secondary skill (adjusted per role)
+// 5. finalBuff0                → Buff slot 0 (adjusted per role)
+// 6. finalBuff1                → Buff slot 1 (adjusted per role)
+// 7. finalBuff2                → Buff slot 2 (adjusted per role)
+// 8. gateNumber                → Gate number
+// 9. mapNumber                 → Map number
+// 10. bot->finalMapX           → X coordinate
+// 11. bot->finalMapY           → Y coordinate
+// 12. finalPhamViTrain         → Training range (adjusted per role)
+// 13. finalMoveRange           → Movement range (adjusted per role)
+// 14. finalTimeReturn          → Return time (adjusted per role)
+// 15. finalTuNhatItem          → Auto pickup (adjusted per role)
+// 16. finalTuDongReset         → Auto reset (adjusted per role)
+// 17. finalPartyMode           → Party mode (adjusted per role)
+// 18. finalPVPMode             → PVP mode (adjusted per role)
+// 19. finalPostKhiDie          → Death post (adjusted per role)
+// 20. bot->botRole             → Bot role (0=Warrior, 1=Merchant, 2=Friendly)
