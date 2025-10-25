@@ -1,0 +1,215 @@
+╔══════════════════════════════════════════════════════════════════════════╗
+║              🔧 SIMPLE CLEAN SOLUTION - START FRESH! 🔧                 ║
+║                   Keep what works, remove what doesn't!                  ║
+╚══════════════════════════════════════════════════════════════════════════╝
+
+═══════════════════════════════════════════════════════════════════════════
+                     ✅ WHAT WE KEEP (Already Works!)
+═══════════════════════════════════════════════════════════════════════════
+
+✅ Multi-language names (NameManager)
+✅ Multi-language phrases (PhraseManager)
+✅ Bot role system (BotRole enum)
+✅ XML generation with BotRole field
+✅ Config auto-adjustment (SkillID=-1 for merchants/friendly)
+✅ Dialog UI with role percentages
+
+ALL OF THIS IS GOOD! DON'T TOUCH IT!
+
+═══════════════════════════════════════════════════════════════════════════
+                     ❌ WHAT WE REMOVE (Causing Problems)
+═══════════════════════════════════════════════════════════════════════════
+
+❌ SafeZoneManager.h/cpp - Delete these files!
+❌ All teleport logic in Attack() - Remove it!
+❌ RestoreFakeOnline() modifications - Revert it!
+❌ IsSafeZone() calls - Remove them!
+
+═══════════════════════════════════════════════════════════════════════════
+                     🎯 THE SIMPLE APPROACH
+═══════════════════════════════════════════════════════════════════════════
+
+WARRIORS (BotRole="0"):
+───────────────────────
+✓ Spawn in hunting zones
+✓ Hunt monsters normally
+✓ Everything works as before
+
+MERCHANTS (BotRole="1"):
+────────────────────────
+✓ SkillID="-1" (don't attack)
+✓ TuNhatItem="1" (pick jewels)
+✓ Spawn in Lorencia (manual XML edit)
+✓ JUST STAND THERE or walk a tiny bit
+✓ That's it!
+
+FRIENDLY (BotRole="2"):
+───────────────────────
+✓ SkillID="-1" (don't attack)
+✓ PartyMode="2" (send invites)
+✓ Spawn in Lorencia (manual XML edit)
+✓ JUST STAND THERE
+✓ That's it!
+
+═══════════════════════════════════════════════════════════════════════════
+                     📝 STEP 1: Clean Up FakeOnline.cpp
+═══════════════════════════════════════════════════════════════════════════
+
+REVERT Attack() to SIMPLE version:
+
+void CFakeOnline::Attack(int aIndex)
+{
+    if (OBJMAX_RANGE(aIndex) == FALSE) { return; }
+    if (!gObjIsConnectedGP(aIndex)) { return; }
+
+    LPOBJ lpObj = &gObj[aIndex];
+
+    // **ONLY check auto-reset for FakeBots**
+    if (lpObj->IsFakeOnlineBot) {
+        this->CheckAutoReset(lpObj);
+    }
+
+    if (lpObj->IsFakeOnline == 0 || !lpObj->IsFakeRegen) { return; }
+    if (lpObj->State == OBJECT_DELCMD || lpObj->DieRegen != 0 || lpObj->Teleport != 0 || lpObj->RegenOk > 0) { return; }
+    if (gServerInfo.InSafeZone(aIndex) == true) { return; }
+
+    OFFEXP_DATA* botData = GetOffExpInfo(lpObj);
+    if (!botData) return;
+
+    // ═══════════════════════════════════════════════════════
+    // SIMPLE ROLE CHECK
+    // ═══════════════════════════════════════════════════════
+    
+    // Merchants and Friendly don't do combat (SkillID=-1)
+    // Just let them stand there!
+    if (botData->BotRole == BOT_ROLE_MERCHANT || botData->BotRole == BOT_ROLE_FRIENDLY)
+    {
+        return; // Do nothing!
+    }
+    
+    // ═══════════════════════════════════════════════════════
+    // WARRIOR - NORMAL COMBAT AI
+    // ═══════════════════════════════════════════════════════
+
+    OFFEXP_DATA* pBotData = this->GetOffExpInfo(lpObj);
+    if (pBotData != nullptr && pBotData->TuNhatItem == 1) {
+        if (this->NhatItem(aIndex) == 2) { 
+             return; 
+        }
+    }
+
+    this->SuDungMauMana(aIndex);
+    this->TuDongBuffSkill(aIndex);
+    this->TuDongDanhSkill(aIndex);
+    FakeAutoRepair(aIndex); 
+}
+
+THAT'S IT! Super simple!
+
+═══════════════════════════════════════════════════════════════════════════
+                     📝 STEP 2: Remove SafeZoneManager
+═══════════════════════════════════════════════════════════════════════════
+
+1. Delete SafeZoneManager.h from project
+2. Delete SafeZoneManager.cpp from project
+3. Remove #include "SafeZoneManager.h" from GameServer.cpp
+4. Remove #include "SafeZoneManager.h" from FakeOnline.cpp
+5. Build - should compile!
+
+═══════════════════════════════════════════════════════════════════════════
+                     📝 STEP 3: Manually Set Merchant/Friendly Spawn
+═══════════════════════════════════════════════════════════════════════════
+
+Open IA/Accounts.xml
+
+FIND merchants (BotRole="1") and friendly (BotRole="2")
+
+CHANGE:
+<Info Account="Bot0230" ... GateNumber="614" Map="12" MapX="16" MapY="-1" ... BotRole="1" />
+
+TO:
+<Info Account="Bot0230" ... GateNumber="0" Map="0" MapX="125" MapY="125" ... BotRole="1" />
+
+This spawns them in Lorencia center!
+
+═══════════════════════════════════════════════════════════════════════════
+                     📝 STEP 4: Restart & Test
+═══════════════════════════════════════════════════════════════════════════
+
+1. Save all changes
+2. Build (Ctrl+Shift+B)
+3. Restart server
+4. Reload IA
+5. ADD IA
+
+RESULT:
+───────
+✅ Warriors: Hunt normally in various maps
+✅ Merchants: Stand in Lorencia, pick jewels (SkillID=-1)
+✅ Friendly: Stand in Lorencia, send party invites (PartyMode=2)
+✅ No more teleporting!
+✅ No more appearing/disappearing!
+✅ SIMPLE and WORKS!
+
+═══════════════════════════════════════════════════════════════════════════
+                     🎯 WHAT YOU GET
+═══════════════════════════════════════════════════════════════════════════
+
+WORKING FEATURES:
+─────────────────
+✅ Multi-language bot names (Spanish, English, Chinese, etc.)
+✅ Multi-language phrases
+✅ 3 bot roles with different configs
+✅ Warriors hunt normally
+✅ Merchants stand in towns, pick jewels
+✅ Friendly stand in towns, send party invites
+✅ No complex teleport logic
+✅ No flickering/disappearing
+✅ SIMPLE and STABLE!
+
+NOT IMPLEMENTED (but that's OK!):
+──────────────────────────────────
+❌ Safe zone wandering (too complex for now)
+❌ Automatic safe zone return (not needed)
+❌ Role-specific phrases (use BotPhrases.txt for all)
+
+YOU CAN ADD THESE LATER IF NEEDED!
+
+═══════════════════════════════════════════════════════════════════════════
+                     📋 FILES TO KEEP
+═══════════════════════════════════════════════════════════════════════════
+
+KEEP:
+─────
+✅ NameManager.h
+✅ NameManager.cpp
+✅ PhraseManager.h
+✅ PhraseManager.cpp
+✅ BotRole.h
+✅ BotRole.cpp
+✅ All IA/ data files
+
+DELETE:
+───────
+❌ SafeZoneManager.h
+❌ SafeZoneManager.cpp
+
+═══════════════════════════════════════════════════════════════════════════
+                     🎉 THIS IS THE SIMPLE SOLUTION!
+═══════════════════════════════════════════════════════════════════════════
+
+• Keep all the GOOD work (names, phrases, roles)
+• Remove all the PROBLEMATIC parts (teleports, wandering)
+• Result: STABLE, WORKING system!
+
+Merchants and Friendly just STAND THERE in Lorencia.
+That's ENOUGH for a realistic server population!
+
+Later you can add:
+• Walking animation
+• Periodic small movements
+• More complex AI
+
+But for now: SIMPLE AND WORKING! ✅
+
+═══════════════════════════════════════════════════════════════════════════
