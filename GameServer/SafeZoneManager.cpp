@@ -84,7 +84,7 @@ bool MoveBotToRandomNearbyPoint(int aIndex, int radius)
     // Try multiple times to find a walkable point
     for (int attempt = 0; attempt < 10; attempt++)
     {
-        // Get random offset within radius (smaller steps for smooth movement)
+        // Get random offset within radius
         int offsetX = (GetLargeRand() % (radius * 2 + 1)) - radius;
         int offsetY = (GetLargeRand() % (radius * 2 + 1)) - radius;
         
@@ -104,31 +104,15 @@ bool MoveBotToRandomNearbyPoint(int aIndex, int radius)
             continue; // Try again
         }
         
-        // Calculate path using map's pathfinding
-        if (gMap[lpObj->Map].m_cMapPath.FindPath(lpObj->X, lpObj->Y, targetX, targetY, false))
-        {
-            lpObj->PathCount = 0;
-            
-            // Copy path (limit to avoid overflow)
-            int maxPath = (gMap[lpObj->Map].m_cMapPath.m_NumPath < 15) ? 
-                          gMap[lpObj->Map].m_cMapPath.m_NumPath : 15;
-            
-            for (int i = 0; i < maxPath; i++)
-            {
-                lpObj->PathX[i] = gMap[lpObj->Map].m_cMapPath.m_PathX[i];
-                lpObj->PathY[i] = gMap[lpObj->Map].m_cMapPath.m_PathY[i];
-                lpObj->PathCount++;
-            }
-            
-            if (lpObj->PathCount > 0)
-            {
-                lpObj->PathCur = 0;
-                lpObj->PathStartEnd = 1;
-                lpObj->TX = targetX;
-                lpObj->TY = targetY;
-                return true;
-            }
-        }
+        // SIMPLE SOLUTION: Just set target coordinates
+        // The bot's existing movement AI will handle pathfinding automatically!
+        lpObj->TX = targetX;
+        lpObj->TY = targetY;
+        lpObj->MTX = targetX;
+        lpObj->MTY = targetY;
+        lpObj->Dir = GetPathPacketDirPos(lpObj->X, lpObj->Y, targetX, targetY);
+        
+        return true;
     }
     
     return false;
