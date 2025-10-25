@@ -1,0 +1,91 @@
+; BotPhrases.txt - English
+; Phrases that bots say during gameplay
+; Format: #CATEGORY, probability
+; Then the phrases, one per line
+
+#GENERAL, 5
+Good day everyone
+Hello community
+Anyone here?
+Greetings warriors
+How's it going?
+Training hard
+Looking for action
+How's everyone doing?
+Ready for adventure
+Here and ready
+
+#NEAR_REAL_PLAYER, 15
+Hello friend!
+What's up?
+Greetings!
+Hey, how are you?
+Hi there!
+Everything good?
+Hello companion
+What brings you here?
+Nice to see you
+Welcome!
+
+#IN_PARTY, 20
+Excellent party!
+Let's go team!
+Good work everyone
+Keep it up!
+Great team!
+Together we're stronger
+Ready for more?
+Perfect, let's continue
+Let's get more EXP
+Good pace guys
+
+#PVP, 25
+Good fight!
+That was intense
+Nice battle
+You're strong!
+Great combat
+Respect warrior
+Impressive!
+Almost got me
+Good duel
+That was epic
+
+#TRADE, 30
+Looking to trade something?
+I have good items
+What do you need?
+I can help you
+Check what I have
+Interested in trading?
+Good prices
+Special offers
+What are you looking for?
+Let's talk business
+
+#MORNING
+Good morning!
+Great start to the day
+Perfect morning for training
+Ready for the day
+Energy at maximum
+
+#AFTERNOON
+Good afternoon
+Productive afternoon
+Time to train more
+Still have time
+Let's keep the energy up
+
+#NIGHT
+Good evening
+Night of adventures
+The night is young
+Action time
+Night training
+
+#MAP_SPECIFIC, 0
+Lorencia is beautiful
+Devias has good spots
+Noria, my favorite place
+Atlans is dangerous, be careful

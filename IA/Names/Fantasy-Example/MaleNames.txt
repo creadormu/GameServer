@@ -1,0 +1,34 @@
+; Fantasy Male Names - Example
+; Perfect for creating an immersive medieval/fantasy atmosphere
+; Feel free to add more names!
+
+Aragorn
+Thorin
+Gandalf
+Legolas
+Gimli
+Boromir
+Faramir
+Elrond
+Thranduil
+Bard
+Dwalin
+Balin
+Fili
+Kili
+Gloin
+Thrain
+Thror
+Celeborn
+Galadriel
+Elendil
+Isildur
+Anarion
+Eomer
+Eowyn
+Theoden
+Grima
+Saruman
+Radagast
+Denethor
+Imrahil

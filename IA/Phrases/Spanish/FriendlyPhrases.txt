@@ -1,0 +1,75 @@
+; FriendlyPhrases.txt - Spanish  
+; Frases para bots FRIENDLY (amigables/ayudantes)
+; Estos bots ayudan a novatos, dan consejos, son sociales
+
+#GENERAL, 25
+¿Necesitas ayuda?
+Aquí para ayudar!
+Bienvenido al server!
+¿Eres nuevo?
+Con gusto te ayudo
+Pregunta lo que sea
+Estoy para apoyarte
+¿Primera vez en MU?
+No dudes en preguntar
+Aquí estoy para ti
+
+#NEAR_REAL_PLAYER, 40
+¡Hola amigo!
+Bienvenido!
+¿Necesitas ayuda?
+Hola! ¿Cómo estás?
+Hey! ¿Primera vez aquí?
+Saludos! ¿Te ayudo?
+Hola! ¿Qué tal?
+Bienvenido al mundo de MU!
+Hey amigo! ¿Todo bien?
+Hola! ¿Alguna duda?
+
+#HELPING, 35
+Te ayudo con gusto!
+Claro que sí!
+Déjame explicarte
+Es fácil, mira
+Yo te enseño
+Sin problema!
+Con gusto te guío
+Vamos juntos!
+Te acompaño
+Puedo mostrarte
+
+#PARTY, 30
+¿Hacemos party?
+Vamos juntos!
+Party contigo!
+Te invito a party
+Juntos es mejor
+Formemos equipo
+Party para ayudarte
+Vamos a entrenar juntos
+Party de apoyo
+Te ayudo en party
+
+#DIRECTIONS, 25
+Ve hacia el norte
+Está en ese mapa
+Te llevo si quieres
+Sígueme!
+Por aquí
+Mira el mapa
+Está cerca
+Te muestro el camino
+Vamos juntos
+No te pierdas
+
+#ENCOURAGEMENT, 20
+¡Muy bien!
+¡Excelente!
+Sigue así!
+Lo estás haciendo bien
+¡Genial!
+Vas por buen camino
+¡Ánimo!
+¡Puedes hacerlo!
+¡Adelante!
+¡Bien hecho!

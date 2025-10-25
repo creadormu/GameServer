@@ -1,0 +1,89 @@
+; BotPhrases.txt - Japanese (Romaji)
+; ボットフレーズ
+
+#GENERAL, 5
+Konnichiwa minna
+Ohayo gozaimasu
+Dare ka iru?
+Konbanwa senshi-tachi
+Genki?
+Shugyo-chu
+Tatakai o sagashite
+Minna genki?
+Boken junbi OK
+Koko ni imasu
+
+#NEAR_REAL_PLAYER, 15
+Konnichiwa tomodachi!
+Genki?
+Yoroshiku!
+Yaa, genki?
+Ohayo!
+Daijoubu?
+Konnichiwa nakama
+Nani shiteru no?
+Atte ureshii
+Youkoso!
+
+#IN_PARTY, 20
+Subarashii party!
+Gambarou team!
+Minna yoku yatta
+Tsuzukeyou!
+Sugoi team!
+Issho nara tsuyoi
+Motto dekiru?
+Kanpeki, tsuzukeyou
+Motto EXP wo torou
+Ii pace da
+
+#PVP, 25
+Ii fight!
+Sugoi intense datta
+Ii battle
+Tsuyoi ne!
+Sugoi combat
+Respect senshi
+Subarashii!
+Motto de kateru tokoro datta
+Ii duel
+Sore wa epic datta
+
+#TRADE, 30
+Trade shitai?
+Ii item aru yo
+Nani ga hitsuyou?
+Tetsudaeru yo
+Mite mite
+Trade ni kyoumi aru?
+Ii nedan
+Special offer
+Nani sagashiteru?
+Business no hanashi shiyou
+
+#MORNING
+Ohayo gozaimasu!
+Ii asa da
+Shugyo ni kanpeki na asa
+Kyou no junbi OK
+Energy MAX
+
+#AFTERNOON
+Konnichiwa
+Seisanteki na gogo
+Motto shugyo no jikan
+Mada jikan aru
+Energy tamochou
+
+#NIGHT
+Konbanwa
+Boken no yoru
+Yoru wa mada wakai
+Action no jikan
+Yoru no shugyo
+
+#MAP_SPECIFIC, 0
+Lorencia wa kirei
+Devias wa ii basho aru
+Noria, suki na basho
+Atlans wa abunai, ki wo tsukete

@@ -1,0 +1,112 @@
+╔══════════════════════════════════════════════════════════════════════════╗
+║                  🔧 DIALOG HEIGHT FIX - MANUAL GUIDE 🔧                 ║
+║            Make "Create Bots" Dialog Taller to See All Controls          ║
+╚══════════════════════════════════════════════════════════════════════════╝
+
+═══════════════════════════════════════════════════════════════════════════
+                     📋 PROBLEM
+═══════════════════════════════════════════════════════════════════════════
+
+The "Create Multiple Bots" dialog is TOO SHORT vertically!
+You can't see the new Bot Role controls at the bottom.
+
+═══════════════════════════════════════════════════════════════════════════
+                     ✅ SOLUTION: Increase Dialog Height
+═══════════════════════════════════════════════════════════════════════════
+
+MANUAL STEPS (Easy!):
+─────────────────────
+
+1. Open Visual Studio
+
+2. Open Resource View:
+   • View → Other Windows → Resource View
+   OR
+   • Press Ctrl+Shift+E
+
+3. Expand GameServer → Dialog
+
+4. Double-click "IDD_CREATEBOTS"
+   → Dialog editor opens
+
+5. Right-click on the dialog window → Properties
+
+6. Find "Height" property
+
+7. CHANGE IT:
+   Current: probably 320 or 380
+   New:     420 or 450
+   
+8. Save (Ctrl+S)
+
+9. Rebuild (Ctrl+Shift+B)
+
+DONE! ✅
+
+═══════════════════════════════════════════════════════════════════════════
+                     OR: Edit .rc File Directly
+═══════════════════════════════════════════════════════════════════════════
+
+IF YOU PREFER TO EDIT THE FILE:
+────────────────────────────────
+
+1. Close Visual Studio
+
+2. Open GameServer.rc with Notepad++
+
+3. Find this line:
+   IDD_CREATEBOTS DIALOGDISCARDABLE  0, 0, 250, 380
+                                                 ^^^
+                                           This is height
+   
+4. Change the last number (height) to 420:
+   IDD_CREATEBOTS DIALOGDISCARDABLE  0, 0, 250, 420
+   
+5. Save
+
+6. Open Visual Studio again
+
+7. Rebuild
+
+DONE! ✅
+
+═══════════════════════════════════════════════════════════════════════════
+                     📏 RECOMMENDED HEIGHTS
+═══════════════════════════════════════════════════════════════════════════
+
+Original:  ~320-380  (too short, can't see role controls)
+Good:      420       (comfortable, all controls visible)
+Spacious:  450       (very comfortable, lots of space)
+
+Choose what works best for your screen!
+
+═══════════════════════════════════════════════════════════════════════════
+                     ✅ RESULT
+═══════════════════════════════════════════════════════════════════════════
+
+After increasing height, you'll see:
+
+┌─ Create Bots Dialog ────────────────────┐
+│                                          │
+│  [All previous controls...]              │
+│                                          │
+│  ┌─ Config Variations ─────────┐        │
+│  │  ☑ Config 1  ☐ Config 2     │        │
+│  │  ...                         │        │
+│  └──────────────────────────────┘        │
+│                                          │
+│  ┌─ Bot Role Distribution ─────┐  ✅    │
+│  │  Warrior:   [70]%            │  NOW  │
+│  │  Merchant:  [20]%            │  VISIBLE! │
+│  │  Friendly:  [10]%            │        │
+│  └──────────────────────────────┘        │
+│                                          │
+│  [ Configure Classes... ]                │
+│                                          │
+│  [ Create Bots ]  [ Cancel ]             │
+│                                          │
+└──────────────────────────────────────────┘
+
+All controls now visible! ✅
+
+═══════════════════════════════════════════════════════════════════════════

@@ -1,0 +1,59 @@
+; MerchantPhrases.txt - Spanish
+; Frases específicas para bots MERCHANT (comerciantes)
+; Estos bots anuncian trades, hablan de joyas, etc.
+
+#GENERAL, 15
+Vendiendo joyas!
+Cambio joyas aquí
+Buenos precios hoy
+Ofertas especiales
+Buscando clientes
+Compro y vendo joyas
+Mejores precios del server
+Comerciante de confianza
+Joyas de calidad
+Ven a comerciar!
+
+#ADVERTISING, 40
+Cambio {required_jewel} por {reward_jewel}!
+Necesito {required_jewel}, ofrezco {reward_jewel}!
+Vendo {reward_jewel} por {required_jewel}!
+Buen trade: {required_jewel} → {reward_jewel}!
+Cambio joyas aquí!
+Trade activo: {required_jewel} por {reward_jewel}!
+Ofrezco {reward_jewel}!
+Busco {required_jewel}!
+Mejor cambio de joyas aquí!
+Trade justo y rápido!
+
+#TRADE_COMPLETE, 30
+Gracias por el trade!
+Excelente negocio!
+Trade completado!
+Gracias amigo!
+Vuelve pronto!
+Siempre a tu servicio!
+Buen trade!
+Gracias por confiar!
+Hasta la próxima!
+Trade exitoso!
+
+#TRADE_WAITING, 20
+Esperando clientes...
+¿Alguien necesita joyas?
+¿Algún trade?
+Estoy aquí para comerciar
+¿Buscas joyas?
+Trade disponible
+Tengo joyas para vender
+¿Necesitas cambiar joyas?
+
+#NEAR_REAL_PLAYER, 25
+Hola! ¿Buscas trade?
+Saludos! ¿Necesitas joyas?
+Hey! Tengo buenas ofertas
+Hola amigo! ¿Algún trade?
+Bienvenido! ¿Qué buscas?
+Hola! Comerciante a tu servicio
+Hey! ¿Qué joyas necesitas?
+Saludos guerrero! ¿Trade?

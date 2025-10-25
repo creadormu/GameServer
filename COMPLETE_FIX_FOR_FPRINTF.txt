@@ -1,0 +1,246 @@
+╔══════════════════════════════════════════════════════════════════════════╗
+║                🔧 COMPLETE FIX FOR FPRINTF - COPY & PASTE! 🔧           ║
+╚══════════════════════════════════════════════════════════════════════════╝
+
+═══════════════════════════════════════════════════════════════════════════
+                     ❌ WHAT'S WRONG IN YOUR CODE
+═══════════════════════════════════════════════════════════════════════════
+
+You have THIS (WRONG - 31 parameters):
+────────────────────────────────────────
+
+int result = fprintf(xmlFile,
+    "  <Info Account=\"%s\" Password=\"123456\" Name=\"%s\" "
+    "SkillID=\"%d\" SecondarySkillID=\"%d\" "
+    "UseBuffs_0=\"%d\" UseBuffs_1=\"%d\" UseBuffs_2=\"%d\" "
+    "GateNumber=\"%d\" Map=\"%d\" MapX=\"%d\" MapY=\"%d\" "
+    "PhamViTrain=\"%d\" MoveRange=\"%d\" TimeReturn=\"%d\" "
+    "TuNhatItem=\"%d\" TuDongReset=\"%d\" "
+    "PartyMode=\"%d\" PVPMode=\"%d\" PostKhiDie=\"%d\" "
+    "BotRole=\"%d\" />\n",
+    bot->account, bot->charName,
+    bot->classInfo->mainSkill, bot->classInfo->secondarySkill,  ❌ WRONG!
+    bot->classInfo->buff1, bot->classInfo->buff2, bot->classInfo->buff3,  ❌ WRONG!
+    finalSkillID, finalSecondarySkillID,  ❌ DUPLICATE!
+    finalBuff0, finalBuff1, finalBuff2,  ❌ DUPLICATE!
+    gateNumber, mapNumber, bot->finalMapX, bot->finalMapY,
+    phamViTrain, moveRange, timeReturn,  ❌ WRONG (should be final*)!
+    tuNhatItem, tuDongReset,  ❌ WRONG (should be final*)!
+    partyMode, pvpMode, postKhiDie,  ❌ WRONG (should be final*)!
+    finalPhamViTrain, finalMoveRange, finalTimeReturn,  ❌ DUPLICATE!
+    finalTuNhatItem, finalTuDongReset,  ❌ DUPLICATE!
+    finalPartyMode, finalPVPMode, finalPostKhiDie,  ❌ DUPLICATE!
+    bot->botRole
+);
+
+PROBLEM: You provided parameters TWICE!
+• bot->classInfo->mainSkill AND finalSkillID
+• phamViTrain AND finalPhamViTrain
+• etc.
+
+This causes ALL values to shift and become scrambled!
+
+═══════════════════════════════════════════════════════════════════════════
+                     ✅ REPLACE WITH THIS (CORRECT - 20 parameters)
+═══════════════════════════════════════════════════════════════════════════
+
+FIND THIS SECTION (around line 1360):
+──────────────────────────────────────
+
+int result = fprintf(xmlFile,
+    "  <Info Account=\"%s\" Password=\"123456\" Name=\"%s\" "
+    "SkillID=\"%d\" SecondarySkillID=\"%d\" "
+    "UseBuffs_0=\"%d\" UseBuffs_1=\"%d\" UseBuffs_2=\"%d\" "
+    "GateNumber=\"%d\" Map=\"%d\" MapX=\"%d\" MapY=\"%d\" "
+    "PhamViTrain=\"%d\" MoveRange=\"%d\" TimeReturn=\"%d\" "
+    "TuNhatItem=\"%d\" TuDongReset=\"%d\" "
+    "PartyMode=\"%d\" PVPMode=\"%d\" PostKhiDie=\"%d\" "
+    "BotRole=\"%d\" />\n",
+    bot->account, bot->charName,
+    bot->classInfo->mainSkill, bot->classInfo->secondarySkill,
+    bot->classInfo->buff1, bot->classInfo->buff2, bot->classInfo->buff3,
+    finalSkillID, finalSecondarySkillID,
+    finalBuff0, finalBuff1, finalBuff2,
+    gateNumber, mapNumber, bot->finalMapX, bot->finalMapY,
+    phamViTrain, moveRange, timeReturn,
+    tuNhatItem, tuDongReset,
+    partyMode, pvpMode, postKhiDie,
+    finalPhamViTrain, finalMoveRange, finalTimeReturn,
+    finalTuNhatItem, finalTuDongReset,
+    finalPartyMode, finalPVPMode, finalPostKhiDie,
+    bot->botRole
+);
+
+REPLACE WITH THIS:
+──────────────────
+
+int result = fprintf(xmlFile,
+    "  <Info Account=\"%s\" Password=\"123456\" Name=\"%s\" "
+    "SkillID=\"%d\" SecondarySkillID=\"%d\" "
+    "UseBuffs_0=\"%d\" UseBuffs_1=\"%d\" UseBuffs_2=\"%d\" "
+    "GateNumber=\"%d\" Map=\"%d\" MapX=\"%d\" MapY=\"%d\" "
+    "PhamViTrain=\"%d\" MoveRange=\"%d\" TimeReturn=\"%d\" "
+    "TuNhatItem=\"%d\" TuDongReset=\"%d\" "
+    "PartyMode=\"%d\" PVPMode=\"%d\" PostKhiDie=\"%d\" "
+    "BotRole=\"%d\" />\n",
+    bot->account, bot->charName,
+    finalSkillID, finalSecondarySkillID,
+    finalBuff0, finalBuff1, finalBuff2,
+    gateNumber, mapNumber, bot->finalMapX, bot->finalMapY,
+    finalPhamViTrain, finalMoveRange, finalTimeReturn,
+    finalTuNhatItem, finalTuDongReset,
+    finalPartyMode, finalPVPMode, finalPostKhiDie,
+    bot->botRole
+);
+
+═══════════════════════════════════════════════════════════════════════════
+                     📋 WHAT CHANGED
+═══════════════════════════════════════════════════════════════════════════
+
+REMOVED (were causing duplicates):
+───────────────────────────────────
+❌ bot->classInfo->mainSkill
+❌ bot->classInfo->secondarySkill
+❌ bot->classInfo->buff1
+❌ bot->classInfo->buff2
+❌ bot->classInfo->buff3
+❌ phamViTrain
+❌ moveRange
+❌ timeReturn
+❌ tuNhatItem
+❌ tuDongReset
+❌ partyMode
+❌ pvpMode
+❌ postKhiDie
+
+KEPT (the adjusted values):
+────────────────────────────
+✅ finalSkillID (already has the right value)
+✅ finalSecondarySkillID
+✅ finalBuff0, finalBuff1, finalBuff2
+✅ finalPhamViTrain
+✅ finalMoveRange
+✅ finalTimeReturn
+✅ finalTuNhatItem
+✅ finalTuDongReset
+✅ finalPartyMode
+✅ finalPVPMode
+✅ finalPostKhiDie
+
+═══════════════════════════════════════════════════════════════════════════
+                     ✅ RESULT AFTER FIX
+═══════════════════════════════════════════════════════════════════════════
+
+WARRIOR (BotRole="0"):
+──────────────────────
+SkillID="9"               ✓ Correct
+SecondarySkillID="12"     ✓ Correct
+UseBuffs_0="16"           ✓ Correct
+GateNumber="614"          ✓ Correct
+Map="0"                   ✓ Correct
+MapX="110"                ✓ Correct
+MapY="200"                ✓ Correct
+PhamViTrain="6"           ✓ Correct
+MoveRange="30"            ✓ Correct
+TuNhatItem="1"            ✓ Correct
+PartyMode="1"             ✓ Correct
+PVPMode="1"               ✓ Correct
+
+MERCHANT (BotRole="1"):
+───────────────────────
+SkillID="-1"              ✓ Correct (no combat!)
+SecondarySkillID="-1"     ✓ Correct
+UseBuffs_0="-1"           ✓ Correct
+UseBuffs_1="-1"           ✓ Correct
+UseBuffs_2="-1"           ✓ Correct
+GateNumber="614"          ✓ Correct
+Map="0"                   ✓ Correct
+MapX="110"                ✓ Correct
+MapY="200"                ✓ Correct
+PhamViTrain="-1"          ✓ Correct (no training!)
+MoveRange="50"            ✓ Correct (larger wander!)
+TimeReturn="15"           ✓ Correct
+TuNhatItem="1"            ✓ Correct (picks jewels!)
+TuDongReset="-1"          ✓ Correct
+PartyMode="-1"            ✓ Correct (doesn't party)
+PVPMode="-1"              ✓ Correct (no PVP)
+PostKhiDie="-1"           ✓ Correct
+
+FRIENDLY (BotRole="2"):
+───────────────────────
+SkillID="-1"              ✓ Correct (no combat!)
+SecondarySkillID="-1"     ✓ Correct
+UseBuffs_0="-1"           ✓ Correct
+UseBuffs_1="-1"           ✓ Correct
+UseBuffs_2="-1"           ✓ Correct
+GateNumber="614"          ✓ Correct
+Map="0"                   ✓ Correct
+MapX="110"                ✓ Correct
+MapY="200"                ✓ Correct
+PhamViTrain="-1"          ✓ Correct (no training!)
+MoveRange="40"            ✓ Correct (medium wander!)
+TimeReturn="10"           ✓ Correct
+TuNhatItem="-1"           ✓ Correct (doesn't pick items)
+TuDongReset="-1"          ✓ Correct
+PartyMode="2"             ✓ Correct (sends party invites!)
+PVPMode="-1"              ✓ Correct (no PVP)
+PostKhiDie="-1"           ✓ Correct
+
+═══════════════════════════════════════════════════════════════════════════
+                     🎯 ABOUT SPAWN LOCATIONS
+═══════════════════════════════════════════════════════════════════════════
+
+You're RIGHT - there's NO OPTION to specify different spawn locations!
+
+CURRENT SITUATION:
+──────────────────
+• ALL bots spawn at same location (Map, MapX, MapY from dialog)
+• Warriors: Should spawn in hunting zones ✓
+• Merchants: Should spawn in Lorencia (safe zone) ✓
+• Friendly: Should spawn in newbie zones ✓
+
+But they all use the SAME coordinates!
+
+SOLUTION (for now):
+───────────────────
+1. Create Warriors: Set Map=0, MapX=110, MapY=200
+2. Create Merchants: CHANGE dialog to Map=0, MapX=120, MapY=140 (Lorencia)
+3. Create Friendly: CHANGE dialog to Map=0, MapX=130, MapY=150 (Lorencia)
+
+OR BETTER: Add separate spawn fields to dialog (later enhancement)
+
+FOR NOW: Just use existing spawn coordinates and spawn ALL in Lorencia!
+• Merchants will stay and wander
+• Friendly will stay and wander
+• Warriors will WALK OUT to hunting zones automatically!
+
+═══════════════════════════════════════════════════════════════════════════
+                     🚀 STEPS TO FIX
+═══════════════════════════════════════════════════════════════════════════
+
+1. Open GameServer.cpp in Visual Studio
+
+2. Find the fprintf() section (around line 1360)
+
+3. Replace the ENTIRE fprintf() call with the corrected version above
+
+4. Build (Ctrl+Shift+B)
+
+5. Create new bots
+
+6. Check IA_Accounts.xml - should now be correct!
+
+═══════════════════════════════════════════════════════════════════════════
+                     ✅ DONE!
+═══════════════════════════════════════════════════════════════════════════
+
+After this fix:
+✅ All XML values will be correct
+✅ Warriors will have proper combat settings
+✅ Merchants will have SkillID=-1, TuNhatItem=1, MoveRange=50
+✅ Friendly will have SkillID=-1, PartyMode=2, MoveRange=40
+✅ No more scrambled values!
+
+Then you can test in-game! 🎮
+
+═══════════════════════════════════════════════════════════════════════════

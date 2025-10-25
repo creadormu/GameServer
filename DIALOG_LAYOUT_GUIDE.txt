@@ -1,0 +1,214 @@
+╔══════════════════════════════════════════════════════════════════════════╗
+║             CREATE BOTS DIALOG - NOW WITH LANGUAGE SELECTOR!             ║
+╚══════════════════════════════════════════════════════════════════════════╝
+
+The "Create Multiple Bots" dialog now includes a Language selector!
+
+╔════════════════════════════════════════════════════════════════════════╗
+║  ┌──────────────────────────────────────────────────────────────────┐  ║
+║  │   Create Bots - Advanced Configuration                          │  ║
+║  └──────────────────────────────────────────────────────────────────┘  ║
+║                                                                          ║
+║  ┌─ Basic Configuration ─────────────────────────────────────┐          ║
+║  │                                                            │          ║
+║  │  Number of Bots:     [____50____]                         │          ║
+║  │                                                            │          ║
+║  │  Start From Bot #:   [____1_____] (1 = Bot0001)          │          ║
+║  │                                                            │          ║
+║  │  Class:              [All Classes (Mixed)        ▼]       │          ║
+║  │                                                            │          ║
+║  │  Bot Names Language: [Spanish                    ▼]  ⭐NEW!│          ║
+║  │                                                            │          ║
+║  └────────────────────────────────────────────────────────────┘          ║
+║                                                                          ║
+║  ┌─ Spawn Location ───────────────────────────────────────┐             ║
+║  │  Gate Number:  [___614___] (0 = use coords)           │             ║
+║  │  Map:          [____0____]                             │             ║
+║  │  Map X:        [___110___]    Map Y: [___200___]       │             ║
+║  └────────────────────────────────────────────────────────┘             ║
+║                                                                          ║
+║  ┌─ Level Range ──────────────┐                                         ║
+║  │  Min Level: [__250__]      │                                         ║
+║  │  Max Level: [__400__]      │                                         ║
+║  └────────────────────────────┘                                         ║
+║                                                                          ║
+║  ┌─ Bot Behavior ──────────────────────────────┐                        ║
+║  │  PhamViTrain:  [__6__] (0-100)              │                        ║
+║  │  MoveRange:    [_30__] (0-100)              │                        ║
+║  │  TimeReturn:   [_40__] (minutes)            │                        ║
+║  │  ☑ Auto Pick Items                          │                        ║
+║  │  ☐ Auto Reset                               │                        ║
+║  └─────────────────────────────────────────────┘                        ║
+║                                                                          ║
+║  ┌─ Combat & Social ───────────────────────────┐                        ║
+║  │  Party Mode:  [1 - Accept Party Invites ▼] │                        ║
+║  │  PVP Mode:    [1 - Defend Only          ▼] │                        ║
+║  │  ☑ Post Message When Die                    │                        ║
+║  └─────────────────────────────────────────────┘                        ║
+║                                                                          ║
+║  ┌─ Config Variations ─────────────────────────┐                        ║
+║  │  ☑ Config 1    ☐ Config 2                   │                        ║
+║  │  ☐ Config 3    ☐ Config 4                   │                        ║
+║  │  ☐ Config 5    ☐ Config 6                   │                        ║
+║  │  ☐ Config 7                                 │                        ║
+║  │  Available Configs: 1/7                     │                        ║
+║  └─────────────────────────────────────────────┘                        ║
+║                                                                          ║
+║  [ Configure Classes... ]                                               ║
+║                                                                          ║
+║  Note: Each class must be configured. For 50+ bots may take 30 seconds. ║
+║                                                                          ║
+║              [ Create Bots ]         [ Cancel ]                         ║
+║                                                                          ║
+╚══════════════════════════════════════════════════════════════════════════╝
+
+╔══════════════════════════════════════════════════════════════════════════╗
+║                    LANGUAGE DROPDOWN WILL SHOW:                          ║
+╚══════════════════════════════════════════════════════════════════════════╝
+
+  Bot Names Language: [Spanish                    ▼]
+                       ├─ Spanish
+                       ├─ English
+                       ├─ Chinese
+                       ├─ Japanese
+                       ├─ German
+                       ├─ Fantasy-Example
+                       └─ [Your Custom Languages...]
+
+When you select a language, the NameManager will:
+  ✅ Load names from IA/Names/[Language]/MaleNames.txt
+  ✅ Load names from IA/Names/[Language]/FemaleNames.txt
+  ✅ Log to console: [NameManager] Loaded language: [Language] (X male, Y female)
+  ✅ Use those names when generating bots
+
+╔══════════════════════════════════════════════════════════════════════════╗
+║                           HOW IT WORKS                                   ║
+╚══════════════════════════════════════════════════════════════════════════╝
+
+1. Open "Create Multiple Bots" dialog (IA Menu → Create Multiple Bots)
+
+2. You'll see the new "Bot Names Language:" dropdown
+
+3. Click the dropdown to see all available languages
+
+4. Select your preferred language (e.g., English, Chinese, etc.)
+
+5. The names are loaded IMMEDIATELY - check the console:
+   [CreateBots] Language changed to: English
+   
+6. Configure your other bot settings (count, level, location, etc.)
+
+7. Click "Create Bots"
+
+8. Bots will be created with names from your selected language!
+   Example Output:
+   - Spanish:  Bot0001 = Carlos23
+   - English:  Bot0001 = James56  
+   - Chinese:  Bot0001 = Wei42
+   - Japanese: Bot0001 = Hiroshi28
+
+╔══════════════════════════════════════════════════════════════════════════╗
+║                      FILE CHANGES SUMMARY                                ║
+╚══════════════════════════════════════════════════════════════════════════╝
+
+✅ GameServer.rc - UPDATED!
+   Added Language combo box to IDD_CREATEBOTS dialog
+   Location: After "Class" selection in Basic Configuration section
+   
+   Control Details:
+   - Label: "Bot Names Language:" at position (20, 85)
+   - Combo: IDC_COMBO_LANGUAGE at position (100, 83)
+   - Style: Dropdown List with vertical scroll
+
+✅ resource.h - UPDATED!
+   Added: #define IDC_COMBO_LANGUAGE 3318
+
+✅ GameServer.cpp - UPDATED!
+   - Added hComboLanguage static variable
+   - Language dropdown populated in WM_INITDIALOG
+   - Language change handler (CBN_SELCHANGE) added
+   - Calls g_NameManager.LoadLanguage() on selection
+
+✅ NameManager.h/.cpp - CREATED!
+   Complete name loading system with language support
+
+✅ IA/Names/ - CREATED!
+   6 language packs with 520+ names ready to use
+
+╔══════════════════════════════════════════════════════════════════════════╗
+║                        COMPILATION STEPS                                 ║
+╚══════════════════════════════════════════════════════════════════════════╝
+
+1. Open GameServer.sln in Visual Studio
+
+2. Add new files to project:
+   - Right-click GameServer project
+   - Add → Existing Item
+   - Select: NameManager.h and NameManager.cpp
+
+3. Build Solution (F7 or Ctrl+Shift+B)
+
+4. If you see resource.h warnings, just rebuild
+
+5. Copy IA/ folder to your GameServer.exe directory
+
+6. Run GameServer.exe
+
+7. Check console for:
+   [NameManager] Found 6 language(s):
+     - Spanish
+     - English
+     - Chinese
+     - Japanese
+     - German
+     - Fantasy-Example
+   [NameManager] Loaded language: Spanish (50 male, 40 female names)
+
+8. Open IA → Create Multiple Bots
+
+9. You should see the Language dropdown! 🎉
+
+╔══════════════════════════════════════════════════════════════════════════╗
+║                     TROUBLESHOOTING                                      ║
+╚══════════════════════════════════════════════════════════════════════════╝
+
+❓ Language dropdown not visible?
+   → Check GameServer.rc was properly updated
+   → Rebuild solution (Ctrl+Shift+B)
+   → Check resource.h has IDC_COMBO_LANGUAGE defined
+
+❓ Dropdown is empty?
+   → Check IA/Names/ directory exists with language folders
+   → Check console for [NameManager] messages
+   → Verify MaleNames.txt and FemaleNames.txt exist in language folders
+
+❓ Names still Spanish?
+   → Select language from dropdown
+   → Check console: [CreateBots] Language changed to: [Language]
+   → Create bots and check generated names
+
+❓ Compiler errors?
+   → Ensure NameManager.h and NameManager.cpp are in project
+   → Check #include "NameManager.h" is in GameServer.cpp
+   → Rebuild entire solution
+
+╔══════════════════════════════════════════════════════════════════════════╗
+║                  🎉 YOU'RE ALL SET, MY FRIEND! 🎉                       ║
+╚══════════════════════════════════════════════════════════════════════════╝
+
+The Language selector is now integrated into your Create Bots dialog!
+
+Your bots can now have authentic names from any culture around the world!
+
+Enjoy creating bots with:
+  • Spanish names (Carlos, Maria)
+  • English names (James, Jennifer)  
+  • Chinese names (Wei, Ying)
+  • Japanese names (Hiroshi, Yuki)
+  • German names (Hans, Anna)
+  • Fantasy names (Aragorn, Arwen)
+  • Or your own custom language packs!
+
+¡Disfruta, amigo! 🚀
+
+═══════════════════════════════════════════════════════════════════════════

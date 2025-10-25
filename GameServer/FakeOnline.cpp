@@ -7,6 +7,9 @@
 #include <cctype>
 #include "stdafx.h" 
 #include "FakeOnline.h"
+#include "PhraseManager.h"
+#include "BotRole.h"
+#include "SafeZoneManager.h"
 #include "ItemManager.h"
 #include "Map.h"
 #include "MasterSkillTree.h"
@@ -65,13 +68,13 @@ std::string trim(const std::string& str) {
 
 CFakeOnline s_FakeOnline;
 
-// --- Definición de variables globales ---
+// --- Definiciï¿½n de variables globales ---
 std::vector<std::string> g_BotPhrasesGeneral;
 std::vector<std::string> g_BotPhrasesNear;
 std::vector<std::string> g_BotPhrasesInParty;
 std::vector<std::string> g_BotPhrasesPVP;
 std::vector<std::string> g_BotPhrasesTrade;
-// NUEVO: Frases por hora del día
+// NUEVO: Frases por hora del dï¿½a
 std::vector<std::string> g_BotPhrasesMorning;
 std::vector<std::string> g_BotPhrasesAfternoon;
 std::vector<std::string> g_BotPhrasesNight;
@@ -228,7 +231,7 @@ CFakeOnline::CFakeOnline()
 	{
 		this->m_dwLastCommentTick[i] = 0;
 		this->m_dwLastPlayerNearbyCommentTick[i] = 0;
-		this->m_dwLastLocalChatTick[i] = 0; // <-- AÑADE ESTA LÍNEA
+		this->m_dwLastLocalChatTick[i] = 0; // <-- Aï¿½ADE ESTA Lï¿½NEA
 	}
 }
 
@@ -274,8 +277,9 @@ void CFakeOnline::LoadFakeData(char* path)
     this->m_Data.clear(); 
     this->m_botPVPCombatStates.clear(); 
     this->IndexMsgMax = 0; this->IndexMsgMin = 0;
-    LoadBotPhrasesFromFile(".\\IA\\Phrases\\BotPhrases.txt");
-	LoadBotKeywordResponses(".\\IA\\Answers\\Answering.txt");
+    // Load phrases and answers from current language
+    LoadBotPhrasesFromFile(g_PhraseManager.GetBotPhrasesPath());
+	LoadBotKeywordResponses(g_PhraseManager.GetAnsweringPath());
 	this->LoadFakeBotTradeConfig(".\\IA\\Trade\\FakeBotTrade.txt");
     if (!path) { LeaveCriticalSection(&this->m_BotDataMutex); return; }
     pugi::xml_document file;
@@ -296,6 +300,8 @@ void CFakeOnline::LoadFakeData(char* path)
             info.TuNhatItem = rInfoData.attribute("TuNhatItem").as_int(0); info.TuDongReset = rInfoData.attribute("TuDongReset").as_int(0);
             info.PartyMode = rInfoData.attribute("PartyMode").as_int(0); info.PostKhiDie = rInfoData.attribute("PostKhiDie").as_int(0);
 			info.Map = rInfoData.attribute("Map").as_int(0);
+			info.BotRole = rInfoData.attribute("BotRole").as_int(0); // NEW: Bot role
+			info.LastRoleActionTick = 0; // Initialize timer
 			//info.MinLevel = rInfoReset.attribute("MinLevel").as_int();
 			if (strlen(info.Account) > 0) { this->m_Data.insert(std::pair<std::string, OFFEXP_DATA>(info.Account, info));}
         }
@@ -508,7 +514,7 @@ static std::string GetRandomBotPhrase(int botDBClass, int currentMap, bool realP
     return (*pSelectedList)[rand() % pSelectedList->size()];
 }
 
-// Reemplaza la función completa en FakeOnline.cpp
+// Reemplaza la funciï¿½n completa en FakeOnline.cpp
 
 void CFakeOnline::AttemptRandomBotComment(int aIndex)
 {
@@ -531,7 +537,7 @@ void CFakeOnline::AttemptRandomBotComment(int aIndex)
         return;
     }
 
-    // -- Lógica para determinar si el bot debe hablar --
+    // -- Lï¿½gica para determinar si el bot debe hablar --
     bool realPlayerNearby = false;
     char nearbyPlayerName[11] = {0}; 
     for (int i = 0; i < MAX_VIEWPORT; i++) {
@@ -555,7 +561,7 @@ void CFakeOnline::AttemptRandomBotComment(int aIndex)
         return;
     }
 
-    // Verificar cooldowns. El bot solo hablará si ha pasado el tiempo para AMBOS tipos de chat.
+    // Verificar cooldowns. El bot solo hablarï¿½ si ha pasado el tiempo para AMBOS tipos de chat.
     if ((currentTick - this->m_dwLastCommentTick[aIndex]) < GLOBAL_POST_COOLDOWN_MS &&
         (currentTick - this->m_dwLastLocalChatTick[aIndex]) < LOCAL_CHAT_COOLDOWN_MS)
     {
@@ -563,12 +569,12 @@ void CFakeOnline::AttemptRandomBotComment(int aIndex)
         return;
     }
     
-    // -- Lógica para ELEGIR el tipo de chat y la frase --
+    // -- Lï¿½gica para ELEGIR el tipo de chat y la frase --
     bool isInParty = (lpObj->PartyNumber >= 0);
     bool botInActivePVPCombat = (this->m_botPVPCombatStates.count(aIndex) && this->m_botPVPCombatStates[aIndex].isInActiveCombat);
     
 
-	// NUEVO: Frase contextual por hora del día
+	// NUEVO: Frase contextual por hora del dï¿½a
 	SYSTEMTIME time;
 	GetLocalTime(&time);
 
@@ -637,7 +643,7 @@ void CFakeOnline::AttemptRandomBotComment(int aIndex)
 			strncpy_s(chatMsg.message, msg, sizeof(chatMsg.message) - 1);
 
 			CGChatRecv(&chatMsg, lpObj->Index);
-			LogAdd(LOG_EVENT, "[FakeOnline][%s] Usó TRADE PHRASE: \"%s\"", lpObj->Name, msg);
+			LogAdd(LOG_EVENT, "[FakeOnline][%s] Usï¿½ TRADE PHRASE: \"%s\"", lpObj->Name, msg);
 
 			this->m_dwLastCommentTick[aIndex] = GetTickCount();
 			this->m_dwLastLocalChatTick[aIndex] = GetTickCount();
@@ -666,13 +672,13 @@ void CFakeOnline::AttemptRandomBotComment(int aIndex)
     char msg[MAX_CHAT_MESSAGE_SIZE + 1] = {0};
     strncpy_s(msg, sizeof(msg), processedPhrase.c_str(), _TRUNCATE);
 
-    // --- DECISIÓN: ¿CHAT LOCAL O POST GLOBAL? ---
+    // --- DECISIï¿½N: ï¿½CHAT LOCAL O POST GLOBAL? ---
     const int LOCAL_CHAT_CHANCE = 80; // 80% de probabilidad de usar chat local
 
-    // Solo usar /post si ha pasado su cooldown específico
+    // Solo usar /post si ha pasado su cooldown especï¿½fico
     if ((currentTick - this->m_dwLastCommentTick[aIndex]) >= GLOBAL_POST_COOLDOWN_MS && (rand() % 100) >= LOCAL_CHAT_CHANCE)
     {
-        // Lógica de /post que ya tenías
+        // Lï¿½gica de /post que ya tenï¿½as
         bool posted = false;
         if(gServerInfo.m_CommandPostType == 0) { PostMessage1(lpObj->Name,gMessage.GetMessage(69),msg); posted = true; }
         else if(gServerInfo.m_CommandPostType == 1) { PostMessage2(lpObj->Name,gMessage.GetMessage(69),msg); posted = true; }
@@ -680,14 +686,14 @@ void CFakeOnline::AttemptRandomBotComment(int aIndex)
         else { if (gCommandManager.CommandPost(lpObj, msg)) { posted = true;} else { GDGlobalPostSend(gMapServerManager.GetMapServerGroup(),0,lpObj->Name,msg); posted = true;} }
         
         if(posted) {
-            LogAdd(LOG_EVENT, "[FakeOnline][%s] Usó POST GLOBAL: \"%s\"", lpObj->Name, msg);
+            LogAdd(LOG_EVENT, "[FakeOnline][%s] Usï¿½ POST GLOBAL: \"%s\"", lpObj->Name, msg);
             this->m_dwLastCommentTick[aIndex] = currentTick; // Actualizar cooldown de POST
         }
     }
-    // Si no, usar chat local si ha pasado su cooldown específico
+    // Si no, usar chat local si ha pasado su cooldown especï¿½fico
     else if ((currentTick - this->m_dwLastLocalChatTick[aIndex]) >= LOCAL_CHAT_COOLDOWN_MS)
     {
-        // Llamamos a la función que procesa el chat normal (la que se activa con ENTER)
+        // Llamamos a la funciï¿½n que procesa el chat normal (la que se activa con ENTER)
 		PMSG_CHAT_RECV chatMsg; // Define the chatMsg variable
 		memset(&chatMsg, 0, sizeof(chatMsg)); // Initialize the structure to avoid garbage values
 		chatMsg.header.set(0x00, sizeof(chatMsg)); // Set the header for the chat message
@@ -695,7 +701,7 @@ void CFakeOnline::AttemptRandomBotComment(int aIndex)
 		strncpy_s(chatMsg.message, msg, sizeof(chatMsg.message) - 1); // Copy the message into the message field
 
 		CGChatRecv(&chatMsg, lpObj->Index); // Pass the constructed PMSG_CHAT_RECV and the index
-        LogAdd(LOG_EVENT, "[FakeOnline][%s] Usó CHAT LOCAL: \"%s\"", lpObj->Name, msg);
+        LogAdd(LOG_EVENT, "[FakeOnline][%s] Usï¿½ CHAT LOCAL: \"%s\"", lpObj->Name, msg);
         this->m_dwLastLocalChatTick[aIndex] = currentTick; // Actualizar cooldown de CHAT LOCAL
     }
 
@@ -728,20 +734,20 @@ void CFakeOnline::RestoreFakeOnline()
             LogAdd(LOG_RED, "[FakeOnline]  [TK: %s NV: %s][Cls:%d] Da Online Vao Server. PVPMode:%d. PhysiSpeed:%d. DBClass:%d", 
                    it->second.Account, it->second.Name, lpObj->Class, lpObj->IsFakePVPMode, lpObj->PhysiSpeed, lpObj->DBClass);
 		
-			// === AGREGADO PARA VISUALIZACIÓN CORRECTA EN TODOS LOS MAPAS ===
+			// === AGREGADO PARA VISUALIZACIï¿½N CORRECTA EN TODOS LOS MAPAS ===
 
-				// Asignar coordenadas y mapa del bot según info (ajusta si tu estructura cambia)
+				// Asignar coordenadas y mapa del bot segï¿½n info (ajusta si tu estructura cambia)
 			lpObj->Map = it->second.Map;
 			lpObj->X = it->second.MapX;
 			lpObj->Y = it->second.MapY;
 
-			// ASIGNA EL GATENUMBER PARA LÓGICA DE MOVIMIENTO
+			// ASIGNA EL GATENUMBER PARA Lï¿½GICA DE MOVIMIENTO
 			lpObj->GateNumber = it->second.GateNumber;
 
 			GATE_INFO gateInfo = { 0 };
 			if (gGate.GetInfo(lpObj->GateNumber, &gateInfo))
 			{
-				// Ajusta los nombres según tu struct LPOBJ si es necesario
+				// Ajusta los nombres segï¿½n tu struct LPOBJ si es necesario
 				lpObj->MoveRangeStartX = gateInfo.X;
 				lpObj->MoveRangeStartY = gateInfo.Y;
 				lpObj->MoveRangeEndX = gateInfo.TX;
@@ -809,9 +815,9 @@ void FakeAnimationMove(int aIndex, int x, int y, bool dixa)
 
 //void CFakeOnline::CheckAutoReset(LPOBJ lpObj)
 //{
-//    // ... (Tu código de CheckAutoReset, asegurándote que el nivel de reset sea 400 o la variable correcta de gServerInfo)
+//    // ... (Tu cï¿½digo de CheckAutoReset, asegurï¿½ndote que el nivel de reset sea 400 o la variable correcta de gServerInfo)
 //    // ... (Y que las llamadas a gDefaultClassInfo usen .m_DefaultClassInfo[DBClass].Stat)
-//    // ... (Y que las funciones GC...Send sean las correctas o estén comentadas si no existen)
+//    // ... (Y que las funciones GC...Send sean las correctas o estï¿½n comentadas si no existen)
 //}
 void FakeAutoRepair(int aIndex)
 {
@@ -824,8 +830,8 @@ void FakeAutoRepair(int aIndex)
 	}
 }
 
-// --- COPIA AQUÍ LAS DEFINICIONES COMPLETAS DE LAS SIGUIENTES FUNCIONES MIEMBRO DE CFakeOnline ---
-// --- DESDE TU ÚLTIMO ARCHIVO FakeOnline.cpp FUNCIONAL:
+// --- COPIA AQUï¿½ LAS DEFINICIONES COMPLETAS DE LAS SIGUIENTES FUNCIONES MIEMBRO DE CFakeOnline ---
+// --- DESDE TU ï¿½LTIMO ARCHIVO FakeOnline.cpp FUNCIONAL:
 // void CFakeOnline::QuayLaiToaDoGoc(int aIndex) { /*...*/ }
 // void CFakeOnline::SuDungMauMana(int aIndex) { /*...*/ }
 // void CFakeOnline::TuDongBuffSkill(int aIndex) { /*...*/ }
@@ -838,7 +844,7 @@ void FakeAutoRepair(int aIndex)
 // void CFakeOnline::SendRFSkillAttack(LPOBJ lpObj, int aIndex, int SkillNumber) { /*...*/ }
 // void CFakeOnline::GuiYCParty(int aIndex, int bIndex) { /*...*/ }
 
-// --- Y LA FUNCIÓN GLOBAL FakeAnimationMove SI NO ESTÁ YA DEFINIDA ARRIBA ---
+// --- Y LA FUNCIï¿½N GLOBAL FakeAnimationMove SI NO ESTï¿½ YA DEFINIDA ARRIBA ---
 // void FakeAnimationMove(int aIndex, int x, int y, bool dixa) { /*...*/ }
 
 //=====================================
@@ -1253,27 +1259,27 @@ bool FakeitemListPickUp(int Index, int Level, LPOBJ lpObj)
 
 // ... (includes y otras funciones como estaban) ...
 // ... (FakeisJewels, constructor, destructor, GetOffExpInfo, GetOffExpInfoByAccount, LoadFakeData, LoadBotPhrasesFromFile, GetRandomBotPhrase, AttemptRandomBotComment, RestoreFakeOnline como estaban) ...
-// ... (Asegúrate que CheckAutoReset NO esté siendo llamada desde Attack por ahora)
+// ... (Asegï¿½rate que CheckAutoReset NO estï¿½ siendo llamada desde Attack por ahora)
 
 
 // En FakeOnline.cpp
 
 // ... (includes y otras funciones como estaban) ...
 // ... (FakeisJewels, constructor, destructor, GetOffExpInfo, GetOffExpInfoByAccount, LoadFakeData, LoadBotPhrasesFromFile, GetRandomBotPhrase, AttemptRandomBotComment, RestoreFakeOnline como estaban) ...
-// ... (Asegúrate que CheckAutoReset NO esté siendo llamada desde Attack por ahora)
+// ... (Asegï¿½rate que CheckAutoReset NO estï¿½ siendo llamada desde Attack por ahora)
 // ... (includes y definiciones globales como estaban) ...
 // ... (FakeisJewels, CFakeOnline constructor/destructor, GetOffExpInfo, GetOffExpInfoByAccount, LoadFakeData, LoadBotPhrasesFromFile, GetRandomBotPhrase, AttemptRandomBotComment, RestoreFakeOnline como estaban) ...
-// ... (Asegúrate que la definición de CheckAutoReset esté aquí, pero su llamada en Attack estará comentada)
+// ... (Asegï¿½rate que la definiciï¿½n de CheckAutoReset estï¿½ aquï¿½, pero su llamada en Attack estarï¿½ comentada)
 
-// Función de ayuda para mover una casilla hacia un objetivo
-// Devuelve true si se intentó mover, false si ya está en el objetivo o no se puede mover
+// Funciï¿½n de ayuda para mover una casilla hacia un objetivo
+// Devuelve true si se intentï¿½ mover, false si ya estï¿½ en el objetivo o no se puede mover
 static bool MoveBotOneStepTowards(LPOBJ lpObj, int targetX, int targetY)
 {
     
 	
 	if (lpObj->X == targetX && lpObj->Y == targetY)
     {
-        return false; // Ya está en el destino
+        return false; // Ya estï¿½ en el destino
     }
 
     int offsetX = 0;
@@ -1288,26 +1294,26 @@ static bool MoveBotOneStepTowards(LPOBJ lpObj, int targetX, int targetY)
     int nextX = lpObj->X + offsetX;
     int nextY = lpObj->Y + offsetY;
 
-    // Comprobar si la siguiente casilla es válida y caminable (ATTR_WALL = 1)
+    // Comprobar si la siguiente casilla es vï¿½lida y caminable (ATTR_WALL = 1)
     // Tu gMap[map_num].CheckAttr puede tener diferentes flags. ATTR_WALL suele ser 1.
-    // Revisa cómo verificas si una casilla es caminable en tu código.
-    // Si gMap[map_num].CheckAttr(nextX, nextY, 1) es true si hay pared, entonces la condición es == 0.
+    // Revisa cï¿½mo verificas si una casilla es caminable en tu cï¿½digo.
+    // Si gMap[map_num].CheckAttr(nextX, nextY, 1) es true si hay pared, entonces la condiciï¿½n es == 0.
     // Si gMap[map_num].m_MapAttr[nextY * gMap[map_num].m_width + nextX] & 1 es pared...
-    // Por ahora, asumiré que un valor de atributo bajo (ej. 0) es caminable.
-    // ¡¡DEBES AJUSTAR ESTA VERIFICACIÓN DE PARED A TU CÓDIGO!!
+    // Por ahora, asumirï¿½ que un valor de atributo bajo (ej. 0) es caminable.
+    // ï¿½ï¿½DEBES AJUSTAR ESTA VERIFICACIï¿½N DE PARED A TU Cï¿½DIGO!!
     BYTE attr = gMap[lpObj->Map].GetAttr(nextX, nextY); 
     if ((attr & 1) == 0 && (attr & 4) == 0 && (attr & 8) == 0) // Ejemplo: No es pared, no es zona segura (si aplica), no es agua (si aplica)
     {
-        // Usar FakeAnimationMove para el movimiento de un solo paso podría ser excesivo
-        // o podrías tener una función más simple para mover un paso.
-        // Por ahora, usaremos FakeAnimationMove para consistencia con tu código.
+        // Usar FakeAnimationMove para el movimiento de un solo paso podrï¿½a ser excesivo
+        // o podrï¿½as tener una funciï¿½n mï¿½s simple para mover un paso.
+        // Por ahora, usaremos FakeAnimationMove para consistencia con tu cï¿½digo.
         LogAdd(LOG_BLUE, "[MoveBotOneStepTowards][%s] Moviendo de %d,%d hacia %d,%d (target %d,%d)", 
                lpObj->Name, lpObj->X, lpObj->Y, nextX, nextY, targetX, targetY);
         FakeAnimationMove(lpObj->Index, nextX, nextY, false);
-        return true; // Se intentó mover
+        return true; // Se intentï¿½ mover
     }
     LogAdd(LOG_BLUE, "[MoveBotOneStepTowards][%s] No se pudo mover a %d,%d (attr: %d)", lpObj->Name, nextX, nextY, attr);
-    return false; // No se pudo mover (obstáculo)
+    return false; // No se pudo mover (obstï¿½culo)
 }
 
 
@@ -1347,64 +1353,64 @@ int CFakeOnline::NhatItem(int aIndex)
 				if (lpMapItem->m_Index == GET_ITEM(14, 13)) { // Jewel of Bless
 					lpObj->BlessBank += 1;
 					gMap[map_num].ItemGive(aIndex, n);
-					LogAdd(LOG_EVENT, "[FakeOnline][%s] RECOGIÓ Jewel of Bless (BANCO), total: %d", lpObj->Name, lpObj->BlessBank);
+					LogAdd(LOG_EVENT, "[FakeOnline][%s] RECOGIï¿½ Jewel of Bless (BANCO), total: %d", lpObj->Name, lpObj->BlessBank);
 					return 1;
 				}
 				else if (lpMapItem->m_Index == GET_ITEM(14, 14)) { // Jewel of Soul
 					lpObj->SoulBank += 1;
 					gMap[map_num].ItemGive(aIndex, n);
-					LogAdd(LOG_EVENT, "[FakeOnline][%s] RECOGIÓ Jewel of Soul (BANCO), total: %d", lpObj->Name, lpObj->SoulBank);
+					LogAdd(LOG_EVENT, "[FakeOnline][%s] RECOGIï¿½ Jewel of Soul (BANCO), total: %d", lpObj->Name, lpObj->SoulBank);
 					return 1;
 				}
 				else if (lpMapItem->m_Index == GET_ITEM(12, 15)) { // Chaos
 					lpObj->ChaosBank += 1;
 					gMap[map_num].ItemGive(aIndex, n);
-					LogAdd(LOG_EVENT, "[FakeOnline][%s] RECOGIÓ Chaos Jewel (BANCO), total: %d", lpObj->Name, lpObj->ChaosBank);
+					LogAdd(LOG_EVENT, "[FakeOnline][%s] RECOGIï¿½ Chaos Jewel (BANCO), total: %d", lpObj->Name, lpObj->ChaosBank);
 					return 1;
 				}
 				else if (lpMapItem->m_Index == GET_ITEM(14, 16)) { // Life
 					lpObj->LifeBank += 1;
 					gMap[map_num].ItemGive(aIndex, n);
-					LogAdd(LOG_EVENT, "[FakeOnline][%s] RECOGIÓ Jewel of Life (BANCO), total: %d", lpObj->Name, lpObj->LifeBank);
+					LogAdd(LOG_EVENT, "[FakeOnline][%s] RECOGIï¿½ Jewel of Life (BANCO), total: %d", lpObj->Name, lpObj->LifeBank);
 					return 1;
 				}
 				else if (lpMapItem->m_Index == GET_ITEM(14, 22)) { // Creation
 					lpObj->CreateonBank += 1;
 					gMap[map_num].ItemGive(aIndex, n);
-					LogAdd(LOG_EVENT, "[FakeOnline][%s] RECOGIÓ Jewel of Creation (BANCO), total: %d", lpObj->Name, lpObj->CreateonBank);
+					LogAdd(LOG_EVENT, "[FakeOnline][%s] RECOGIï¿½ Jewel of Creation (BANCO), total: %d", lpObj->Name, lpObj->CreateonBank);
 					return 1;
 				}
 				else if (lpMapItem->m_Index == GET_ITEM(14, 31)) { // Guardian
 					lpObj->GuardianBank += 1;
 					gMap[map_num].ItemGive(aIndex, n);
-					LogAdd(LOG_EVENT, "[FakeOnline][%s] RECOGIÓ Jewel of Guardian (BANCO), total: %d", lpObj->Name, lpObj->GuardianBank);
+					LogAdd(LOG_EVENT, "[FakeOnline][%s] RECOGIï¿½ Jewel of Guardian (BANCO), total: %d", lpObj->Name, lpObj->GuardianBank);
 					return 1;
 				}
 				else if (lpMapItem->m_Index == GET_ITEM(14, 42)) { // Harmony
 					lpObj->HarmonyBank += 1;
 					gMap[map_num].ItemGive(aIndex, n);
-					LogAdd(LOG_EVENT, "[FakeOnline][%s] RECOGIÓ Jewel of Harmony (BANCO), total: %d", lpObj->Name, lpObj->HarmonyBank);
+					LogAdd(LOG_EVENT, "[FakeOnline][%s] RECOGIï¿½ Jewel of Harmony (BANCO), total: %d", lpObj->Name, lpObj->HarmonyBank);
 					return 1;
 				}
 				else if (lpMapItem->m_Index == GET_ITEM(14, 43)) { // LowStone
 					lpObj->LowStoneBank += 1;
 					gMap[map_num].ItemGive(aIndex, n);
-					LogAdd(LOG_EVENT, "[FakeOnline][%s] RECOGIÓ Lower Stone (BANCO), total: %d", lpObj->Name, lpObj->LowStoneBank);
+					LogAdd(LOG_EVENT, "[FakeOnline][%s] RECOGIï¿½ Lower Stone (BANCO), total: %d", lpObj->Name, lpObj->LowStoneBank);
 					return 1;
 				}
 				else if (lpMapItem->m_Index == GET_ITEM(14, 44)) { // HighStone
 					lpObj->HighStoneBank += 1;
 					gMap[map_num].ItemGive(aIndex, n);
-					LogAdd(LOG_EVENT, "[FakeOnline][%s] RECOGIÓ Higher Stone (BANCO), total: %d", lpObj->Name, lpObj->HighStoneBank);
+					LogAdd(LOG_EVENT, "[FakeOnline][%s] RECOGIï¿½ Higher Stone (BANCO), total: %d", lpObj->Name, lpObj->HighStoneBank);
 					return 1;
 				}
 				else if (lpMapItem->m_Index == GET_ITEM(14, 41)) { // GemStone
 					lpObj->GemStoneBank += 1;
 					gMap[map_num].ItemGive(aIndex, n);
-					LogAdd(LOG_EVENT, "[FakeOnline][%s] RECOGIÓ Gemstone (BANCO), total: %d", lpObj->Name, lpObj->GemStoneBank);
+					LogAdd(LOG_EVENT, "[FakeOnline][%s] RECOGIï¿½ Gemstone (BANCO), total: %d", lpObj->Name, lpObj->GemStoneBank);
 					return 1;
 				}
-				// Si quieres agregar más jewels, copia este bloque y ajusta el index y la variable.
+				// Si quieres agregar mï¿½s jewels, copia este bloque y ajusta el index y la variable.
 				else {
 					// Joyas que NO van al banco: SE INSERTAN EN EL INVENTARIO
 					CItem itemForInfo;
@@ -1416,7 +1422,7 @@ int CFakeOnline::NhatItem(int aIndex)
 					BYTE resultStack = gItemManager.InventoryInsertItemStack(lpObj, lpMapItem);
 					if (resultStack != 0xFF) {
 						gMap[map_num].ItemGive(aIndex, n);
-						LogAdd(LOG_EVENT, "[FakeOnline][%s] RECOGIÓ (stack) jewel: %s en slot %d", lpObj->Name, itemForInfo.GetName(), resultStack);
+						LogAdd(LOG_EVENT, "[FakeOnline][%s] RECOGIï¿½ (stack) jewel: %s en slot %d", lpObj->Name, itemForInfo.GetName(), resultStack);
 						gItemManager.GCItemModifySend(aIndex, resultStack);
 						return 1;
 					}
@@ -1424,7 +1430,7 @@ int CFakeOnline::NhatItem(int aIndex)
 						BYTE posNoStack = gItemManager.InventoryInsertItem(aIndex, itemForInfo);
 						if (posNoStack != 0xFF) {
 							gMap[map_num].ItemGive(aIndex, n);
-							LogAdd(LOG_EVENT, "[FakeOnline][%s] RECOGIÓ (no-stack) jewel: %s en slot %d", lpObj->Name, itemForInfo.GetName(), posNoStack);
+							LogAdd(LOG_EVENT, "[FakeOnline][%s] RECOGIï¿½ (no-stack) jewel: %s en slot %d", lpObj->Name, itemForInfo.GetName(), posNoStack);
 							gItemManager.GCItemModifySend(aIndex, posNoStack);
 							return 1;
 						}
@@ -1445,7 +1451,7 @@ int CFakeOnline::NhatItem(int aIndex)
 					if (!gObjCheckMaxMoney(aIndex, lpMapItem->m_BuyMoney)) { if (lpObj->Money < MAX_MONEY) lpObj->Money = MAX_MONEY; } else lpObj->Money += lpMapItem->m_BuyMoney;
 					gMap[map_num].ItemGive(aIndex, n); 
                     GCMoneySend(aIndex, lpObj->Money); 
-					LogAdd(LOG_EVENT, "[FakeOnline][%s] RECOGIÓ Zen: %d", lpObj->Name, lpMapItem->m_BuyMoney);
+					LogAdd(LOG_EVENT, "[FakeOnline][%s] RECOGIï¿½ Zen: %d", lpObj->Name, lpMapItem->m_BuyMoney);
 					return 1; 
 				} else { 
 				    if (lpMapItem->m_QuestItem != false) continue;
@@ -1457,14 +1463,14 @@ int CFakeOnline::NhatItem(int aIndex)
 				    BYTE resultStack = gItemManager.InventoryInsertItemStack(lpObj, lpMapItem); 
 				    if (resultStack != 0xFF) { 
 					    gMap[map_num].ItemGive(aIndex, n); 
-						LogAdd(LOG_EVENT, "[FakeOnline][%s] RECOGIÓ (stack) item: %s en slot %d", lpObj->Name, itemForInfo.GetName(), resultStack);
+						LogAdd(LOG_EVENT, "[FakeOnline][%s] RECOGIï¿½ (stack) item: %s en slot %d", lpObj->Name, itemForInfo.GetName(), resultStack);
                         gItemManager.GCItemModifySend(aIndex, resultStack); 
                         return 1; 
 				    } else { 
                         BYTE posNoStack = gItemManager.InventoryInsertItem(aIndex, itemForInfo); 
                         if (posNoStack != 0xFF) {
                             gMap[map_num].ItemGive(aIndex, n); 
-							LogAdd(LOG_EVENT, "[FakeOnline][%s] RECOGIÓ (no-stack) item: %s en slot %d", lpObj->Name, itemForInfo.GetName(), posNoStack);
+							LogAdd(LOG_EVENT, "[FakeOnline][%s] RECOGIï¿½ (no-stack) item: %s en slot %d", lpObj->Name, itemForInfo.GetName(), posNoStack);
                             gItemManager.GCItemModifySend(aIndex, posNoStack);
                             return 1; 
                         } else {
@@ -1476,7 +1482,7 @@ int CFakeOnline::NhatItem(int aIndex)
 			} 
             else if (dis > 0 && !attemptedMoveThisCycle) 
             {
-                LogAdd(LOG_BLUE, "[NhatItem][%s] Ítem '%s' cerca (Dist: %d). Moviendo a %d,%d.", 
+                LogAdd(LOG_BLUE, "[NhatItem][%s] ï¿½tem '%s' cerca (Dist: %d). Moviendo a %d,%d.", 
                        lpObj->Name, lpMapItem->GetName(), dis, lpMapItem->m_X, lpMapItem->m_Y);
                 FakeAnimationMove(lpObj->Index, lpMapItem->m_X, lpMapItem->m_Y, false);
                 attemptedMoveThisCycle = true; 
@@ -1560,7 +1566,7 @@ void CFakeOnline::QuayLaiToaDoGoc(int aIndex) {
 					if ((attr & 1) == 0 && (attr & 4) == 0 && (attr & 8) == 0) { 
 						lpObj->m_OfflineTimeResetMove = GetTickCount();
 						FakeAnimationMove(lpObj->Index, DiChuyenX, DiChuyenY, false);
-						LogAdd(LOG_BLUE, "[FakeOnline][%s] Mover a ubicación predeterminada (%d/%d)", lpObj->Name, DiChuyenX, DiChuyenY);
+						LogAdd(LOG_BLUE, "[FakeOnline][%s] Mover a ubicaciï¿½n predeterminada (%d/%d)", lpObj->Name, DiChuyenX, DiChuyenY);
 						return;
 					}
 				}
@@ -1783,7 +1789,7 @@ bool CFakeOnline::GetTargetPlayer(LPOBJ lpObj, int SkillNumber, int* MonsterInde
 
             bool allowInviteToThisTarget = true;
             if (lpObj->IsFakePartyMode == 3 && lpTargetVp->IsFakeOnline == 0) { 
-                LogAdd(LOG_BLUE, "[GetTargetPlayer][%s] PartyMode=3, target %s es JUGADOR REAL. No se envía invitación.", lpObj->Name, lpTargetVp->Name);
+                LogAdd(LOG_BLUE, "[GetTargetPlayer][%s] PartyMode=3, target %s es JUGADOR REAL. No se envï¿½a invitaciï¿½n.", lpObj->Name, lpTargetVp->Name);
                 allowInviteToThisTarget = false;
             }
 
@@ -1792,7 +1798,7 @@ bool CFakeOnline::GetTargetPlayer(LPOBJ lpObj, int SkillNumber, int* MonsterInde
 
                 if (gParty.IsParty(lpObj->PartyNumber)) {
                     if (!gParty.IsLeader(lpObj->PartyNumber, lpObj->Index)) {
-                        LogAdd(LOG_BLUE, "[GetTargetPlayer][%s] Está en party pero NO ES LÍDER. No puede invitar.", lpObj->Name);
+                        LogAdd(LOG_BLUE, "[GetTargetPlayer][%s] Estï¿½ en party pero NO ES Lï¿½DER. No puede invitar.", lpObj->Name);
                         canSendInviteConditionsMet = false;
                     } else {
                         int memberCount = 0;
@@ -1802,14 +1808,14 @@ bool CFakeOnline::GetTargetPlayer(LPOBJ lpObj, int SkillNumber, int* MonsterInde
                             }
                         }
                         if (memberCount >= MAX_PARTY_USER) {
-                            LogAdd(LOG_BLUE, "[GetTargetPlayer][%s] Es líder, pero su party está LLENA (%d/%d). No puede invitar.", lpObj->Name, memberCount, MAX_PARTY_USER);
+                            LogAdd(LOG_BLUE, "[GetTargetPlayer][%s] Es lï¿½der, pero su party estï¿½ LLENA (%d/%d). No puede invitar.", lpObj->Name, memberCount, MAX_PARTY_USER);
                             canSendInviteConditionsMet = false;
                         } else {
-                             LogAdd(LOG_BLUE, "[GetTargetPlayer][%s] Es líder, party tiene %d/%d miembros. Puede invitar.", lpObj->Name, memberCount, MAX_PARTY_USER);
+                             LogAdd(LOG_BLUE, "[GetTargetPlayer][%s] Es lï¿½der, party tiene %d/%d miembros. Puede invitar.", lpObj->Name, memberCount, MAX_PARTY_USER);
                         }
                     }
                 } else {
-                    LogAdd(LOG_BLUE, "[GetTargetPlayer][%s] No está en party. Puede formar una nueva al invitar.", lpObj->Name);
+                    LogAdd(LOG_BLUE, "[GetTargetPlayer][%s] No estï¿½ en party. Puede formar una nueva al invitar.", lpObj->Name);
                 }
 
                 if (canSendInviteConditionsMet) {
@@ -1862,7 +1868,7 @@ void CFakeOnline::TuDongDanhSkill(int aIndex)
 	int distance = (lpObj->HuntingRange > 6) ? 6 : lpObj->HuntingRange; 
 
 	CSkill* SkillRender;
-	// Selección de skill según estado de vida (curación o ataque)
+	// Selecciï¿½n de skill segï¿½n estado de vida (curaciï¿½n o ataque)
 
 
 	if (lpObj->Class == CLASS_SUMMONER &&
@@ -2390,10 +2396,10 @@ bool CFakeOnline::CanTradeWithBot(const LPOBJ lpBot)
 	std::transform(acc.begin(), acc.end(), acc.begin(), ::toupper);
 	auto it = m_TradeData.find(acc);
 	if (it != m_TradeData.end()) {
-		LogAdd(LOG_BLUE, "[FakeBot][CanTradeWithBot] Bot %s (Account: %s) SÍ está en la lista de trade.", lpBot->Name, lpBot->Account);
+		LogAdd(LOG_BLUE, "[FakeBot][CanTradeWithBot] Bot %s (Account: %s) Sï¿½ estï¿½ en la lista de trade.", lpBot->Name, lpBot->Account);
 		return true;
 	}
-	LogAdd(LOG_RED, "[FakeBot][CanTradeWithBot] Bot %s (Account: %s) NO está en la lista de trade.", lpBot->Name, lpBot->Account);
+	LogAdd(LOG_RED, "[FakeBot][CanTradeWithBot] Bot %s (Account: %s) NO estï¿½ en la lista de trade.", lpBot->Name, lpBot->Account);
 	return false;
 }
 
@@ -2563,7 +2569,7 @@ bool CFakeOnline::HandleFakeBotTrade(int playerIndex, LPOBJ lpBot) {
 	const auto& config = it->second;
 
 	if (config.requiredItems.empty() || config.rewardItems.empty()) {
-		gNotice.NewNoticeSend(playerIndex, 0, 0, 0, 0, 0, "Configuración de trade inválida.");
+		gNotice.NewNoticeSend(playerIndex, 0, 0, 0, 0, 0, "Configuraciï¿½n de trade invï¿½lida.");
 		return false;
 	}
 
@@ -2628,7 +2634,7 @@ bool CFakeOnline::HandleFakeBotTrade(int playerIndex, LPOBJ lpBot) {
 	if (config.successRate < 100) {
 		int random = rand() % 100;
 		if (random >= config.successRate) {
-			gNotice.NewNoticeSend(playerIndex, 0, 0, 0, 0, 0, "El trade falló por suerte.");
+			gNotice.NewNoticeSend(playerIndex, 0, 0, 0, 0, 0, "El trade fallï¿½ por suerte.");
 			return false;
 		}
 	}
@@ -2653,7 +2659,7 @@ bool CFakeOnline::HandleFakeBotTrade(int playerIndex, LPOBJ lpBot) {
 			reward.Skill, reward.Luck, reward.OptionMin, -1, reward.Exc, 0, 0, 0, 0, 0xFE, 0);
 	}
 
-	gNotice.NewNoticeSend(playerIndex, 0, 0, 0, 0, 0, "Trade completado con éxito.");
+	gNotice.NewNoticeSend(playerIndex, 0, 0, 0, 0, 0, "Trade completado con ï¿½xito.");
 
 	// Clear trade windows
 	for (int i = 0; i < TRADE_SIZE; i++) {
@@ -2857,7 +2863,7 @@ bool CFakeOnline::CanStartTradeWithBot(int playerIndex, LPOBJ lpBot) {
 	}
 
 	if (gObj[playerIndex].Interface.use != 0) {
-		gNotice.NewNoticeSend(playerIndex, 0, 0, 0, 0, 0, "FakeBot: Ya estás en una ventana.");
+		gNotice.NewNoticeSend(playerIndex, 0, 0, 0, 0, 0, "FakeBot: Ya estï¿½s en una ventana.");
 		return false;
 	}
 

@@ -1,0 +1,70 @@
+; Answering.txt - German
+; Schlüsselwort-Antwortsystem
+
+#GREETING
+hallo
+hi
+hey
+grüße
+>>>
+Hallo! Wie geht's?
+Hey! Was geht?
+Grüße Krieger!
+Hallo Freund!
+Hey! Was gibt's?
+
+#PARTY
+party
+pt
+gruppe
+team
+>>>
+Klar, schick mir eine Einladung!
+Ja, los geht's!
+Alles klar, ich bin dabei!
+OK, Party machen
+Gerne!
+
+#TRADE
+trade
+handel
+verkaufen
+kaufen
+>>>
+Was suchst du?
+Sag mir was du brauchst
+Ich kann helfen
+Schau mein Inventar
+Was bietest du?
+
+#HELP
+hilfe
+help
+>>>
+Wie kann ich helfen?
+Sag mir was du brauchst
+Ich bin hier um zu helfen
+Was ist los?
+
+#GOODBYE
+tschüss
+bye
+ciao
+bis bald
+>>>
+Bis später!
+Tschüss! Pass auf dich auf
+Bis dann!
+Tschüss Freund
+Mach's gut!
+
+#THANKS
+danke
+thx
+dankeschön
+>>>
+Gern geschehen!
+Gerne!
+Dafür sind wir da
+Kein Problem!
+Immer gerne
