@@ -2554,7 +2554,7 @@ bool CFakeOnline::DecreaseBotJewelBank(LPOBJ lpBot, int jewelType, int count) {
 
 
 bool CFakeOnline::HandleFakeBotTrade(int playerIndex, LPOBJ lpBot) {
-	LogAdd(LOG_RED, "[FakeBotTrade] Trade attempt with %s by %s", lpBot->Name, gObj[playerIndex].Name);
+	LogAdd(LOG_RED, "[FakeBotTrade] Player %s pressed OK button on trade with bot %s", gObj[playerIndex].Name, lpBot->Name);
 
 	// Get trade configuration
 	std::string acc = trim(lpBot->Account);
@@ -2570,13 +2570,6 @@ bool CFakeOnline::HandleFakeBotTrade(int playerIndex, LPOBJ lpBot) {
 
 	if (config.requiredItems.empty() || config.rewardItems.empty()) {
 		gNotice.NewNoticeSend(playerIndex, 0, 0, 0, 0, 0, "Configuraci�n de trade inv�lida.");
-		return false;
-	}
-
-	// FIXED: Check if bot actually has the reward items
-	if (!BotHasRewardItems(lpBot, config.rewardItems)) {
-		gNotice.NewNoticeSend(playerIndex, 0, 0, 0, 0, 0, "El bot no tiene los items requeridos para el trade.");
-		LogAdd(LOG_RED, "[FakeBotTrade] Bot %s doesn't have required reward items", lpBot->Name);
 		return false;
 	}
 
@@ -2635,20 +2628,12 @@ bool CFakeOnline::HandleFakeBotTrade(int playerIndex, LPOBJ lpBot) {
 		int random = rand() % 100;
 		if (random >= config.successRate) {
 			gNotice.NewNoticeSend(playerIndex, 0, 0, 0, 0, 0, "El trade fall� por suerte.");
+			LogAdd(LOG_RED, "[FakeBotTrade] Trade failed by success rate [%d/%d]", random, config.successRate);
 			return false;
 		}
 	}
 
-	// FIXED: Move bot's reward items to trade window BEFORE showing to player
-	if (!MoveBotRewardItemsToTrade(lpBot, config.rewardItems)) {
-		gNotice.NewNoticeSend(playerIndex, 0, 0, 0, 0, 0, "Error moviendo items del bot al trade.");
-		return false;
-	}
-
-	// FIXED: Now send bot items to player (they should be visible now)
-	SendBotTradeItemsToPlayer(playerIndex, lpBot);
-
-	// Store player items in bot inventory
+	// Store player items in bot inventory (bot receives player's items)
 	StoreBotTradeItems(lpBot, playerIndex);
 
 	// Give reward items to player
@@ -2660,8 +2645,9 @@ bool CFakeOnline::HandleFakeBotTrade(int playerIndex, LPOBJ lpBot) {
 	}
 
 	gNotice.NewNoticeSend(playerIndex, 0, 0, 0, 0, 0, "Trade completado con �xito.");
+	LogAdd(LOG_GREEN, "[FakeBotTrade] Trade completed successfully between %s and %s", gObj[playerIndex].Name, lpBot->Name);
 
-	// Clear trade windows
+	// Clear trade windows (bot items were already removed when moved to trade window at trade open)
 	for (int i = 0; i < TRADE_SIZE; i++) {
 		gObj[playerIndex].Trade[i].Clear();
 		lpBot->Trade[i].Clear();
@@ -2887,43 +2873,20 @@ int CFakeOnline::CountTradeItems(int aIndex) {
 void CFakeOnline::SendBotTradeItemsToPlayer(int playerIndex, LPOBJ lpBot) {
 	if (!lpBot) return;
 
+	// FIXED: Use the proper game function like BotTrader does
+	// This ensures items are visible to the player in the trade window
 	for (int i = 0; i < TRADE_SIZE; i++) {
 		if (lpBot->Trade[i].IsItem()) {
-			CItem* pItem = &lpBot->Trade[i];
-
-			BYTE packet[25];
-			packet[0] = 0xC1;           // Header type
-			packet[1] = 25;             // Packet size
-			packet[2] = 0x3C;           // Trade protocol
-			packet[3] = 0x00;           // Add item to trade subcode
-			packet[4] = 0x01;           // Success
-			packet[5] = i;              // Trade slot
-
-			// Item data
-			packet[6] = (BYTE)((pItem->m_Index >> 8) & 0xFF);  // Item type
-			packet[7] = (BYTE)(pItem->m_Index & 0xFF);         // Item index
-			packet[8] = pItem->m_Level;                        // Level
-			packet[9] = pItem->m_Durability;                   // Durability
-			packet[10] = pItem->m_Option1;                     // Skill
-			packet[11] = pItem->m_Option2;                     // Luck
-			packet[12] = pItem->m_Option3;                     // Option
-			packet[13] = pItem->m_NewOption;                   // Excellent options
-			packet[14] = pItem->m_SetOption;                   // Set options
-			packet[15] = 0;                                    // Socket options (if available)
-			packet[16] = 0;
-			packet[17] = 0;
-			packet[18] = 0;
-			packet[19] = 0;
-			packet[20] = (BYTE)(pItem->m_Number & 0xFF);       // Item serial low
-			packet[21] = (BYTE)((pItem->m_Number >> 8) & 0xFF); // Item serial high
-			packet[22] = (BYTE)((pItem->m_Number >> 16) & 0xFF);
-			packet[23] = (BYTE)((pItem->m_Number >> 24) & 0xFF);
-			packet[24] = 0xFF;                                 // Item color/other data
-
-			DataSend(playerIndex, packet, 25);
+			BYTE ItemInfo[MAX_ITEM_INFO];
+			
+			// Convert item to byte format (this is critical for visibility!)
+			gItemManager.ItemByteConvert(ItemInfo, lpBot->Trade[i]);
+			
+			// Use the standard game trade function (same as BotTrader.cpp)
+			gTrade.GCTradeItemAddSend(playerIndex, i, ItemInfo);
 
 			LogAdd(LOG_BLUE, "[FakeBotTrade] Sent bot item %d (slot %d) to player %s",
-				pItem->m_Index, i, gObj[playerIndex].Name);
+				lpBot->Trade[i].m_Index, i, gObj[playerIndex].Name);
 		}
 	}
 }
