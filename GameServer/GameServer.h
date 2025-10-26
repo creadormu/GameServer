@@ -15,6 +15,8 @@ INT_PTR CALLBACK ConfigClassDialogProc(HWND hDlg, UINT message, WPARAM wParam, L
 bool CreateMultipleBotsAdvanced(int botCount, int startFrom, int gateNumber, int mapNumber, int mapX, int mapY,
 int minLevel, int maxLevel, int selectedClass, int phamViTrain, int moveRange, int timeReturn,
 int tuNhatItem, int tuDongReset, int partyMode, int pvpMode, int postKhiDie, int enabledConfigs);
+bool ExecuteSQLFile(const char* sqlFilePath, const char* serverName, const char* databaseName, char* errorMsg, int errorMsgSize);
+bool UpdateAccountsXML(bool replaceMode, char* errorMsg, int errorMsgSize);
 
 ATOM MyRegisterClass(HINSTANCE hInstance);
 BOOL InitInstance(HINSTANCE hInstance,int nCmdShow);

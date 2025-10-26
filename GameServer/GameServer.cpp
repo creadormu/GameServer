@@ -40,6 +40,9 @@
 #include "Guild.h"
 #include "Path.h"
 #include "ClassConfig.h"
+#include "pugixml.hpp"
+#include <fstream>
+#include <sstream>
 
 
 TCHAR szTitle[MAX_LOADSTRING];
@@ -676,6 +679,238 @@ LRESULT CALLBACK WndProc(HWND hWnd,UINT message,WPARAM wParam,LPARAM lParam) // 
 }
 
 // ====================================
+// BOT AUTOMATION HELPER FUNCTIONS
+// ====================================
+
+// Execute SQL file using SQLCMD (SQL Server command-line tool)
+bool ExecuteSQLFile(const char* sqlFilePath, const char* serverName, const char* databaseName, char* errorMsg, int errorMsgSize)
+{
+	// Build SQLCMD command with Windows Authentication
+	char cmdLine[1024];
+	sprintf_s(cmdLine, sizeof(cmdLine),
+		"sqlcmd -S \"%s\" -d \"%s\" -E -i \"%s\" -o \"IA\\Generated\\SQLOutput.log\"",
+		serverName, databaseName, sqlFilePath);
+
+	LogAdd(LOG_BLUE, "[ExecuteSQL] Command: %s", cmdLine);
+
+	// Execute SQLCMD
+	STARTUPINFOA si = { sizeof(si) };
+	PROCESS_INFORMATION pi;
+	si.dwFlags = STARTF_USESHOWWINDOW;
+	si.wShowWindow = SW_HIDE;
+
+	if (!CreateProcessA(NULL, cmdLine, NULL, NULL, FALSE, CREATE_NO_WINDOW, NULL, NULL, &si, &pi))
+	{
+		sprintf_s(errorMsg, errorMsgSize, "Failed to start SQLCMD.\nError: %d\n\nMake sure SQL Server tools are installed!", GetLastError());
+		LogAdd(LOG_RED, "[ExecuteSQL] CreateProcess failed: %d", GetLastError());
+		return false;
+	}
+
+	// Wait for completion (timeout: 60 seconds)
+	DWORD waitResult = WaitForSingleObject(pi.hProcess, 60000);
+
+	DWORD exitCode = 0;
+	GetExitCodeProcess(pi.hProcess, &exitCode);
+
+	CloseHandle(pi.hProcess);
+	CloseHandle(pi.hThread);
+
+	if (waitResult == WAIT_TIMEOUT)
+	{
+		sprintf_s(errorMsg, errorMsgSize, "SQL execution timeout (>60s)");
+		LogAdd(LOG_RED, "[ExecuteSQL] Timeout");
+		return false;
+	}
+
+	if (exitCode != 0)
+	{
+		sprintf_s(errorMsg, errorMsgSize, "SQLCMD failed with exit code: %d\n\nCheck IA\\Generated\\SQLOutput.log for details", exitCode);
+		LogAdd(LOG_RED, "[ExecuteSQL] Exit code: %d", exitCode);
+		return false;
+	}
+
+	LogAdd(LOG_GREEN, "[ExecuteSQL] Success!");
+	return true;
+}
+
+// Update or Replace Accounts.xml from IA_Accounts.xml
+bool UpdateAccountsXML(bool replaceMode, char* errorMsg, int errorMsgSize)
+{
+	using namespace pugi;
+
+	const char* sourceFile = "IA\\Generated\\IA_Accounts.xml";
+	const char* targetFile = "IA\\Accounts.xml";
+	const char* backupFile = "IA\\Accounts_Backup.xml";
+
+	// Load source file (generated bots)
+	xml_document sourceDoc;
+	xml_parse_result sourceResult = sourceDoc.load_file(sourceFile);
+
+	if (!sourceResult)
+	{
+		sprintf_s(errorMsg, errorMsgSize, "Failed to load source file:\n%s\n\nError: %s", sourceFile, sourceResult.description());
+		LogAdd(LOG_RED, "[UpdateXML] Failed to load source: %s", sourceResult.description());
+		return false;
+	}
+
+	xml_node sourceRoot = sourceDoc.child("FakeOnlineData");
+	if (!sourceRoot)
+	{
+		sprintf_s(errorMsg, errorMsgSize, "Invalid XML format in source file!");
+		LogAdd(LOG_RED, "[UpdateXML] No FakeOnlineData root in source");
+		return false;
+	}
+
+	if (replaceMode)
+	{
+		// REPLACE MODE: Create backup and copy source to target
+		LogAdd(LOG_BLUE, "[UpdateXML] REPLACE mode");
+
+		// Backup existing file if it exists
+		if (GetFileAttributesA(targetFile) != INVALID_FILE_ATTRIBUTES)
+		{
+			if (!CopyFileA(targetFile, backupFile, FALSE))
+			{
+				sprintf_s(errorMsg, errorMsgSize, "Failed to create backup file!");
+				LogAdd(LOG_RED, "[UpdateXML] Backup failed");
+				return false;
+			}
+			LogAdd(LOG_GREEN, "[UpdateXML] Backup created: %s", backupFile);
+		}
+
+		// Copy source to target
+		if (!CopyFileA(sourceFile, targetFile, FALSE))
+		{
+			sprintf_s(errorMsg, errorMsgSize, "Failed to copy file!");
+			LogAdd(LOG_RED, "[UpdateXML] Copy failed");
+			return false;
+		}
+
+		LogAdd(LOG_GREEN, "[UpdateXML] REPLACE completed!");
+		return true;
+	}
+	else
+	{
+		// UPDATE MODE: Merge new bots into existing file
+		LogAdd(LOG_BLUE, "[UpdateXML] UPDATE mode");
+
+		xml_document targetDoc;
+		xml_parse_result targetResult = targetDoc.load_file(targetFile);
+
+		// If target doesn't exist or is invalid, create new
+		if (!targetResult)
+		{
+			LogAdd(LOG_BLUE, "[UpdateXML] Target doesn't exist, creating new");
+			if (!CopyFileA(sourceFile, targetFile, FALSE))
+			{
+				sprintf_s(errorMsg, errorMsgSize, "Failed to create target file!");
+				return false;
+			}
+			return true;
+		}
+
+		xml_node targetRoot = targetDoc.child("FakeOnlineData");
+		if (!targetRoot)
+		{
+			// Create root if missing
+			targetRoot = targetDoc.append_child("FakeOnlineData");
+		}
+
+		// Backup existing file
+		if (!CopyFileA(targetFile, backupFile, FALSE))
+		{
+			LogAdd(LOG_RED, "[UpdateXML] Warning: Backup failed");
+		}
+
+		// Build map of existing accounts for duplicate checking
+		std::map<std::string, xml_node> existingAccounts;
+		for (xml_node info = targetRoot.child("Info"); info; info = info.next_sibling("Info"))
+		{
+			const char* account = info.attribute("Account").value();
+			if (account && account[0] != '\\0')
+			{
+				existingAccounts[account] = info;
+			}
+		}
+
+		// Merge new bots
+		int addedCount = 0;
+		int updatedCount = 0;
+
+		for (xml_node sourceInfo = sourceRoot.child("Info"); sourceInfo; sourceInfo = sourceInfo.next_sibling("Info"))
+		{
+			const char* account = sourceInfo.attribute("Account").value();
+			if (!account || account[0] == '\\0')
+				continue;
+
+			auto it = existingAccounts.find(account);
+			if (it != existingAccounts.end())
+			{
+				// Update existing
+				xml_node existingNode = it->second;
+				
+				// Copy all attributes
+				for (xml_attribute attr = sourceInfo.first_attribute(); attr; attr = attr.next_attribute())
+				{
+					existingNode.attribute(attr.name()).set_value(attr.value());
+				}
+				
+				updatedCount++;
+			}
+			else
+			{
+				// Add new
+				targetRoot.append_copy(sourceInfo);
+				addedCount++;
+			}
+		}
+
+		// Copy MSGThongBao and Config from source if they exist
+		xml_node sourceMSG = sourceDoc.child("MSGThongBao");
+		if (sourceMSG)
+		{
+			xml_node targetMSG = targetDoc.child("MSGThongBao");
+			if (!targetMSG)
+			{
+				targetDoc.prepend_copy(sourceMSG);
+			}
+		}
+
+		xml_node sourceConfig = sourceDoc.child("Config");
+		if (sourceConfig)
+		{
+			xml_node targetConfig = targetDoc.child("Config");
+			if (!targetConfig)
+			{
+				xml_node msgNode = targetDoc.child("MSGThongBao");
+				if (msgNode)
+				{
+					targetDoc.insert_copy_after(sourceConfig, msgNode);
+				}
+				else
+				{
+					targetDoc.prepend_copy(sourceConfig);
+				}
+			}
+		}
+
+		// Save merged file
+		if (!targetDoc.save_file(targetFile))
+		{
+			sprintf_s(errorMsg, errorMsgSize, "Failed to save merged file!");
+			LogAdd(LOG_RED, "[UpdateXML] Save failed");
+			return false;
+		}
+
+		LogAdd(LOG_GREEN, "[UpdateXML] UPDATE completed! Added: %d, Updated: %d", addedCount, updatedCount);
+
+		// Store counts for message box
+		sprintf_s(errorMsg, errorMsgSize, "Added: %d new bots\\nUpdated: %d existing bots", addedCount, updatedCount);
+		return true;
+	}
+}
+
+// ====================================
 // CLASS CONFIGURATION DIALOG
 // ====================================
 
@@ -973,30 +1208,165 @@ INT_PTR CALLBACK CreateBotsDialogProc(HWND hDlg, UINT message, WPARAM wParam, LP
 					if (enabledConfigs & (1 << i)) configCount++;
 				}
 
-				char szMsg[512];
+				char szMsg[1024];
 				sprintf_s(szMsg, sizeof(szMsg),
-					"Successfully created %d bots!\n\n"
+					"✓ Successfully created %d bots!\n\n"
 					"Range: Bot%04d to Bot%04d\n"
 					"Location: %s\n"
 					"Levels: %d-%d\n"
 					"Config Variations: %d\n\n"
-					"Files:\n- Generated\\IA_Accounts.xml\n- Generated\\CreateBots.sql\n\n"
-					"How to use:\nExecute CreateBots.sql, then update:\nAccounts.xml with IA_Accounts.xml\n\n"
-					"Finally: 1) Reload IA, 2) ADD IA",
+					"Files Generated:\n"
+					"- IA\\Generated\\IA_Accounts.xml\n"
+					"- IA\\Generated\\CreateBots.sql\n\n"
+					"=================================\n"
+					"NEXT STEPS:\n"
+					"=================================\n"
+					"1. Click 'Execute SQL' to add bots to database\n"
+					"2. Click 'Update Accounts.xml' to merge configuration\n"
+					"3. Reload IA from menu\n"
+					"4. Add IA from menu",
 					botCount, startFrom, startFrom + botCount - 1,
 					(gateNumber > 0) ? "Gate" : "Custom Coords",
 					minLevel, maxLevel, configCount);
 
 				SetCursor(LoadCursor(NULL, IDC_ARROW));
 				EnableWindow(hDlg, TRUE);
-				MessageBox(hDlg, szMsg, "Success", MB_OK | MB_ICONINFORMATION);
-				EndDialog(hDlg, IDOK);
+				MessageBox(hDlg, szMsg, "Bots Created Successfully!", MB_OK | MB_ICONINFORMATION);
 			}
 			else
 			{
 				SetCursor(LoadCursor(NULL, IDC_ARROW));
 				EnableWindow(hDlg, TRUE);
 				MessageBox(hDlg, "Failed to create bots.\n\nCheck console logs for details.", "Error", MB_OK | MB_ICONERROR);
+			}
+
+			return TRUE;
+		}
+		else if (LOWORD(wParam) == IDC_BTN_EXECUTESQL)
+		{
+			// Execute SQL button
+			if (MessageBox(hDlg, 
+				"This will execute CreateBots.sql and add the bots to your database.\n\n"
+				"Make sure you have:\n"
+				"- Created bots first (click Create Bots)\n"
+				"- SQL Server running\n"
+				"- Correct server settings below\n\n"
+				"Continue?", 
+				"Execute SQL", MB_YESNO | MB_ICONQUESTION) != IDYES)
+			{
+				return TRUE;
+			}
+
+			// Get SQL Server settings from edit controls
+			char serverName[128] = ".\\SQLEXPRESS";  // Default
+			char dbName[64] = "MuOnline";            // Default
+
+			// Try to get from dialog if controls exist
+			GetDlgItemTextA(hDlg, IDC_EDIT_SQLSERVER, serverName, sizeof(serverName));
+			GetDlgItemTextA(hDlg, IDC_EDIT_SQLDB, dbName, sizeof(dbName));
+
+			// Use defaults if empty
+			if (strlen(serverName) == 0) strcpy_s(serverName, ".\\SQLEXPRESS");
+			if (strlen(dbName) == 0) strcpy_s(dbName, "MuOnline");
+
+			EnableWindow(hDlg, FALSE);
+			SetCursor(LoadCursor(NULL, IDC_WAIT));
+
+			char errorMsg[512];
+			if (ExecuteSQLFile("IA\\Generated\\CreateBots.sql", serverName, dbName, errorMsg, sizeof(errorMsg)))
+			{
+				SetCursor(LoadCursor(NULL, IDC_ARROW));
+				EnableWindow(hDlg, TRUE);
+				MessageBox(hDlg, 
+					"✓ SQL executed successfully!\n\n"
+					"Bots have been added to the database.\n\n"
+					"Next step:\n"
+					"Click 'Update Accounts.xml' to merge bot configuration.", 
+					"SQL Success", MB_OK | MB_ICONINFORMATION);
+			}
+			else
+			{
+				SetCursor(LoadCursor(NULL, IDC_ARROW));
+				EnableWindow(hDlg, TRUE);
+				MessageBox(hDlg, errorMsg, "SQL Execution Failed", MB_OK | MB_ICONERROR);
+			}
+
+			return TRUE;
+		}
+		else if (LOWORD(wParam) == IDC_BTN_UPDATEXML)
+		{
+			// Update Accounts.xml button - Show choice dialog
+			int choice = MessageBox(hDlg, 
+				"Choose update mode:\n\n"
+				"UPDATE (Yes): Merge new bots with existing Accounts.xml\n"
+				"  - Keeps existing bots\n"
+				"  - Adds new bots\n"
+				"  - Updates duplicates\n"
+				"  - Creates backup\n\n"
+				"REPLACE (No): Replace entire Accounts.xml\n"
+				"  - Deletes all existing bots\n"
+				"  - Uses only new bots\n"
+				"  - Creates backup\n\n"
+				"Choose UPDATE?", 
+				"Update Accounts.xml", MB_YESNOCANCEL | MB_ICONQUESTION);
+
+			if (choice == IDCANCEL)
+				return TRUE;
+
+			bool updateMode = (choice == IDYES);
+
+			EnableWindow(hDlg, FALSE);
+			SetCursor(LoadCursor(NULL, IDC_WAIT));
+
+			char resultMsg[512];
+			if (UpdateAccountsXML(updateMode == false, resultMsg, sizeof(resultMsg)))
+			{
+				SetCursor(LoadCursor(NULL, IDC_ARROW));
+				EnableWindow(hDlg, TRUE);
+
+				char successMsg[1024];
+				if (updateMode)
+				{
+					// resultMsg contains the counts from UPDATE mode
+					sprintf_s(successMsg, sizeof(successMsg),
+						"✓ Accounts.xml UPDATED successfully!\n\n"
+						"%s\n\n"
+						"Backup saved to:\n"
+						"IA\\Accounts_Backup.xml\n\n"
+						"=================================\n"
+						"FINAL STEPS:\n"
+						"=================================\n"
+						"1. Go to GameServer menu\n"
+						"2. Click 'Reload IA Data'\n"
+						"3. Click 'Add Fake Online'\n\n"
+						"Your bots are now ready!",
+						resultMsg);
+				}
+				else
+				{
+					sprintf_s(successMsg, sizeof(successMsg),
+						"✓ Accounts.xml REPLACED successfully!\n\n"
+						"All previous bots removed.\n"
+						"New bots configuration loaded.\n\n"
+						"Backup saved to:\n"
+						"IA\\Accounts_Backup.xml\n\n"
+						"=================================\n"
+						"FINAL STEPS:\n"
+						"=================================\n"
+						"1. Go to GameServer menu\n"
+						"2. Click 'Reload IA Data'\n"
+						"3. Click 'Add Fake Online'\n\n"
+						"Your bots are now ready!");
+				}
+
+				MessageBox(hDlg, successMsg, "Accounts.xml Updated!", MB_OK | MB_ICONINFORMATION);
+				EndDialog(hDlg, IDOK);
+			}
+			else
+			{
+				SetCursor(LoadCursor(NULL, IDC_ARROW));
+				EnableWindow(hDlg, TRUE);
+				MessageBox(hDlg, resultMsg, "Update Failed", MB_OK | MB_ICONERROR);
 			}
 
 			return TRUE;
