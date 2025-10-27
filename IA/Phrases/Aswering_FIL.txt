@@ -1,0 +1,477 @@
+#GREETING
+hello
+hi
+hey
+sup
+what's up
+greetings
+morning
+hey there
+howdy
+o/
+kumusta
+musta
+>>>
+Kumusta, {player_name}!
+Ano ba, {player_name}?
+Pagbati, {player_name}!
+Finally may bumati!
+Hey hey, {player_name}!
+Saya makita ka, {player_name}!
+Howdy, {player_name}!
+Nag-farm ka o mamamatay?
+Magsalita ng malinaw, {player_name}!
+Tagal mo magsalita!
+Ano ba, {player_name}!
+Kumusta ka? {player_name}?
+Welcome, {player_name}!
+Kumusta pare, {player_name}!
+Okay ka ba? {player_name}?
+Pagbati mandirigma, {player_name}!
+Bago ka ba? {player_name}?
+Gulat na surprise, {player_name}!
+Madalas ka ba? {player_name}?
+Finally may nagsalita!
+Kumusta kasamahan, {player_name}!
+Kailangan mo ba ng tulong? {player_name}?
+Kumusta kaibigan, {player_name}!
+Okay ka ba? {player_name}?
+Hey, welcome {player_name}!
+Kamusta naman, {player_name}?
+Kumusta pare, {player_name}!
+Ano ginagawa mo dito, {player_name}?
+Mainit na pagbati, {player_name}!
+Hey, saya makita ka {player_name}!
+
+#FAREWELL
+bye
+see ya
+i'm out
+later
+logging off
+closing
+leaving
+take care
+ciao
+goodbye
+paalam
+>>>
+Mag-ingat, {player_name}!
+Kita tayo, {player_name}.
+Good luck, {player_name}!
+Sa uulitin, {player_name}.
+Huwag kalimutan mag-reset bago mag-logout.
+Safe journey, {player_name}.
+Aalis na agad... classic.
+Sana bumalik ka may bless.
+Huwag mamatay na walang PK, {player_name}.
+Aalis ka na, {player_name}!
+Mamaya na, {player_name}!
+Kita agad, {player_name}.
+Paalam mandirigma, {player_name}!
+Mag-ingat dyan sa labas, {player_name}.
+Bumalik ka agad, {player_name}!
+Sige na, {player_name}.
+Kita sa laro, {player_name}!
+Sana okay ka, {player_name}.
+Paalam kaibigan, {player_name}!
+Magpahinga ng mabuti, {player_name}.
+Bukas na lang, {player_name}!
+Usap mamaya, {player_name}.
+Good luck dyan sa labas, {player_name}!
+Sana makita kita ulit, {player_name}.
+Bye bye, {player_name}!
+Sana okay ka lang, {player_name}.
+Paalam kasama, {player_name}!
+Kita mamaya, {player_name}.
+Sa ibang araw, {player_name}!
+Mag-ingat talaga, {player_name}!
+
+#SLANG
+what's up
+wassup
+yo
+sup dude
+how you doing
+whatcha up to
+yo bro
+where you at
+chillin
+just joined
+musta
+pre
+>>>
+Okay lang, {player_name}.
+Nag-farm pa rin, {player_name}.
+Haha, ano nangyari sayo?
+Pare? Nandito ako, {player_name}!
+Ano ginagawa ko? Pumapatay ng mob.
+Chill lang sa Devias.
+Reporting, pre!
+Grind pa rin tulad ng dati.
+Full reset mode.
+Gaya ng dati, nagsusurvive lang.
+Ano ba, {player_name}?
+Nandito nag-farm.
+Relax lang, {player_name}!
+Chill lahat, {player_name}.
+Ano meron, {player_name}?
+Nasa grind, {player_name}.
+Ano ba pre, {player_name}!
+Naglalaro lang, {player_name}.
+Ano ginagawa mo, {player_name}?
+Nandito, {player_name}.
+Relax lahat, {player_name}!
+Kamusta naman, {player_name}?
+Nasa mapa, {player_name}.
+Chill lang, {player_name}!
+Okay lang ba pre, {player_name}?
+Aktibo dito, {player_name}.
+Ano ba kaibigan, {player_name}!
+Nag-farm lang, {player_name}.
+Nandito tayo, {player_name}!
+Tahimik lahat, {player_name}.
+
+#TRADE
+sell
+buy
+trade
+offer
+market
+bless
+chaos
+jewel
+zen
+deal
+bentahin
+bilhin
+trade
+>>>
+May {item_required} ba?
+Kailangan {item_required}, meron {item_reward}!
+{item_required} wanted, {item_reward} offered!
+Trade ang {item_required} mo dito!
+Mabilis na trade: {item_required} -> {item_reward}
+Sino nagbebenta ng {item_required}?
+Bumibili ng {item_required} urgent!
+Nagbebenta ng {item_reward} mura!
+Palit {item_required} para {item_reward}!
+May nagtrade ba ng {item_required}?
+Magandang presyo para {item_required}!
+Nag-offer ng magandang deal!
+Kailangan mo ba {item_reward}?
+Laging fair trade!
+Bibili ng {item_required} agad!
+Sino may extra {item_required}?
+Nagbebenta ng iba't ibang items!
+Win-win trade dito!
+May nagbebenta ba ng jewels?
+Garantisadong magandang presyo!
+Desperado na ako sa {item_required}!
+Honest trade!
+Nagtrade ba ng magandang items?
+Palit marami para sa {item_required}!
+Nag-offer ng {item_reward} para sa {item_required}!
+May kailangan ba ng zen?
+Mabilis at safe na trade!
+Bumibili ng quality items!
+Bentahin mura, {player_name}!
+Sino nagtrade ngayon?
+
+#HELP
+help
+how to
+stuck
+where to go
+reset
+level up
+doubt
+bug
+problem
+issue
+tulong
+paano
+>>>
+Stuck ka, {player_name}?
+Mag-reset ka ng may faith, {player_name}.
+Ang guide ay nasa puso mo... o /post.
+Para umakyat ng level, patayin ang hindi ka papatayin.
+Humingi ng tulong sa admin, {player_name}.
+User lang ako... {player_name}.
++51917039407 ang WhatsApp ng Admin.
+Tanungin mo lang, {player_name}.
+Pumunta sa discord ng MU, {player_name}.
+Makikita mo ang Admin sa website.
+Ano problema, {player_name}?
+Ano tutulong ko, {player_name}?
+Maghanap sa forum, {player_name}.
+Kailangan mo ba ng guide? {player_name}?
+Magtanong sa komunidad, {player_name}.
+May doubt ka ba? {player_name}?
+Tignan ang commands, {player_name}.
+May nakita kang bug? {player_name}?
+Makipag-ugnayan sa staff, {player_name}.
+Technical problem? {player_name}?
+Basahin ang guides, {player_name}.
+Saan ka stuck? {player_name}?
+Maghanap ng tutorials, {player_name}.
+Kailangan mo bang mag-reset? {player_name}?
+Magtanong ng specific, {player_name}.
+Saan mag-level up? {player_name}?
+Check ang wiki, {player_name}.
+Ano kailangan mo, {player_name}?
+Paparating ang tulong, {player_name}!
+Naayos na ba ang problema? {player_name}?
+
+#JOKES
+joke
+funny
+haha
+xD
+that was good
+you're funny
+lol
+clown
+laugh
+meme
+haha
+nakakatawa
+>>>
+Joke? Kung nakakatawa lang, {player_name}.
+Maganda yun, {player_name}!
+Haha, mas nakakatawa ka pa kay Kundun.
+May clown dito, {player_name}.
+Nakakatawa ka, {player_name}!
+Igalang ang seryosong users, please.
+Kung gusto mo ng tawa, pumunta sa circus, {player_name}.
+Medyo nakakatawa yun, {player_name}.
+Ikaw naman ngayon, {player_name}.
+Comedy level Devil Square!
+Haha anong mukha yan, {player_name}.
+Natawa ako, {player_name}!
+Magandang joke, {player_name}.
+Comedian ka, {player_name}!
+Haha maganda yun, {player_name}.
+Nakakatawa talaga, {player_name}!
+Halos mamatay ako sa kakatawa, {player_name}.
+Sobrang nakakatawa, {player_name}!
+Mag-kwento pa, {player_name}.
+Ikaw ang best, {player_name}!
+Haha gusto kita, {player_name}.
+Anong humor yan, {player_name}!
+Garantisadong tawa, {player_name}.
+Natural na comedian, {player_name}!
+Haha epic, {player_name}.
+Pinasaya mo ang araw ko, {player_name}!
+Magaling ang sense of humor, {player_name}.
+Tawa level boss, {player_name}!
+Haha tuloy mo yan, {player_name}.
+Pure comedy, {player_name}!
+
+#GUILD
+guild
+clan
+alliance
+invite
+recruiting
+my team
+i want in
+i join
+invite me
+guild
+>>>
+Naghahanap ng clan? Pwede sa akin.
+Kausapin ang GM... kung makikita mo.
+Sumali sa ating cause... literally.
+Malakas lang ang kinukuha namin.
+Kaya naghahanap ng guild?
+Sasabihin ko sa clan leader.
+Bakit di mo gawin sarili mo, {player_name}?
+Ang guild mo ba ay may events? {player_name}?
+Magdala ng jewels at papasok ka.
+Hindi ako guild leader, {player_name}.
+Gusto mo bang sumali sa clan? {player_name}?
+Pag-usapan natin ang recruitment, {player_name}.
+May experience ka ba? {player_name}?
+Guild ay laging aktibo, {player_name}.
+Naaabot mo ba ang requirements? {player_name}?
+Makipag-ugnayan sa leader, {player_name}.
+Bakit itong guild? {player_name}?
+Tayo ay pamilya, {player_name}.
+Legendary guild, {player_name}.
+Magiging loyal ka ba? {player_name}?
+Naghahanap kami ng aktibo, {player_name}.
+Sasali ka ba sa gyera? {player_name}?
+United guild, {player_name}.
+May commitment ka ba? {player_name}?
+Nag-recruit kami ng elite, {player_name}.
+Sapat ang level? {player_name}?
+Weekly guild events, {player_name}.
+Magpadala ng application? {player_name}?
+Welcome sa clan, {player_name}!
+Guild master ka ba? {player_name}?
+
+#EVENT
+event
+invasion
+devil square
+blood castle
+chaos castle
+ilusion temple
+white wizard
+golden dragon
+selupan
+kundun
+event
+>>>
+Tara sa event, {player_name}!
+May mas maraming aksyon sa mapa ko kaysa sa event.
+Anong event? Yung tatalunan mo?
+Laging nanalo ako sa event, {player_name}!
+Pumunta ka mag-isa sa event tulad ng champion, {player_name}.
+Hindi ako makakasama, kulang ang set.
+Bakit hindi ka pumunta mag-isa?
+May mga users na pumupunta sa event nang hindi nagsasalita.
+Confirmed ang event: pero ayaw kong pumunta!
+Ang tanging event ngayong araw... ang pagbabalik ko, {player_name}!
+Anong event ang magsisimula, {player_name}?
+Devil Square event, {player_name}!
+Blood Castle na ba, {player_name}?
+Chaos Castle mahirap, {player_name}.
+Nagsimula na ba ang invasion? {player_name}?
+Event mamaya, {player_name}!
+Golden Dragon lalabas, {player_name}?
+Tara sabay tayo, {player_name}!
+Legendary event, {player_name}.
+Handa ka na ba? {player_name}?
+Magandang rewards ang event, {player_name}!
+Sumasali ka ba sa events? {player_name}?
+Huwag palampasin ang event, {player_name}!
+Event bawat oras, {player_name}.
+Nanalo ka ba sa event? {player_name}?
+Intense ang event, {player_name}!
+Ilang event ngayong araw, {player_name}?
+Event coordinate team, {player_name}.
+Tara sa pagwawagi, {player_name}!
+Paparating ang epic event, {player_name}!
+
+#PK
+pk
+killer
+murder
+pvp
+got killed
+got dropped
+hit me
+got deleted
+die
+namatay
+>>>
+Pinatay ka? Welcome sa tunay na MU.
+Ako ay namamatay lang dahil sa courtesy.
+Kung noob ka, tumakbo ka lang.
+Hindi ako yun... pero sana ako.
+Legal ang PK, tawagin mo itong rustic justice.
+Na-drop ka? Oras para mag-training, {player_name}.
+Bakit hindi ka mag-training ng higit pa, {player_name}?
+Next time, gumamit ng wings. O swerte.
+Haha duwag, mas mabuti tumakbo.
+Maghiganti tayo! O panoorin ka ulit na mamatay.
+PK dangerous zone, {player_name}.
+Sino pumatay sayo? {player_name}?
+Hingin ang revenge, {player_name}!
+PK ay bahagi ng laro, {player_name}.
+Nawala ka ng items? {player_name}?
+Mag-training pa, {player_name}.
+PK ay gumawa sa iyo ng malakas! {player_name}!
+Susubukan mo ulit? {player_name}?
+PK MU justice, {player_name}.
+Kailangan mo ba ng tulong laban sa PK? {player_name}?
+Mag-ingat sa PK, {player_name}!
+PK red zone, {player_name}.
+Umiiwas ka ba sa PK? {player_name}?
+PK challenge accepted, {player_name}!
+Respeto sa PK, {player_name}.
+PK ka ba? {player_name}?
+PK ay bahagi ng risk, {player_name}.
+Huwag matakot sa PK, {player_name}!
+PK ay nagtuturo sa iyo, {player_name}.
+Revenge laban sa PK, {player_name}?
+
+#NOOB
+noob
+newbie
+just joined
+who are you
+are you new
+player newbie
+low reset
+weak
+my first day
+beginner
+baguhan
+noob
+>>>
+Noob? Hindi... limited edition.
+Ikaw yung hindi marunong ng combo.
+Okay lang baguhan, mag-level up ka.
+Bakit hindi ka mag-level up nang lihim?
+Iwasan ang mamatay ng marami, baguhan.
+Taga-saan ka, {player_name}?
+Anong MU nilaro mo dati, {player_name}?
+Kung wala kang alam, makipag-ugnayan sa Admin.
+Una mag-level up o maghanap ng party.
+Ako rin ay baguhan kamakailan, {player_name}.
+Unang araw maglaro? {player_name}?
+Welcome baguhan, {player_name}!
+Kailangan mo ba ng guide? {player_name}?
+Lahat tayo nagsimula ng ganito, {player_name}.
+Anong class pinili mo? {player_name}?
+Baguhan ay mabilis matuto, {player_name}.
+Kailan ang unang reset? {player_name}?
+Mag-training ng mabuti, baguhan {player_name}!
+Taga-saang bansa ka? {player_name}?
+Bago sa server? {player_name}?
+May previous experience? {player_name}?
+Baguhan na may potential, {player_name}.
+Kailangan mo ba ng items? {player_name}?
+Mag-level up muna, {player_name}!
+Welcome baguhan, {player_name}.
+Naglaro ka ba ng ibang MU? {player_name}?
+Matuto ng mabilis, {player_name}!
+Magiging legendary ka na baguhan, {player_name}.
+Party para sa baguhan, {player_name}?
+Magsimula ng malakas, baguhan {player_name}!
+
+#GENERAL
+>>>
+Ano yun, {player_name}?
+Kawili-wili ang sinabi mo, {player_name}.
+Ganun ang buhay sa MU, diba {player_name}?
+Magandang salita, {player_name}!
+Napatawa mo ako, {player_name}.
+Hindi ko naisip ng ganyan.
+Tama ka, {player_name}.
+Ganun ang pagsasalita, {player_name}!
+Ang komento na yan ay deserve ng bless.
+Malalim na pag-iisip, {player_name}.
+Ano sa tingin mo? {player_name}?
+Naintindihan ko ang punto mo, {player_name}.
+Magandang komento, {player_name}.
+Talaga? {player_name}?
+Totally agree, {player_name}!
+Totoo yan, {player_name}.
+Paano? {player_name}?
+Kawili-wiling perspective, {player_name}.
+Magaling ang pagsasalita, {player_name}!
+Ano pa? {player_name}?
+Naibahagi ko ang opinyon, {player_name}.
+Talaga? {player_name}?
+Magandang punto, {player_name}.
+Exactly, {player_name}!
+At yun, {player_name}?
+Gusto ko ang estilo mo, {player_name}.
+Syempre, {player_name}!
+Totoo? {player_name}?
+Kawili-wiling pag-iisip, {player_name}.
+Walang duda, {player_name}!

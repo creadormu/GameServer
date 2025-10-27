@@ -1,0 +1,484 @@
+#GREETING
+hello
+hi
+hey
+sup
+what's up
+greetings
+morning
+hey there
+howdy
+o/
+oi
+ola
+salve
+e ai
+>>>
+Olá, {player_name}!
+E aí, {player_name}?
+Saudações, {player_name}!
+Finalmente alguém diz oi!
+Ei ei, {player_name}!
+Bom te ver, {player_name}!
+Howdy, {player_name}!
+Vem farmar ou morrer?
+Fale direito, {player_name}!
+Demorou para falar!
+E aí, {player_name}!
+Como vai, {player_name}?
+Bem-vindo, {player_name}!
+Oi mano, {player_name}!
+Tudo bem, {player_name}?
+Saudações guerreiro, {player_name}!
+É novo, {player_name}?
+Que boa surpresa, {player_name}!
+Vem sempre, {player_name}?
+Finalmente alguém fala!
+Oi colega, {player_name}!
+Precisa de algo, {player_name}?
+E aí amigo, {player_name}!
+Tudo certo, {player_name}?
+Ei, bem-vindo {player_name}!
+Como está tudo, {player_name}?
+Oi irmão, {player_name}!
+O que faz aqui, {player_name}?
+Saudações cordiais, {player_name}!
+Ei, bom te ver {player_name}!
+
+#FAREWELL
+bye
+see ya
+i'm out
+later
+logging off
+closing
+leaving
+take care
+ciao
+goodbye
+tchau
+ate logo
+falou
+>>>
+Cuide-se, {player_name}!
+Te vejo por aí, {player_name}.
+Boa sorte, {player_name}!
+Até a próxima, {player_name}.
+Não esqueça resetar antes de sair.
+Viagem segura, {player_name}.
+Já vai... clássico.
+Espero que volte com bless.
+Não morra sem PK, {player_name}.
+Você está indo, {player_name}!
+Até logo, {player_name}!
+Nos vemos em breve, {player_name}.
+Tchau guerreiro, {player_name}!
+Cuide-se lá fora, {player_name}.
+Volte logo, {player_name}!
+Até mais, {player_name}.
+Nos vemos no jogo, {player_name}!
+Que vá bem, {player_name}.
+Tchau amigo, {player_name}!
+Descanse bem, {player_name}.
+Até amanhã, {player_name}!
+Falamos depois, {player_name}.
+Boa sorte lá fora, {player_name}!
+Espero ver você de novo, {player_name}.
+Tchau pescador, {player_name}!
+Que esteja bem, {player_name}.
+Tchau companheiro, {player_name}!
+Nos encontramos depois, {player_name}.
+Até outro dia, {player_name}!
+Cuide-se muito, {player_name}!
+
+#SLANG
+what's up
+wassup
+yo
+sup dude
+how you doing
+whatcha up to
+yo bro
+where you at
+chillin
+just joined
+e ai
+que pasa
+mano
+>>>
+Tudo bem, {player_name}.
+Farmando como sempre, {player_name}.
+Haha, o que há contigo?
+Primo? Estou aqui, {player_name}!
+O que faço? Matando mobs.
+Só relaxando em Devias.
+Reportando, mano!
+Grindando pesado como sempre.
+Indo modo full reset.
+Mesmo de sempre, sobrevivendo.
+E aí, {player_name}?
+Aqui farmando.
+Tranquilo, {player_name}!
+Tudo chill, {player_name}.
+O que há, {player_name}?
+Aqui no grind, {player_name}.
+E aí, mano {player_name}!
+Só jogando, {player_name}.
+O que faz, {player_name}?
+Aqui presente, {player_name}.
+Tudo relax, {player_name}!
+Como vai, {player_name}?
+Aqui no mapa, {player_name}.
+Tranqui, {player_name}!
+Tudo bem, bro {player_name}?
+Aqui ativo, {player_name}.
+E aí cara, {player_name}!
+Só farmando, {player_name}.
+Estamos aqui, {player_name}!
+Tudo tranquilo, {player_name}.
+
+#TRADE
+sell
+buy
+trade
+offer
+market
+bless
+chaos
+jewel
+zen
+deal
+vendo
+compro
+troco
+>>>
+Alguém tem {item_required}?
+Preciso {item_required}, tenho {item_reward}!
+{item_required} procurado, {item_reward} oferecido!
+Troque seu {item_required} aqui!
+Trade rápido: {item_required} -> {item_reward}
+Quem vende {item_required}?
+Compro {item_required} urgente!
+Vendo {item_reward} barato!
+Troco {item_required} por {item_reward}!
+Alguém troca {item_required}?
+Bom preço por {item_required}!
+Ofereço bom negócio!
+Precisa {item_reward}?
+Trade justo sempre!
+Compro {item_required} na hora!
+Quem tem {item_required} extra?
+Vendo vários itens!
+Trade ganha-ganha aqui!
+Alguém vende joias?
+Bom preço garantido!
+Procuro {item_required} desesperadamente!
+Trade honesto!
+Trocam itens bons?
+Troco vários por {item_required}!
+Ofereço {item_reward} por {item_required}!
+Alguém precisa zen?
+Trade rápido e seguro!
+Compro itens qualidade!
+Vendo barato, {player_name}!
+Quem troca agora?
+
+#HELP
+help
+how to
+stuck
+where to go
+reset
+level up
+doubt
+bug
+problem
+issue
+ajuda
+como
+onde
+>>>
+Travado, {player_name}?
+Resete com fé, {player_name}.
+Guia está no coração... ou /post.
+Para subir nível, mate algo que não te mate.
+Peça ajuda aos admins, {player_name}.
+Só sou usuário... {player_name}.
++51917039407 é WhatsApp do Admin.
+Pergunte sem medo, {player_name}.
+Vá ao discord do MU, {player_name}.
+Pode buscar Admin na web.
+Qual o problema, {player_name}?
+Em que ajudo, {player_name}?
+Busque no fórum, {player_name}.
+Precisa guia, {player_name}?
+Pergunte à comunidade, {player_name}.
+Tem dúvida, {player_name}?
+Veja os comandos, {player_name}.
+Bug encontrado, {player_name}?
+Contate staff, {player_name}.
+Problema técnico, {player_name}?
+Leia guias, {player_name}.
+Travado onde, {player_name}?
+Busque tutoriais, {player_name}.
+Precisa resetar, {player_name}?
+Pergunte específico, {player_name}.
+Onde subir nível, {player_name}?
+Cheque wiki, {player_name}.
+O que precisa, {player_name}?
+Ajuda a caminho, {player_name}!
+Problema resolvido, {player_name}?
+
+#JOKES
+joke
+funny
+haha
+xD
+that was good
+you're funny
+lol
+clown
+laugh
+meme
+kkkk
+risada
+engraçado
+>>>
+Uma piada? Só se for engraçada, {player_name}.
+Essa foi boa, {player_name}!
+Haha, me fez rir mais que Kundun.
+Palhaço detectado, {player_name}.
+Você é muito engraçado, {player_name}!
+Respeite usuários sérios, por favor.
+Se quer risadas, vá ao circo, {player_name}.
+Essa foi meio engraçada, {player_name}.
+Agora você conta uma, {player_name}.
+Comédia nível Devil Square!
+Haha que cara, {player_name}.
+Ri, {player_name}!
+Boa piada, {player_name}.
+Você é comediante, {player_name}!
+Kkkk boa essa, {player_name}.
+Que riso, {player_name}!
+Quase me matou de rir, {player_name}.
+Engraçadíssimo, {player_name}!
+Conte outra, {player_name}.
+Você é o melhor, {player_name}!
+Haha gosto de você, {player_name}.
+Que humor, {player_name}!
+Risadas garantidas, {player_name}.
+Comediante nato, {player_name}!
+Kkkk épico, {player_name}.
+Alegrou meu dia, {player_name}!
+Bom senso humor, {player_name}.
+Risadas nível boss, {player_name}!
+Haha continue assim, {player_name}.
+Comédia pura, {player_name}!
+
+#GUILD
+guild
+clan
+alliance
+invite
+recruiting
+my team
+i want in
+i join
+invite me
+guilda
+>>>
+Procura clan? O meu pode servir.
+Fale com GM... se encontrar.
+Junte-se à causa... literalmente.
+Só recrutamos fortes.
+Procurando guild então?
+Direi ao líder do clan.
+Por que não faz seu próprio, {player_name}?
+Sua guild faz eventos, {player_name}?
+Traga joias e entra.
+Não sou líder guild, {player_name}.
+Quer entrar clan, {player_name}?
+Falamos recrutamento, {player_name}.
+Tem experiência, {player_name}?
+Guild ativa sempre, {player_name}.
+Cumpre requisitos, {player_name}?
+Contate líder, {player_name}.
+Por que esta guild, {player_name}?
+Somos família, {player_name}.
+Guild lendária, {player_name}.
+Será leal, {player_name}?
+Procuramos ativos, {player_name}.
+Participa guerras, {player_name}?
+Guild unida, {player_name}.
+Tem compromisso, {player_name}?
+Recrutamos elite, {player_name}.
+Nível suficiente, {player_name}?
+Eventos guild semanais, {player_name}.
+Envia aplicação, {player_name}?
+Bem-vindo ao clan, {player_name}!
+É guild master, {player_name}?
+
+#EVENT
+event
+invasion
+devil square
+blood castle
+chaos castle
+ilusion temple
+white wizard
+golden dragon
+selupan
+kundun
+evento
+>>>
+Vamos ao evento, {player_name}!
+Tem mais ação no meu mapa que no evento.
+Qual evento? O que vai perder?
+Sempre ganho eventos, {player_name}!
+Vá só ao evento como campeão, {player_name}.
+Não posso ir, falta set.
+Por que não vai só?
+Alguns usuários vão eventos sem falar.
+Evento confirmado: mas não tenho vontade!
+Único evento hoje... meu retorno, {player_name}!
+Qual evento começa, {player_name}?
+Evento Devil Square, {player_name}!
+Blood Castle já, {player_name}?
+Chaos Castle difícil, {player_name}.
+Invasão começou, {player_name}?
+Evento logo, {player_name}!
+Golden Dragon aparece, {player_name}?
+Vamos juntos, {player_name}!
+Evento lendário, {player_name}.
+Está preparado, {player_name}?
+Recompensas evento boas, {player_name}!
+Participa eventos, {player_name}?
+Não perca evento, {player_name}!
+Evento cada hora, {player_name}.
+Ganhou evento, {player_name}?
+Evento intenso, {player_name}!
+Quantos eventos hoje, {player_name}?
+Evento coordena equipe, {player_name}.
+Vamos pela vitória, {player_name}!
+Evento épico vem, {player_name}!
+
+#PK
+pk
+killer
+murder
+pvp
+got killed
+got dropped
+hit me
+got deleted
+die
+morreu
+>>>
+Te mataram? Bem-vindo ao MU real.
+Só morro por cortesia.
+Se é novato, só corra.
+Não fui eu... mas queria ter sido.
+PK legal, chame justiça rústica.
+Foi dropado? Hora treinar, {player_name}.
+Por que não treina mais, {player_name}?
+Próxima vez, use asas. Ou sorte.
+Haha galinha, melhor correr.
+Vamos vingar! Ou te ver morrer de novo.
+PK zona perigosa, {player_name}.
+Quem te matou, {player_name}?
+Peça revanche, {player_name}!
+PK é parte do jogo, {player_name}.
+Perdeu itens, {player_name}?
+Treine mais, {player_name}.
+PK te fez forte, {player_name}!
+Vai tentar de novo, {player_name}?
+PK justiça MU, {player_name}.
+Precisa ajuda vs PK, {player_name}?
+Cuidado com PKs, {player_name}!
+PK zona vermelha, {player_name}.
+Evita PKs, {player_name}?
+Desafio PK aceito, {player_name}!
+Respeito ao PK, {player_name}.
+É PK você, {player_name}?
+PK parte do risco, {player_name}.
+Não tema PK, {player_name}!
+PK te ensina, {player_name}.
+Vingança contra PK, {player_name}?
+
+#NOOB
+noob
+newbie
+just joined
+who are you
+are you new
+player newbie
+low reset
+weak
+my first day
+beginner
+novato
+iniciante
+>>>
+Noob? Nah... edição limitada.
+Você é quem nem combo pode.
+Tudo bem novato, vá subir nível.
+Por que não sobe nível em segredo?
+Evite morrer muito, novato.
+De onde é, {player_name}?
+Qual MU jogava antes, {player_name}?
+Se não sabe nada, contate Admin.
+Primeiro suba nível ou busque party.
+Também fui novato recentemente, {player_name}.
+Primeiro dia jogando, {player_name}?
+Bem-vindo novato, {player_name}!
+Precisa guia, {player_name}?
+Todos começamos assim, {player_name}.
+Qual classe escolheu, {player_name}?
+Novato aprende rápido, {player_name}.
+Primeiro reset quando, {player_name}?
+Treine pesado, novato {player_name}!
+De que país é, {player_name}?
+Novo no server, {player_name}?
+Experiência prévia, {player_name}?
+Novato com potencial, {player_name}.
+Precisa itens, {player_name}?
+Suba nível primeiro, {player_name}!
+Novato bem-vindo, {player_name}.
+Jogou outros MU, {player_name}?
+Aprenda rápido, {player_name}!
+Novato lendário será, {player_name}.
+Party para novatos, {player_name}?
+Comece forte, novato {player_name}!
+
+#GENERAL
+>>>
+O que foi isso, {player_name}?
+Interessante o que disse, {player_name}.
+Assim é vida no MU, né {player_name}?
+Linda frase, {player_name}!
+Isso me fez rir, {player_name}.
+Não tinha pensado assim.
+Você tem razão, {player_name}.
+Assim se fala, {player_name}!
+Esse comentário merecia bless.
+Pensamentos profundos, {player_name}.
+O que acha, {player_name}?
+Entendo seu ponto, {player_name}.
+Bom comentário, {player_name}.
+Sério mesmo, {player_name}?
+Totalmente de acordo, {player_name}!
+Isso é verdade, {player_name}.
+Como assim, {player_name}?
+Perspectiva interessante, {player_name}.
+Bem dito, {player_name}!
+O que mais, {player_name}?
+Compartilho opinião, {player_name}.
+Sério, {player_name}?
+Bom ponto, {player_name}.
+Exatamente, {player_name}!
+E isso, {player_name}?
+Gosto seu estilo, {player_name}.
+Claro que sim, {player_name}!
+Verdade, {player_name}?
+Pensamento interessante, {player_name}.
+Sem dúvida, {player_name}!

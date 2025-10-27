@@ -1,0 +1,478 @@
+#GREETING
+hello
+hi
+hey
+sup
+what's up
+greetings
+morning
+hey there
+howdy
+o/
+안녕
+여보세요
+>>>
+안녕, {player_name}!
+무슨 일이야, {player_name}?
+인사합니다, {player_name}!
+드디어 누가 인사하네!
+헤이 헤이, {player_name}!
+만나서 반가워, {player_name}!
+안녕, {player_name}!
+파밍하러 왔어 아니면 죽으러?
+똑바로 말해, {player_name}!
+말하는 데 오래 걸렸네!
+무슨 일이야, {player_name}!
+잘 지내? {player_name}?
+환영해, {player_name}!
+안녕 형제, {player_name}!
+모두 좋아? {player_name}?
+인사 전사, {player_name}!
+새로 왔어? {player_name}?
+좋은 놀라움, {player_name}!
+자주 와? {player_name}?
+드디어 누가 말하네!
+안녕 동료, {player_name}!
+뭔가 필요해? {player_name}?
+안녕 친구, {player_name}!
+모두 괜찮아? {player_name}?
+안녕, 환영해 {player_name}!
+어떻게 지내, {player_name}?
+안녕 형제, {player_name}!
+여기서 뭐 해, {player_name}?
+진심으로 인사드립니다, {player_name}!
+안녕, 만나서 반가워 {player_name}!
+
+#FAREWELL
+bye
+see ya
+i'm out
+later
+logging off
+closing
+leaving
+take care
+ciao
+goodbye
+안녕
+나중에
+>>>
+조심해, {player_name}!
+또 봐, {player_name}.
+행운을 빌어, {player_name}!
+다음에 봐, {player_name}.
+로그아웃 전에 리셋 잊지 마.
+안전한 여정, {player_name}.
+벌써 가네... 클래식.
+bless로 돌아오길 바라.
+PK 없이 죽지 마, {player_name}.
+가는구나, {player_name}!
+나중에 봐, {player_name}!
+곧 봐, {player_name}.
+안녕 전사, {player_name}!
+밖에서 조심해, {player_name}.
+빨리 돌아와, {player_name}!
+그럼 이만, {player_name}.
+게임에서 봐, {player_name}!
+잘 되길, {player_name}.
+안녕 친구, {player_name}!
+잘 쉬어, {player_name}.
+내일 봐, {player_name}!
+나중에 얘기하자, {player_name}.
+밖에서 행운을, {player_name}!
+다시 볼 수 있길, {player_name}.
+바이바이, {player_name}!
+잘 지내, {player_name}.
+안녕 동료, {player_name}!
+나중에 만나자, {player_name}.
+다른 날에 봐, {player_name}!
+정말 조심해, {player_name}!
+
+#SLANG
+what's up
+wassup
+yo
+sup dude
+how you doing
+whatcha up to
+yo bro
+where you at
+chillin
+just joined
+뭐해
+형
+>>>
+모두 좋아, {player_name}.
+항상 파밍 중, {player_name}.
+하하, 무슨 일이야?
+형? 여기 있어, {player_name}!
+뭐 해? 몹 죽이는 중.
+Devias에서 휴식 중.
+보고합니다, 형!
+항상 열심히 그라인드 중.
+풀 리셋 모드로.
+평소대로, 생존 중.
+뭐야, {player_name}?
+여기서 파밍 중.
+편하게, {player_name}!
+모두 편해, {player_name}.
+뭔데, {player_name}?
+그라인드 중, {player_name}.
+뭐야 형, {player_name}!
+그냥 플레이 중, {player_name}.
+뭐 해, {player_name}?
+여기 있어, {player_name}.
+모두 편해, {player_name}!
+어때, {player_name}?
+맵에 있어, {player_name}.
+평화롭게, {player_name}!
+모두 좋아 형, {player_name}?
+여기서 활동 중, {player_name}.
+뭐야 친구, {player_name}!
+그냥 파밍 중, {player_name}.
+여기 있어요, {player_name}!
+모두 조용해, {player_name}.
+
+#TRADE
+sell
+buy
+trade
+offer
+market
+bless
+chaos
+jewel
+zen
+deal
+팔아
+사요
+거래
+>>>
+{item_required} 있는 사람?
+{item_required} 필요해요, {item_reward} 있어요!
+{item_required} 찾아요, {item_reward} 제공!
+여기서 {item_required} 거래하세요!
+빠른 거래: {item_required} -> {item_reward}
+{item_required} 파는 사람?
+{item_required} 긴급 구매!
+{item_reward} 저렴하게 팔아요!
+{item_required}를 {item_reward}와 교환!
+{item_required} 거래하는 사람?
+{item_required} 좋은 가격!
+좋은 거래 제공!
+{item_reward} 필요해?
+항상 공정한 거래!
+{item_required} 즉시 구매!
+{item_required} 여분 있는 사람?
+다양한 아이템 팔아요!
+여기서 윈윈 거래!
+보석 파는 사람?
+좋은 가격 보장!
+{item_required} 절실히 찾습니다!
+정직한 거래!
+좋은 아이템 거래해?
+여러 개를 {item_required}와 교환!
+{item_required}에 {item_reward} 제공!
+젠 필요한 사람?
+빠르고 안전한 거래!
+품질 좋은 아이템 구매!
+저렴하게 팔아, {player_name}!
+지금 거래하는 사람?
+
+#HELP
+help
+how to
+stuck
+where to go
+reset
+level up
+doubt
+bug
+problem
+issue
+도와주세요
+어떻게
+>>>
+막혔어, {player_name}?
+믿음으로 리셋, {player_name}.
+가이드는 네 마음에... 아니면 /post.
+레벨업하려면, 널 죽이지 않을 걸 죽여.
+관리자에게 도움 요청해, {player_name}.
+나는 그냥 유저야... {player_name}.
++51917039407이 관리자 WhatsApp.
+두려워하지 말고 물어봐, {player_name}.
+MU 디스코드로 가, {player_name}.
+웹에서 관리자 찾을 수 있어.
+무슨 문제야, {player_name}?
+뭘 도와줄까, {player_name}?
+포럼에서 검색해, {player_name}.
+가이드 필요해? {player_name}?
+커뮤니티에 물어봐, {player_name}.
+의문 있어? {player_name}?
+명령어 봐, {player_name}.
+버그 찾았어, {player_name}?
+스탭에게 연락해, {player_name}.
+기술적 문제, {player_name}?
+가이드 읽어, {player_name}.
+어디서 막혔어, {player_name}?
+튜토리얼 검색해, {player_name}.
+리셋 필요해? {player_name}?
+구체적으로 물어봐, {player_name}.
+어디서 레벨업, {player_name}?
+위키 확인해, {player_name}.
+뭐가 필요해, {player_name}?
+도움 오고 있어, {player_name}!
+문제 해결됐어? {player_name}?
+
+#JOKES
+joke
+funny
+haha
+xD
+that was good
+you're funny
+lol
+clown
+laugh
+meme
+ㅋㅋㅋ
+웃겨
+>>>
+농담? 웃긴 경우만, {player_name}.
+그거 좋았어, {player_name}!
+하하, Kundun보다 웃겼어.
+광대 발견, {player_name}.
+웃기네, {player_name}!
+진지한 유저 존중해 주세요.
+웃음 원하면, 서커스 가, {player_name}.
+그거 좀 웃겼어, {player_name}.
+이제 네 차례, {player_name}.
+Devil Square 레벨 코미디!
+하하 무슨 표정, {player_name}.
+웃었어, {player_name}!
+좋은 농담, {player_name}.
+코미디언이네, {player_name}!
+하하 좋은 거, {player_name}.
+재밌네, {player_name}!
+웃겨 죽을 뻔, {player_name}.
+정말 웃겨, {player_name}!
+하나 더 얘기해, {player_name}.
+최고야, {player_name}!
+하하 좋아해, {player_name}.
+유머 감각, {player_name}!
+웃음 보장, {player_name}.
+타고난 코미디언, {player_name}!
+하하 서사적, {player_name}.
+하루를 밝혔어, {player_name}!
+좋은 유머 감각, {player_name}.
+보스 레벨 웃음, {player_name}!
+하하 계속해, {player_name}.
+순수 코미디, {player_name}!
+
+#GUILD
+guild
+clan
+alliance
+invite
+recruiting
+my team
+i want in
+i join
+invite me
+길드
+>>>
+클랜 찾아? 내 거 괜찮을지도.
+GM과 얘기해... 찾으면.
+우리 대의에 합류... 말그대로.
+강한 사람만 모집.
+길드 찾는 거야?
+클랜 리더에게 말할게.
+왜 네가 안 만들어, {player_name}?
+네 길드 이벤트 해? {player_name}?
+보석 가져오면 들어와.
+나는 길드 리더 아냐, {player_name}.
+클랜에 들어가고 싶어? {player_name}?
+모집 얘기하자, {player_name}.
+경험 있어? {player_name}?
+길드 항상 활동, {player_name}.
+요구사항 충족해? {player_name}?
+리더에게 연락해, {player_name}.
+왜 이 길드? {player_name}?
+우린 가족이야, {player_name}.
+전설의 길드, {player_name}.
+충성할 거야? {player_name}?
+활동하는 사람 찾아, {player_name}.
+전쟁 참여해? {player_name}?
+단합된 길드, {player_name}.
+헌신 있어? {player_name}?
+엘리트 모집, {player_name}.
+레벨 충분해? {player_name}?
+주간 길드 이벤트, {player_name}.
+신청서 보내? {player_name}?
+클랜에 환영해, {player_name}!
+길드 마스터야? {player_name}?
+
+#EVENT
+event
+invasion
+devil square
+blood castle
+chaos castle
+ilusion temple
+white wizard
+golden dragon
+selupan
+kundun
+이벤트
+>>>
+이벤트 가자, {player_name}!
+내 맵이 이벤트보다 액션 많아.
+무슨 이벤트? 질 거야?
+항상 이벤트 이겨, {player_name}!
+챔피언처럼 혼자 이벤트 가, {player_name}.
+못 가, 세트 부족해.
+왜 혼자 안 가?
+일부 유저는 말 없이 이벤트 가.
+이벤트 확인: 근데 가기 싫어!
+오늘 유일한 이벤트... 내 복귀, {player_name}!
+무슨 이벤트 시작해, {player_name}?
+Devil Square 이벤트, {player_name}!
+Blood Castle 벌써, {player_name}?
+Chaos Castle 어려워, {player_name}.
+침공 시작했어? {player_name}?
+이벤트 곧, {player_name}!
+Golden Dragon 나타나, {player_name}?
+함께 가자, {player_name}!
+전설의 이벤트, {player_name}.
+준비됐어? {player_name}?
+이벤트 보상 좋아, {player_name}!
+이벤트 참여해? {player_name}?
+이벤트 놓치지 마, {player_name}!
+매시간 이벤트, {player_name}.
+이벤트 이겼어? {player_name}?
+강렬한 이벤트, {player_name}!
+오늘 이벤트 몇 개, {player_name}?
+이벤트 팀 조화, {player_name}.
+승리 가자, {player_name}!
+서사적 이벤트 온다, {player_name}!
+
+#PK
+pk
+killer
+murder
+pvp
+got killed
+got dropped
+hit me
+got deleted
+die
+죽었어
+>>>
+죽었어? 진짜 MU에 환영.
+예의로만 죽어.
+초보면, 그냥 도망쳐.
+나 아냐... 근데 그랬으면 좋았을 텐데.
+합법 PK, 소박한 정의라 불러.
+드롭됐어? 훈련할 시간, {player_name}.
+왜 더 훈련 안 해, {player_name}?
+다음엔, 날개 써. 아님 운.
+하하 겁쟁이, 도망가는 게 나아.
+복수하자! 아님 다시 죽는 거 봐.
+PK 위험 구역, {player_name}.
+누가 죽였어? {player_name}?
+복수 요구해, {player_name}!
+PK는 게임의 일부, {player_name}.
+아이템 잃었어? {player_name}?
+더 훈련해, {player_name}.
+PK가 강하게 만들었어! {player_name}!
+다시 시도할 거야? {player_name}?
+PK MU 정의, {player_name}.
+PK 대항 도움 필요해? {player_name}?
+PK 조심해, {player_name}!
+PK 빨간 구역, {player_name}.
+PK 피해? {player_name}?
+PK 도전 수락, {player_name}!
+PK 존경해, {player_name}.
+PK는 너야? {player_name}?
+PK는 위험의 일부, {player_name}.
+PK 두려워하지 마, {player_name}!
+PK가 가르쳐, {player_name}.
+PK 대항 복수, {player_name}?
+
+#NOOB
+noob
+newbie
+just joined
+who are you
+are you new
+player newbie
+low reset
+weak
+my first day
+beginner
+초보
+뉴비
+>>>
+초보? 아니... 한정판.
+콤보도 못 하는 사람.
+괜찮아 초보, 레벨업 가.
+왜 비밀리에 레벨업 안 해?
+너무 많이 죽지 마, 초보.
+어디서 왔어, {player_name}?
+전에 무슨 MU 했어, {player_name}?
+아무것도 모르면, 관리자에게 연락.
+먼저 레벨업하거나 파티 찾아.
+나도 최근에 초보였어, {player_name}.
+첫날 플레이 중? {player_name}?
+환영해 초보, {player_name}!
+가이드 필요해? {player_name}?
+우리 모두 이렇게 시작했어, {player_name}.
+무슨 클래스 선택했어? {player_name}?
+초보는 빨리 배워, {player_name}.
+첫 리셋은 언제? {player_name}?
+열심히 훈련, 초보 {player_name}!
+무슨 나라에서 왔어? {player_name}?
+서버에 새로워? {player_name}?
+이전 경험은? {player_name}?
+잠재력 있는 초보, {player_name}.
+아이템 필요해? {player_name}?
+먼저 레벨업, {player_name}!
+초보 환영, {player_name}.
+다른 MU 했어? {player_name}?
+빨리 배워, {player_name}!
+전설의 초보 될 거야, {player_name}.
+초보용 파티, {player_name}?
+강하게 시작, 초보 {player_name}!
+
+#GENERAL
+>>>
+그게 뭐였어, {player_name}?
+흥미로운 말, {player_name}.
+그게 MU 인생이지, {player_name}?
+좋은 문구, {player_name}!
+웃겼어, {player_name}.
+그렇게 생각 안 했는데.
+맞아, {player_name}.
+그렇게 말하는 거야, {player_name}!
+그 코멘트는 bless 받을 만해.
+깊은 생각, {player_name}.
+어떻게 생각해? {player_name}?
+네 요점 이해해, {player_name}.
+좋은 코멘트, {player_name}.
+정말? {player_name}?
+완전 동의, {player_name}!
+그게 맞아, {player_name}.
+어떻게? {player_name}?
+흥미로운 관점, {player_name}.
+잘 말했어, {player_name}!
+또 뭐야? {player_name}?
+의견 공유해, {player_name}.
+진짜? {player_name}?
+좋은 요점, {player_name}.
+정확히, {player_name}!
+그거, {player_name}?
+스타일 좋아해, {player_name}.
+당연하지, {player_name}!
+진짜? {player_name}?
+흥미로운 생각, {player_name}.
+의심 없이, {player_name}!

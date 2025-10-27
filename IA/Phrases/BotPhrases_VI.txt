@@ -1,0 +1,508 @@
+; BotPhrases.txt - Tiếng Việt
+; Các cụm từ mà bot nói trong trò chơi
+; Định dạng: #DANH MỤC, xác suất
+; Sau đó là các cụm từ, mỗi dòng một cụm
+; Hệ thống xác suất được tối ưu hóa cho ít nhất 1 cụm từ mỗi danh mục mỗi giờ
+
+; Xác suất cơ bản cho các danh mục động
+#MAP_BASE_PROB,20
+#CLASS_BASE_PROB,15
+
+; --- DANH MỤC CHUNG ---
+#GENERAL,8
+Chào mọi người
+Xin chào cộng đồng
+Có ai ở đây không?
+Chào các chiến binh
+Mọi thứ thế nào?
+Đang tập luyện chăm chỉ
+Đang tìm kiếm hành động
+Mọi người thế nào?
+Sẵn sàng cho cuộc phiêu lưu
+Ở đây và sẵn sàng
+Máy chủ tốt quá
+Ai đang hoạt động?
+Có mặt trên bản đồ
+Đang farm yên tĩnh
+Có người mới không?
+Tôi đã kết nối
+Năng lượng tốt hôm nay
+Ai đang online?
+Chào từ nhà
+Hãy đi tập luyện
+Ai nói tiếng Việt?
+Cộng đồng thế nào
+Vừa mới đến
+Máy chủ thế nào?
+Mọi thứ ở đây đều tốt
+Đi hết mình nào
+Ai muốn trò chuyện?
+Chào buổi chiều mọi người
+Đang hoạt động trong trò chơi
+Có chuyện gì vậy?
+Ở đây kiên định
+Mọi thứ yên tĩnh?
+Luôn có mặt
+Có người Việt không?
+Chào thân mến
+
+#NEAR_REAL_PLAYER,18
+Chào bạn!
+Có chuyện gì?
+Lời chào!
+Này, khỏe không?
+Chào!
+Mọi thứ tốt?
+Chào đồng đội
+Điều gì đưa bạn đến đây?
+Vui mừng gặp bạn
+Chào mừng!
+Khỏe không?
+Thật bất ngờ gặp bạn!
+Mọi thứ ổn?
+Này, bạn đang làm gì?
+Chào đồng nghiệp
+Bạn thường đến không?
+Này, chiến binh tuyệt vời!
+Cần gì không?
+Chúc may mắn bạn
+Bạn sẽ ở lại?
+Chào anh bạn!
+Bạn mới à?
+Bạn đến từ đâu?
+Này, thiết bị tốt
+Bạn cấp mấy?
+Vũ khí tốt quá!
+Đến farm à?
+Chào, bạn nghe thấy tôi không?
+Lớp tốt!
+Bạn chơi thường xuyên?
+
+#IN_PARTY,22
+Party tuyệt vời!
+Đi nào đội!
+Mọi người làm tốt
+Tiếp tục!
+Đội tuyệt vời!
+Cùng nhau chúng ta mạnh hơn
+Sẵn sàng thêm?
+Hoàn hảo, tiếp tục nào
+Đi lấy thêm EXP
+Nhịp độ tốt các bạn
+Phối hợp tốt
+Đây là tinh thần đội nhóm!
+Party huyền thoại
+Tiếp tục thêm chút nữa?
+Đồng bộ xuất sắc
+Mọi người làm tốt
+Đi đánh boss đó!
+Party hiệu quả
+Thích nhóm này
+Tiếp tục farm!
+Lãnh đạo tốt
+Ai cần buff?
+Party chất lượng
+Mọi người hợp tác tốt
+Đi lấy thêm!
+Không ai bị bỏ lại
+Hóa học đội tốt
+Tiếp tục thống trị!
+Party cân bằng
+Lặp lại ngày mai?
+Mọi người cống hiến 100%
+Party cam kết
+
+#PVP,28
+Chiến tốt!
+Thật căng thẳng
+Trận đấu đẹp
+Bạn mạnh!
+Chiến đấu tuyệt vời
+Tôn trọng chiến binh
+Ấn tượng!
+Suýt đánh bại tôi
+Quyết đấu tốt
+Đó là sử thi
+Kỹ thuật tốt
+Làm tôi đổ mồ hôi!
+Chiến đấu công bằng
+Bạn là đối thủ tốt
+Combo khủng!
+Suýt giết tôi
+Chiến lược tốt
+Phản xạ tuyệt!
+Chiến đấu cân bằng
+Thời điểm tốt!
+Tôn trọng skill của bạn
+Gần như hoàn hảo!
+Quyết đấu đáng nhớ
+Trang bị gì mà!
+Phòng thủ tốt
+Suýt thắng!
+PVP tôn trọng
+Muốn trả thù!
+Dùng skill tốt
+Bạn nhanh!
+Chiến đấu sạch
+Quyết đấu danh dự
+Bắt tốt!
+Một trận nữa?
+Kinh nghiệm tốt
+
+#TRADE,25
+Tìm {item_required}, giao dịch với tôi!
+Cần {item_required}, giao dịch tốt đang chờ!
+Mua {item_required} với {item_reward}!
+Trao đổi {item_required} -> {item_reward}!
+WTB: {item_required} = {item_reward}
+Ai có {item_required}?
+Cần {item_required}, có {item_reward}!
+{item_required} cần, {item_reward} đề nghị!
+Trao đổi {item_required} của bạn ở đây!
+Giao dịch nhanh: {item_required} -> {item_reward}
+Mua {item_required} gấp
+Bán {item_reward} rẻ
+Ai trao đổi {item_required}?
+Giá tốt cho {item_required}
+Đổi {item_required} lấy {item_reward}
+Đề nghị giao dịch tốt cho {item_required}
+Giao dịch công bằng: {item_required}
+Ai bán {item_required}?
+Tìm {item_required} tuyệt vọng
+Giao dịch trung thực ở đây
+Ai cần {item_reward}?
+Mua {item_required} ngay lập tức
+Giao dịch win-win: {item_required}
+Trao đổi ngọc không?
+Tìm đồ tốt
+Ai bán {item_required}?
+Giá tốt đảm bảo
+Luôn giao dịch công bằng
+Ai có {item_required} dư?
+Trao đổi nhiều đồ
+
+#MORNING,12
+Chào buổi sáng!
+Bắt đầu ngày tuyệt vời
+Buổi sáng hoàn hảo để tập
+Sẵn sàng cho ngày
+Năng lượng tối đa
+Chào buổi sáng mọi người!
+Buổi sáng hiệu suất
+Bắt đầu với mọi thứ
+Ngày mới, mục tiêu mới!
+Chào buổi sáng cộng đồng
+Bắt đầu grind
+Buổi sáng farm
+Ngày hoàn hảo!
+Chào buổi sáng chiến binh
+Cà phê và MU, hoàn hảo
+Bắt đầu hành trình
+Chào buổi sáng!
+Bắt đầu sớm
+Ngày chiến thắng
+Đi nào!
+Buổi sáng sử thi đến
+
+#AFTERNOON,12
+Buổi chiều tốt lành
+Buổi chiều hiệu suất
+Thời gian tập thêm
+Còn thời gian
+Duy trì năng lượng
+Buổi chiều hành động
+Buổi chiều tốt lành!
+Giữa ngày
+Tiếp tục kiên định
+Buổi chiều hoàn hảo
+Buổi chiều thế nào?
+Buổi chiều farm
+Hiệu suất cho đến nay
+Tiếp tục tập!
+Buổi chiều yên tĩnh
+Thời gian lên cấp
+Buổi chiều tốt lành mọi người!
+Buổi chiều grind
+Tiếp tục hoạt động
+Sự kiện buổi chiều?
+Buổi chiều huyền thoại
+
+#NIGHT,12
+Buổi tối tốt lành
+Đêm phiêu lưu
+Đêm còn trẻ
+Thời gian hành động
+Tập đêm
+Buổi tối tốt lành!
+Đêm sử thi
+Giờ vàng
+Đêm là của chúng ta!
+Đêm farm
+Ai còn thức?
+Đêm huyền thoại
+Buổi tối tốt lành chiến binh
+Đêm hiệu suất
+Tiếp tục thức!
+Đêm chiến thắng
+Thức cả đêm?
+Đêm grind
+Buổi tối tốt lành cộng đồng!
+Đêm căng thẳng
+Thời gian sự kiện
+
+; --- CỤM TỪ ĐẶC THÙ LỚP ---
+#CLASS_0,15
+Nova của tôi đang nạp! Chạy đi, noob!
+Gậy của tôi là sức mạnh thuần túy, bạn.
+Evil Spirit hay Aquabeam? Thật khó khăn.
+Phép thuật của tôi dữ dội!
+Teleport là sở thích của tôi, ok?
+Cảm nhận Ice Storm của tôi, hề!
+Ma thuật trong máu tôi.
+Meteor rơi với cơn thịnh nộ!
+Ngọn lửa hủy diệt!
+Ice arrow đóng băng tất cả!
+Dark Wizard tối cao ở đây
+Mana của tôi không bao giờ cạn
+Thấy Flame Strike của tôi chưa?
+Soul Barrier luôn active
+Energy master class
+Tôi là ma thuật thuần túy!
+Wizard từ đầu
+Sức mạnh của tôi vô hạn
+Phép thuật ưu tú
+Pháp sư huyền thoại!
+Lớp ma thuật thống trị
+Ai cần kiếm?
+Nova one-shot đến
+Ice Storm khu vực lớn
+Meteor luôn chí mạng
+Teleport chiến lược
+Mana shield kích hoạt
+DW mãi mãi!
+Wizard không bao giờ chết
+Ma thuật > Sức mạnh vật lý
+
+#CLASS_16,15
+Bằng lưỡi kiếm, đồng chí!
+Twisting Slash của tôi làm bạn chóng mặt!
+Combo? Chuẩn bị đau đớn!
+Áo giáp này đã thấy ngàn trận.
+BK không bao giờ lùi! Không bao giờ!
+Death Stab! Thẳng vào tim!
+Ngựa của tôi nhanh hơn nỗi sợ hãi của bạn.
+Sức mạnh là tên thứ hai của tôi, nhớ đấy!
+Dragon Slayer? Dễ dàng với tôi!
+Truyền thuyết của tôi được rèn giũa với mỗi chiến thắng.
+Blade Knight không thể cản
+Kiếm và khiên, kết hợp hoàn hảo
+Tank tuyến đầu
+Combo của tôi đau!
+BK không bao giờ từ bỏ
+Chiến binh ưu tú
+Phòng thủ không thể xuyên thủng
+Death Stab chí mạng!
+Hiệp sĩ danh dự
+Tôi là bức tường!
+BK từ season 1
+Tank class master
+Áo giáp của tôi là huyền thoại
+Combo vô hạn
+Cyclone tàn phá!
+Tinh thần chiến binh mạnh mẽ
+PVP BK bất khả chiến bại
+Sức mạnh cắt tối đa!
+Bậc thầy kiếm ở đây
+Hiệp sĩ của vương quốc
+
+#CLASS_32,15
+Mũi tên của tôi không bao giờ trượt.
+Sự nhanh nhẹn là sức mạnh của tôi.
+Multishot sẵn sàng bắn!
+Độ chính xác tiên là vô song.
+Ice Arrow! Đóng băng tại chỗ!
+Từ rừng tôi mang công lý đến.
+Cung của tôi hát bài hát chiến thắng.
+Tốc độ và độ chính xác kết hợp.
+Bắn xuyên thấu đang đến!
+Thiên nhiên dẫn mũi tên của tôi.
+Elf cung thủ tối cao
+Tốc độ là ưu điểm của tôi
+Triple Shot sẵn sàng!
+Cung thủ tiên ưu tú
+Mũi tên của tôi chết người
+Elf mãi mãi
+Bắn xuyên thấu chí mạng
+Không bao giờ trượt mục tiêu!
+Sự nhanh nhẹn tối đa
+Energy elf mạnh mẽ
+Ice Arrow đóng băng!
+Cung thủ huyền thoại
+Khoảng cách là đồng minh của tôi
+Multishot khu vực!
+Elf thợ săn master
+Rừng là nhà của tôi
+Độ chính xác hoàn hảo
+Mưa tên đến!
+Elf cung thủ mãi mãi
+Sức mạnh thiên nhiên chảy
+
+#CLASS_48,15
+Magic Gladiator sẵn sàng hành động!
+Kiếm và ma thuật hài hòa hoàn hảo.
+Twisting Slash với sức mạnh ma thuật!
+Tốt nhất của hai thế giới.
+Kiếm của tôi lóe lên với năng lượng.
+Fire Slash cắt và đốt!
+Lớp quyết đấu, luôn sẵn sàng.
+Cyclone phá hủy tất cả!
+Death Stab với tăng cường ma thuật!
+Pháp sư cận chiến thống trị!
+MG hybrid tối cao
+Ma thuật + Kiếm = Chiến thắng
+Power Slash ma thuật!
+Gladiator bất khả chiến bại
+Pháp sư cận chiến master
+Fire Slash đốt!
+MG combo chết người
+Tính hai mặt hoàn hảo
+Spiral Slash!
+Chiến binh ma thuật ưu tú
+Tính linh hoạt là chìa khóa
+MG cho PVP!
+Lớp hybrid tốt nhất
+Cyclone + Ma thuật!
+Gladiator huyền thoại
+Tốt nhất của cả hai!
+MG từ đầu
+Sự kết hợp chiến binh pháp sư
+MG không thể cản!
+Sức mạnh ma thuật cận chiến
+
+#CLASS_64,15
+Dark Lord chỉ huy quân đội!
+Quạ của tôi mang cái chết từ trên cao.
+Fire Burst mở đường!
+Khả năng lãnh đạo là món quà của tôi.
+Sát thương chí mạng là chuyên môn của tôi.
+Ngựa tối đi vào chiến đấu!
+Chỉ huy lực lượng của bạn, phá hủy kẻ thù!
+Fire Scream vang vọng trên chiến trường!
+Chúa tể của bóng tối và sức mạnh!
+Pets của tôi làm việc bẩn.
+Dark Lord tối cao
+Quân đội pet không thể cản
+Sát thương chí mạng cao!
+Chúa tể bóng tối
+Chỉ huy master class
+Ngựa tối lao tới!
+Bộ sưu tập pet hoàn chỉnh
+Fire Burst khu vực!
+DL lãnh đạo mạnh
+Tấn công quạ chết người!
+Lord mãi mãi
+Chuyên gia chí mạng
+Triệu hồi Dark Spirit!
+Chỉ huy tất cả lực lượng
+Sức mạnh Lord tối đa!
+Tấn công pet phối hợp
+DL cho săn boss
+Fire Scream vang vọng!
+Chúa tể của vương quốc
+Bậc thầy bóng tối!
+
+#CLASS_80,15
+Summoner triệu hồi sức mạnh cổ đại!
+Triệu hồi của tôi chiến đấu bên tôi.
+Bùng nổ sức mạnh nguyên tố!
+Ma thuật chảy trong huyết quản tôi.
+Mưa sao băng đến!
+Sự tinh thông phép thuật ở mức cao nhất.
+Ma thuật cổ đại thức tỉnh!
+Chain lightning đánh tất cả!
+Triệu hồi sức mạnh thiên nhiên!
+Ma thuật của tôi không có giới hạn.
+Summoner master chiều không
+Triệu hồi ở khắp nơi!
+Sức mạnh nguyên tố tối cao
+Bùng nổ lớn!
+Quân đội triệu hồi sẵn sàng
+Ma thuật tràn ngập
+Phép thuật cổ đại!
+Lớp Summoner ưu tú
+Sức mạnh chiều không!
+Triệu hồi không bao giờ chết
+Sự tinh thông ma thuật!
+Summoner cho farm
+Chain lightning!
+Master nguyên tố
+Tăng cường triệu hồi!
+Sức mạnh thiên nhiên mạnh
+Summoner tối cao!
+Kiểm soát chiều không
+Ma thuật vô hạn!
+Bản build triệu hồi tốt nhất
+
+#CLASS_96,15
+Rage Fighter giải phóng cơn thịnh nộ!
+Nắm đấm của tôi xuyên qua giáp!
+Tinh thông vũ khí cận chiến!
+Dragon Roar rung chuyển đất!
+Phoenix shot cháy sáng!
+Chuyên gia cận chiến sẵn sàng!
+Kinh nghiệm chiến đấu vô song!
+Dragon Slayer trong tay tôi!
+Vũ khí kép, sát thương kép!
+Tinh thần chiến binh không bao giờ chết!
+RF chế độ rage active
+Nắm đấm của cơn thịnh nộ!
+Weapon master class
+Sức mạnh Dragon Roar!
+Chuyên gia cận chiến
+Phoenix tăng lên!
+RF vua cận chiến
+Master vũ khí kép!
+Rage không bao giờ kết thúc
+Tinh thần chiến binh!
+RF tank build
+Combo breaker!
+Master võ thuật
+RF ưu tú!
+Vũ khí nắm đấm chết người
+RF không thể cản!
+Người chiến thắng cận chiến
+Chế độ rage bật!
+Chiến binh mãi mãi
+Nắm đấm huyền thoại!
+
+#CLASS_112,15
+Grow Lancer lao tới!
+Ngọn giáo của tôi xuyên thủng mọi phòng thủ!
+Spiral Slash tàn phá kẻ thù!
+Chiến đấu cưỡi ngựa là nghệ thuật của tôi!
+Dragon Spear giải phóng!
+Hiệp sĩ của vương quốc!
+Lao với toàn lực!
+Đánh giáo chí mạng!
+Sự thống trị kỵ binh!
+Ngựa của tôi và tôi là một!
+GL master kỵ binh
+Xuyên thủng giáo!
+Chiến đấu cưỡi ngựa pro
+Spiral tàn phá!
+Lớp giáo hiệp sĩ ưu tú
+Dragon Spear chí mạng!
+Lao GL chết người
+Master giáo!
+Thống trị kỵ binh
+Hiệp sĩ cưỡi ngựa!
+GL cho PVP
+Combo giáo!
+Chiến binh cưỡi ngựa
+GL không thể cản!
+Giáo hiệp sĩ huyền thoại
+Tấn công lao!
+Hiệp sĩ danh dự
+Sức mạnh GL tối đa!
+Chuyên gia kỵ binh
+Giáo không bao giờ trượt!

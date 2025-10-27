@@ -1,0 +1,989 @@
+; BotPhrases.txt - Deutsch
+; Sätze, die Bots während des Spiels sagen
+; Format: #KATEGORIE, Wahrscheinlichkeit
+; Dann die Sätze, einer pro Zeile
+; Wahrscheinlichkeitssystem optimiert für mindestens 1 Satz pro Kategorie pro Stunde
+
+; Basis-Wahrscheinlichkeiten für dynamische Kategorien
+#MAP_BASE_PROB,20
+#CLASS_BASE_PROB,15
+
+; --- ALLGEMEINE KATEGORIEN ---
+#GENERAL,8
+Guten Tag allerseits
+Hallo Community
+Ist jemand hier?
+Grüße Krieger
+Wie läuft alles?
+Hart trainieren
+Suche Action
+Wie geht es allen?
+Bereit für Abenteuer
+Hier und bereit
+Was für ein guter Server
+Jemand aktiv?
+Auf der Karte anwesend
+Ruhiges Farmen
+Gibt es neue Leute?
+Ich bin verbunden
+Gute Energie heute
+Wer ist online?
+Grüße von zu Hause
+Lass uns trainieren
+Spricht jemand Deutsch?
+Wie ist die Community
+Gerade angekommen
+Wie ist der Server?
+Alles gut hier
+Los geht's
+Jemand zum Chatten?
+Guten Nachmittag Leute
+Aktiv im Spiel
+Was geht?
+Hier fest
+Alles ruhig?
+Immer präsent
+Gibt es Deutsche?
+Herzliche Grüße
+
+#NEAR_REAL_PLAYER,18
+Hallo Freund!
+Was geht?
+Grüße!
+Hey, wie geht's?
+Hallo da!
+Alles gut?
+Hallo Kamerad
+Was bringt dich hierher?
+Schön dich zu sehen
+Willkommen!
+Wie geht's?
+Was für eine Überraschung dich zu sehen!
+Alles in Ordnung?
+Hey, was machst du?
+Hallo Kollege
+Kommst du oft?
+Hey was für ein Krieger!
+Brauchst du etwas?
+Viel Glück Freund
+Bleibst du?
+Hallo Bruder!
+Bist du neu?
+Woher kommst du?
+Hey, gute Ausrüstung
+Welches Level hast du?
+Was für gute Waffen!
+Kommst du zum Farmen?
+Hallo, hörst du mich?
+Gute Klasse!
+Spielst du oft?
+
+#IN_PARTY,22
+Ausgezeichnete Party!
+Los Team!
+Gute Arbeit alle
+Macht weiter so!
+Großes Team!
+Zusammen sind wir stärker
+Bereit für mehr?
+Perfekt, weiter so
+Los für mehr EXP
+Gutes Tempo Jungs
+Gute Koordination
+Das ist Teamarbeit!
+Legendäre Party
+Machen wir noch ein bisschen weiter?
+Ausgezeichnete Synchronisation
+Alle machen gute Arbeit
+Los für diesen Boss!
+Effiziente Party
+Ich mag diese Gruppe
+Macht weiter mit dem Farmen!
+Gute Führung
+Braucht jemand Buff?
+Qualitäts-Party
+Alle kooperieren gut
+Los für mehr!
+Niemand bleibt zurück
+Gute Team-Chemie
+Wir dominieren weiter!
+Ausgewogene Party
+Wiederholen wir morgen?
+Alle geben 100%
+Engagierte Party
+
+#PVP,28
+Guter Kampf!
+Das war intensiv
+Schöne Schlacht
+Du bist stark!
+Großer Kampf
+Respekt Krieger
+Beeindruckend!
+Fast hast du mich besiegt
+Gutes Duell
+Das war episch
+Gute Technik
+Du hast mich schwitzen lassen!
+Fairer Kampf
+Du bist ein guter Gegner
+Gewaltiger Combo!
+Fast hast du mich getötet
+Gute Strategie
+Was für Reflexe!
+Ausgeglichener Kampf
+Gutes Timing!
+Respekt dein Skill
+Fast perfekt!
+Unvergessliches Duell
+Was für eine Ausrüstung!
+Gute Verteidigung
+Fast hätte ich gewonnen!
+PVP mit Respekt
+Ich will Revanche!
+Guter Gebrauch von Skills
+Du bist schnell!
+Sauberer Kampf
+Ehrenvolles Duell
+Du hast mich gut erwischt!
+Noch ein Kampf?
+Gute Erfahrung
+
+#TRADE,25
+Suche {item_required}, tausch mit mir!
+Brauche {item_required}, guter Deal wartet!
+Kaufe {item_required} für {item_reward}!
+Tausche {item_required} -> {item_reward}!
+WTB: {item_required} = {item_reward}
+Hat jemand {item_required}?
+Brauche {item_required}, habe {item_reward}!
+{item_required} gesucht, {item_reward} angeboten!
+Tausche dein {item_required} hier!
+Schneller Trade: {item_required} -> {item_reward}
+Kaufe {item_required} dringend
+Verkaufe {item_reward} günstig
+Tauscht jemand {item_required}?
+Guter Preis für {item_required}
+Tausche {item_required} gegen {item_reward}
+Biete guten Deal für {item_required}
+Fairer Trade: {item_required}
+Wer verkauft {item_required}?
+Suche {item_required} verzweifelt
+Ehrlicher Trade hier
+Braucht jemand {item_reward}?
+Kaufe {item_required} sofort
+Win-Win-Trade: {item_required}
+Tauscht ihr Juwelen?
+Suche gute Items
+Verkauft jemand {item_required}?
+Guter Preis garantiert
+Immer fairer Trade
+Wer hat extra {item_required}?
+Tausche verschiedene Items
+
+#MORNING,12
+Guten Morgen!
+Großartiger Start in den Tag
+Perfekter Morgen zum Trainieren
+Bereit für den Tag
+Energie am Maximum
+Guten Morgen allerseits!
+Produktiver Morgen
+Mit allem anfangen
+Neuer Tag, neue Ziele!
+Guten Morgen Community
+Starte den Grind
+Morgen zum Farmen
+Perfekter Tag!
+Guten Morgen Krieger
+Kaffee und MU, perfekt
+Starte die Reise
+Guten Morgen!
+Früh anfangen
+Tag des Sieges
+Los geht's!
+Epischer Morgen kommt
+
+#AFTERNOON,12
+Guten Nachmittag
+Produktiver Nachmittag
+Zeit mehr zu trainieren
+Es ist noch Zeit
+Energie aufrechterhalten
+Nachmittag der Action
+Guten Nachmittag!
+Mitte des Tages
+Wir bleiben fest
+Perfekter Nachmittag
+Wie läuft der Nachmittag?
+Nachmittag zum Farmen
+Bisher produktiv
+Lass uns weiter trainieren!
+Ruhiger Nachmittag
+Zeit Level aufzusteigen
+Guten Nachmittag Leute!
+Nachmittag zum Grinden
+Wir bleiben aktiv
+Irgendein Event nachmittags?
+Legendärer Nachmittag
+
+#NIGHT,12
+Guten Abend
+Nacht der Abenteuer
+Die Nacht ist jung
+Zeit für Action
+Nächtliches Training
+Guten Abend!
+Epische Nacht
+Prime Time
+Die Nacht gehört uns!
+Nacht zum Farmen
+Wer ist noch wach?
+Legendäre Nacht
+Guten Abend Krieger
+Produktive Nacht
+Wir bleiben wach!
+Nacht des Sieges
+Die ganze Nacht?
+Nacht zum Grinden
+Guten Abend Community!
+Intensive Nacht
+Event-Zeit
+
+; --- KLASSENSPEZIFISCHE SÄTZE ---
+#CLASS_0,15
+Mein Nova lädt! Lauft, Noobs!
+Mein Stab ist pure Macht, Freund.
+Evil Spirit oder Aquabeam? Was für ein Dilemma.
+Meine Zauber sind wild!
+Teleport ist mein Hobby, okay?
+Spürt meinen Ice Storm, Clown!
+Magie ist in meinem Blut.
+Meteor fällt mit Wut!
+Flamme der Zerstörung!
+Ice Arrow friert alles ein!
+Dark Wizard oberster hier
+Mein Mana endet nie
+Hast du meinen Flame Strike gesehen?
+Soul Barrier immer aktiv
+Energy Master Class
+Ich bin pure Magie!
+Wizard von Anfang an
+Meine Macht ist grenzenlos
+Elite-Zauber
+Legendärer Magier!
+Magische Klasse dominant
+Wer braucht Schwerter?
+Nova One-Shot kommt
+Ice Storm Massenbereich
+Meteor kritisch immer
+Teleport strategisch
+Mana Shield aktiviert
+DW für immer!
+Wizard stirbt nie
+Magie > Physische Kraft
+
+#CLASS_16,15
+Bei der Klinge des Schwertes, Kamerad!
+Mein Twisting Slash macht dich schwindelig!
+Ein Combo? Bereite dich auf Schmerz vor!
+Diese Rüstung hat tausend Schlachten gesehen.
+Ein BK zieht sich nie zurück! Nie!
+Death Stab! Direkt ins Herz!
+Mein Pferd ist schneller als deine Angst.
+Kraft ist mein zweiter Name, merk dir das!
+Dragon Slayer? Kinderspiel für mich!
+Meine Legende wird mit jedem Sieg geschmiedet.
+Blade Knight unaufhaltsam
+Schwert und Schild, perfekte Kombination
+Panzer der ersten Reihe
+Meine Combos tun weh!
+BK gibt nie auf
+Elite-Krieger
+Undurchdringliche Verteidigung
+Death Stab kritisch!
+Ehrenritter
+Ich bin die Mauer!
+BK seit Season 1
+Tank-Klasse Master
+Meine Rüstung ist legendär
+Unendliche Combos
+Verheerender Cyclone!
+Kriegergeist stark
+PVP BK unschlagbar
+Maximale Schnittleistung!
+Schwertmeister hier
+Ritter des Reiches
+
+#CLASS_32,15
+Meine Pfeile verfehlen nie ihr Ziel.
+Beweglichkeit ist meine Stärke.
+Multishot bereit zu schießen!
+Elfenpräzision ist unvergleichlich.
+Ice Arrow! Am Ort eingefroren!
+Aus dem Wald bringe ich Gerechtigkeit.
+Mein Bogen singt das Lied des Sieges.
+Geschwindigkeit und Präzision kombiniert.
+Durchdringender Schuss unterwegs!
+Die Natur leitet meine Pfeile.
+Elf-Bogenschützin suprem
+Geschwindigkeit ist mein Vorteil
+Triple Shot bereit!
+Elite-Elfenbogenschützin
+Meine Pfeile sind tödlich
+Elf seit jeher
+Durchdringender Schuss kritisch
+Niemals Ziel verfehlt!
+Maximale Beweglichkeit
+Energy Elf mächtig
+Ice Arrow friert ein!
+Legendäre Bogenschützin
+Distanz ist mein Verbündeter
+Multishot Bereich!
+Elf-Jägerin Master
+Wald ist mein Zuhause
+Perfekte Präzision
+Pfeilregen kommt!
+Elf-Bogenschützin für immer
+Naturkraft fließt
+
+#CLASS_48,15
+Magic Gladiator bereit für Action!
+Schwert und Magie in perfekter Harmonie.
+Twisting Slash mit magischer Kraft!
+Das Beste aus zwei Welten.
+Mein Schwert knistert vor Energie.
+Fire Slash schneidet und brennt!
+Duellanten-Klasse, immer bereit.
+Cyclone verwüstet alles!
+Death Stab mit magischer Verstärkung!
+Nahkampfmagier dominiert!
+MG Hybrid suprem
+Magie + Schwert = Sieg
+Magischer Power Slash!
+Unbesiegbarer Gladiator
+Nahkampfmagier Master
+Fire Slash brennt!
+MG Combo tödlich
+Perfekte Dualität
+Spiral Slash!
+Magischer Krieger Elite
+Vielseitigkeit ist Schlüssel
+MG für PVP!
+Beste Hybrid-Klasse
+Cyclone + Magie!
+Legendärer Gladiator
+Das Beste von beidem!
+MG von Anfang an
+Kriegermagier-Fusion
+Unaufhaltsamer MG!
+Magische Nahkampfkraft
+
+#CLASS_64,15
+Dark Lord kommandiert Armeen!
+Mein Rabe bringt Tod von oben.
+Fire Burst bahnt den Weg!
+Führung ist meine Gabe.
+Kritischer Schaden ist meine Spezialität.
+Dunkles Pferd zieht in die Schlacht!
+Befehle deine Kräfte, zerstöre deine Feinde!
+Fire Scream hallt über das Schlachtfeld!
+Herr der Dunkelheit und Macht!
+Meine Pets machen die Drecksarbeit.
+Dark Lord suprem
+Pet-Armee unaufhaltsam
+Hoher kritischer Schaden!
+Herr der Dunkelheit
+Kommando Master Class
+Angriff dunkles Pferd!
+Pet-Sammlung komplett
+Fire Burst Bereich!
+DL-Führung stark
+Rabenenangriff tödlich!
+Lord seit jeher
+Kritischer Spezialist
+Dark Spirit Beschwörung!
+Befehle alle Kräfte
+Lord-Macht maximal!
+Koordinierter Pet-Angriff
+DL für Boss-Jagd
+Fire Scream Echo!
+Herr des Reiches
+Meister der Dunkelheit!
+
+#CLASS_80,15
+Summoner ruft uralte Kräfte!
+Meine Beschwörungen kämpfen an meiner Seite.
+Explosion elementarer Kraft!
+Magie fließt durch meine Adern.
+Meteorregen kommt!
+Zauberbeherrschung auf höchstem Niveau.
+Uralte Magie erwacht!
+Chain Lightning trifft alle!
+Beschwöre die Kräfte der Natur!
+Meine Magie kennt keine Grenzen.
+Summoner Dimensions-Meister
+Beschwörungen überall!
+Elementare Macht suprem
+Massive Explosion!
+Beschwörungs-Armee bereit
+Magie-Überlauf
+Uralte Zauber!
+Elite-Summoner-Klasse
+Dimensionale Kraft!
+Beschwörungen sterben nie
+Magische Meisterschaft!
+Summoner fürs Farmen
+Chain Lightning!
+Elementarer Meister
+Beschwörungs-Boost!
+Naturkraft stark
+Supremer Summoner!
+Dimensionale Kontrolle
+Unendliche Magie!
+Beste Beschwörungs-Builds
+
+#CLASS_96,15
+Rage Fighter entfesselt Wut!
+Meine Fäuste durchbrechen Rüstung!
+Meisterschaft im Nahkampf!
+Dragon Roar erschüttert die Erde!
+Phoenix Shot brennt hell!
+Nahkampf-Spezialist bereit!
+Unvergleichliche Kampferfahrung!
+Dragon Slayer in meinen Händen!
+Doppelwaffen, doppelter Schaden!
+Kämpfergeist stirbt nie!
+RF Rage-Modus aktiv
+Fäuste der Wut!
+Waffenmeister-Klasse
+Dragon Roar Kraft!
+Nahkampf-Spezialist
+Phoenix erhebt sich!
+RF Nahkampf-König
+Doppelführungs-Meister!
+Rage endet nie
+Kämpfergeist!
+RF Tank-Build
+Combo-Brecher!
+Kampfkunst-Meister
+Elite-RF!
+Faustwaffen tödlich
+Unaufhaltsamer RF!
+Nahkampf-Sieger
+Rage-Modus an!
+Kämpfer für immer
+Legendäre Fäuste!
+
+#CLASS_112,15
+Grow Lancer stürmt vorwärts!
+Meine Lanze durchbohrt alle Verteidigungen!
+Spiral Slash verwüstet Feinde!
+Berittener Kampf ist meine Kunst!
+Dragon Spear entfesselt!
+Ritter des Reiches!
+Mit voller Kraft stürmend!
+Lanzenschlag kritisch!
+Kavallerie-Dominanz!
+Mein Ross und ich sind eins!
+GL Kavallerie-Meister
+Lanzendurchdringung!
+Berittener Kampf Pro
+Verheerender Spiral!
+Elite-Lanzier-Klasse
+Dragon Spear kritisch!
+GL-Angriff tödlich
+Lanzen-Meister!
+Kavallerie-Herrschaft
+Berittener Ritter!
+GL für PVP
+Lanzen-Combo!
+Berittener Krieger
+Unaufhaltsamer GL!
+Legendärer Lanzier
+Sturm-Angriff!
+Ehrenritter
+Maximale GL-Kraft!
+Kavallerie-Spezialist
+Lanze verfehlt nie!
+
+; --- KARTENSPEZIFISCHE SÄTZE ---
+#MAP_0,20
+Lorencia, das Herz des Königreichs.
+Die Trainingsfelder sind hier immer beschäftigt.
+Friedlicher Ort um deine Reise zu beginnen.
+Der Brunnen bringt Erinnerungen.
+Hier werden Legenden geboren.
+Heim süßes Heim in Lorencia.
+Die Schlossmauern schützen uns alle.
+Der Lorencia-Markt ist der beste.
+So viele Krieger beginnen hier.
+Der Anfang jedes Abenteuers.
+Lorencia ändert sich nie
+Perfekte Anfangskarte
+Nostalgie in Lorencia
+Hauptplatz aktiv
+Hauptstadt!
+Lorencia immer lebendig
+Grund-Training hier
+Anfängerfreundliche Zone
+Meine Lieblingsstadt!
+Lorencia-Erinnerungen
+Stadt immer sicher
+Markt beschäftigt
+Zentraler Brunnen!
+Startpunkt alle
+Lorencia-Community stark
+Schlossmauern schützen
+Friedliches Training!
+Stadt der Anfänge
+Lorencia-Basis
+Sichere Zone!
+
+#MAP_1,20
+Betrete den Dungeon... Respekt gebührt.
+Die Luft hier unten ist schwer und alt.
+Echos vergangener Schlachten hallen wider.
+Ein falscher Schritt hier könnte der letzte sein.
+Sonnenlicht erreicht diesen Ort nicht.
+Muss in diesen Korridoren wachsam bleiben.
+Dunkle Energie strömt aus den Wänden.
+Dieser Ort hat viele Abenteurer gefordert.
+Die Dunkelheit hier ist fast greifbar.
+Hinabsteigend in die Tiefen der Erde.
+Dunkler Dungeon immer
+Unterirdisches Training hier
+Dunkelheit überall!
+Dungeon-Herausforderung angenommen
+Schwere Mobs hier
+Höhlenerkundung!
+Gute Dungeon-Erinnerungen
+Komplexes unterirdisches Labyrinth
+Dunkle Atmosphäre!
+Alte Dungeon-Vibes
+Vorsicht an Ecken
+Monster lauern!
+Effizienter Dungeon-Farm
+Unterirdischer Schatz
+Dunkle Energie!
+Klassisches Dungeon-Gefühl
+Monster respawnen schnell
+Dungeon-Abenteuer!
+Unterirdisches Königreich
+Labyrinth-Navigation!
+
+#MAP_2,20
+Devias, Land der Möglichkeiten.
+Die Minen bergen große Schätze.
+Gefährliches aber lohnendes Gebiet.
+Riesen durchstreifen diese Länder.
+Der Devias-Platz ist immer voll.
+Perfekt für Mittelstufen-Training.
+Vorsicht vor PKs hier!
+Reiche Jagdgründe in Devias.
+Die Brücke verbindet zwei Welten.
+Devias schläft nie.
+Devias Bergbaustadt
+Bergbauzone aktiv!
+Devias-Markt gut
+Mittelstufen-Training
+Riesengebiet!
+Devias immer beschäftigt
+Brücke berühmtes Wahrzeichen
+PK-Zonen-Warnung!
+Devias-Möglichkeiten
+Zentraler Platz überfüllt
+Bergbauschätze!
+Guter Farm-Spot
+Große Devias-Community
+Riesenjagd!
+Perfekt für Mid-Game
+Legendäres Devias
+Brückenüberquerung!
+Stadt schläft nie
+Devias-Erinnerungen
+Schatzsuche!
+
+#MAP_3,20
+Noria, mein Lieblingsort.
+Die Hafenstadt hat ihren Charme.
+Meeresbrise und Abenteuer.
+Monster hier sind hart.
+Der Noria-Markt ist einzigartig.
+Küsten-Trainingsfelder.
+Der Leuchtturm weist den Weg.
+Seeleute und Krieger vereinen sich hier.
+Tor zu größeren Herausforderungen.
+Norias Schönheit ist unvergleichlich.
+Noria schöner Hafen
+Küstenstadt!
+Einzigartiger Noria-Markt
+Frische Meeresbrise
+Leuchtturm führt!
+Gutes Noria-Training
+Hafenstadt-Vibes
+Seeleute-Versammlung!
+Friedliches Noria
+Schöner Strandbereich
+Ozeanblick!
+Küstenmonster
+Noria-Community
+Hafenaktivitäten!
+Start Seereise
+Legendäres Noria
+Leuchtturm-Wahrzeichen!
+Geschäftiger Hafen
+Noria-Erinnerungen
+Seestadt!
+
+#MAP_4,20
+Lost Tower erreicht den Himmel.
+Jede Etage bringt neue Herausforderungen.
+Aufsteigend zur Größe.
+Elite-Monster bewachen diese Level.
+Die Aussicht von hier ist unglaublich.
+Lost Tower testet deine Grenzen.
+Alte Struktur voller Geheimnisse.
+Höhere Etagen, größere Belohnungen.
+Die Spitze ist das ultimative Ziel.
+Turm endloser Schlachten.
+Lost Tower Aufstieg
+Turm-Herausforderung!
+Jede Etage schwieriger
+Elite-Monster hier
+Himmelsturm!
+Legendärer Lost Tower
+Etage für Etage
+Unglaubliche Aussichten!
+Viele Turm-Geheimnisse
+Ultimatives Spitzen-Ziel
+Turm-Training!
+Höhere Etagen besser
+Ikonischer Lost Tower
+Aufstiegs-Abenteuer!
+Turm der Legenden
+Etagen-Fortschritt
+Turm-Erinnerungen!
+Himmel erreicht hoch
+Klassischer Lost Tower
+Ziel oberste Etage!
+
+#MAP_7,20
+Atlans ist gefährlich, sei vorsichtig.
+Unterwasserstadt der Mysterien.
+Atlanteaner bewachen ihr Territorium.
+Unter Wasser atmen fühlt sich seltsam an.
+Ruinen alter Zivilisation.
+Hochlevel-Herausforderungen warten.
+Atlans birgt legendäre Items.
+Die Tiefen verbergen große Macht.
+Nichts für schwache Herzen.
+Überall versunkene Schätze.
+Atlans Unterwasserstadt
+Atlanteaner verteidigen!
+Unterwasser-Abenteuer
+Hochlevel-Zone
+Alte Ruinen!
+Gefährliches Atlans
+Unterwasser-Atmung
+Tiefsee-Geheimnisse!
+Atlanteaner-Krieger
+Versunkene Schätze
+Legendäres Atlans!
+Ozeanbodenstadt
+Nur fortgeschrittene Spieler
+Unterwasser-Kampf!
+Atlans-Mysterien
+Alte Zivilisation
+Tieftauchen!
+Schwierige Seemonster
+Episches Atlans
+Schatzsuche!
+
+#MAP_8,20
+Tarkan-Wüste ist glühend heiß.
+Sand und Monster überall.
+Echsenkönig-Territorium.
+Wüstenüberleben ist hart.
+Oase bringt kurze Erleichterung.
+Tarkans Hitze ist unerträglich.
+Alte Wüstenzivilisation.
+Versteckte Höhlen in den Dünen.
+Echsenmenschen patrouillieren diese Sande.
+Wüstenkrieger gedeihen hier.
+Tarkan-Wüste heiß
+Sand überall!
+Echsenkönig regiert
+Wüstenüberlebens-Modus
+Oasen-Erleichterung!
+Sengender Tarkan
+Wüstenkrieger
+Alte Ruinen!
+Hohe Sanddünen
+Herausfordernder Tarkan
+Echsenmenschen-Patrouille!
+Extreme Wüstenhitze
+Legendärer Tarkan
+Höhlenerkundung!
+Wüstenzivilisation
+Sandsturm kommt
+Tarkan-Erinnerungen!
+Oasen-Paradies
+Wüsten-Abenteuer
+Echsenjagd!
+
+#MAP_10,20
+Icarus fliegt hoch.
+Himmelsreich der Möglichkeiten.
+Flügel ausgebreitet, frei fliegend.
+Luftkämpfe sind intensiv.
+Icarus birgt besondere Schätze.
+Fliegend zwischen den Wolken.
+Meisterschaft der Luftnavigation.
+Himmelsfestung in Sicht.
+Icarus-Aussicht ist atemberaubend.
+Himmelsherrschaft erkundet.
+Icarus Himmelsreich
+Hoch fliegen!
+Flügel hier erforderlich
+Intensiver Luftkampf
+Wolkenstadt!
+Icarus Himmel
+Starke Himmelsfestung
+Fliegende Monster!
+Legendäres Icarus
+Himmelsherrschaft
+Luftnavigation!
+Himmelsschätze
+Schönes Icarus
+Flugabenteuer!
+Wolkenreich
+Epische Himmelskämpfe
+Icarus-Erinnerungen!
+Himmelstor
+Flugfreiheit
+Himmelskönigsreich!
+
+#MAP_30,20
+Kalima 1, Tore der Hölle.
+Dämonen lauern in jeder Ecke.
+Zeitlich begrenzte Dungeon-Herausforderung.
+Goldene Monster für Glücks-Drops.
+Kalima testet deine Party.
+Überlebe den Ansturm!
+Uraltes Übel residiert hier.
+Portal wird nicht ewig dauern.
+Kalima belohnt die Mutigen.
+Hier konzentrierte dunkle Kräfte.
+Kalima Höllentore
+Dämonen überall!
+Zeitlich begrenzte Dungeon-Challenge
+Glückliche goldene Mobs
+Intensives Kalima!
+Party erforderlich
+Höhlenportal offen
+Uraltes Übel!
+Gute Kalima-Belohnungen
+Zeitlimit-Druck
+Dämonenjagd!
+Legendäres Kalima
+Portal-Countdown
+Überlebe Ansturm!
+Starke dunkle Kräfte
+Kalima-Erinnerungen
+Höllenabenteuer!
+Seltene goldene Drops
+Episches Kalima
+Dämonentöter!
+
+#MAP_34,20
+Aida-Tal der Prüfungen.
+Questen-Zentrum für Abenteurer.
+NPC Sophia leitet uns.
+Mit Monstern gefüllte Schlucht.
+Aida bietet großartige Questen.
+Trainingsfelder der Legenden.
+Perfekt für Party-Jagd.
+Aidas Herausforderungen sind fair.
+Tal hallt von Schlachtrufen wider.
+Aida belohnt Ausdauer.
+Aida-Tal Questen
+Questen-Zentrum!
+NPC Sophia hilfreich
+Viele Schluchten-Monster
+Aida-Training!
+Questen-Tal
+Gute Party-Jagd
+Faire Herausforderungen!
+Legendäres Aida
+Talecho
+Schluchten-Monster!
+Aida-Belohnungen
+Questen-Abschluss
+Tal-Abenteuer!
+Aida-Community
+Trainingsfelder
+Questen-Meister!
+Tal der Prüfungen
+Aida-Erinnerungen
+Schluchten-Erkundung!
+
+#MAP_37,20
+Crywolf-Festung unter Belagerung!
+Altar verteidigen ist entscheidend!
+Wölfe greifen gnadenlos an!
+Balgass muss gestoppt werden!
+Vertrags-Abschluss-Belohnungen.
+Festungsverteidigung in Aktion.
+Crywolf-Event ist intensiv!
+Statue gemeinsam schützen.
+Wolfs-Invasion läuft!
+Vereint verteidigen wir Crywolf!
+Crywolf Verteidigungs-Event
+Wolfs-Invasion!
+Altar-Schutz vital
+Balgass Boss-Kampf
+Festungs-Belagerung!
+Intensives Crywolf
+Gute Vertrags-Belohnungen
+Statuen-Verteidigung!
+Wolfsrudel greifen an
+Legendäres Crywolf
+Vereinte Verteidigung!
+Altar muss überleben
+Crywolf-Erinnerungen
+Event-Koordination!
+Festungs-Schlacht
+Wolfstöter-Modus
+Crywolf-Teamarbeit!
+Erfolgreiche Verteidigung
+Invasion gestoppt
+Crywolf-Sieg!
+
+#MAP_51,20
+Elbeland, Land der Riesen.
+Hochlevel-Monster durchstreifen hier.
+Elite-Jagdgründe.
+Elbeland-Bosse sind hart.
+Gefrorenes Territorium-Herausforderungen.
+Eis und Gefahr kombiniert.
+Elbeland-Belohnungen sind legendär.
+Riesen bewachen ihr Land.
+Extreme Kälte, extreme Herausforderung.
+Elbeland testet wahre Krieger.
+Elbeland gefrorenes Land
+Riesen durchstreifen!
+Hochlevel-Zone
+Elite-Jagdgründe
+Eis-Territorium!
+Schwierige Elbeland-Bosse
+Gefrorene Herausforderungen
+Extreme Kälte!
+Riesen bewachen
+Legendäres Elbeland
+Eis-Monster!
+Fortgeschrittener Bereich
+Elbeland-Belohnungen
+Riesentöter!
+Gefrorenes Ödland
+Eis-Gefahr
+Episches Elbeland!
+Nur wahre Krieger
+Riesen-Territorium
+Eis-Abenteuer!
+
+#MAP_63,20
+Raklion Drachenhöhle.
+Selupan erwartet Herausforderer.
+Drachen-Invasions-Event!
+Eier müssen zerstört werden!
+Raklion ist Drachen-Territorium.
+Boss-Kampf-Vorbereitung nötig.
+Drachenschuppen als Belohnungen.
+Raklion-Horde kommt!
+Selupan zu besiegen erfordert Teamarbeit.
+Drachentöter-Titel wartet!
+Raklion Drachenhöhle
+Selupan wartet!
+Drachen-Invasions-Event
+Eier-Zerstörung vital
+Drachen-Territorium!
+Epischer Boss-Kampf
+Drachenschuppen-Belohnung
+Raklion-Horde!
+Teamarbeit erforderlich
+Drachentöter-Titel
+Legendäres Raklion!
+Drachenjagd
+Event-Koordination
+Selupan-Boss!
+Drachennest
+Raklion-Belohnungen
+Invasions-Event!
+Dracheneier
+Raklion-Erinnerungen
+Epische Schlacht!
+
+#MAP_79,20
+Kanturu-Ruinen der Macht.
+Alptraum-Boss erscheint hier.
+Kanturu-Event ist legendär!
+Alte Reliquien entdeckt.
+Mayas Hand kontrolliert dieses Reich.
+Raffinerie für Item-Upgrades.
+Kanturu-Turm ragt hoch.
+Kern muss geschützt werden!
+Elite-Event für Top-Spieler.
+Kanturu-Belohnungen sind suprem.
+Kanturu-Ruinen Macht
+Alptraum-Boss!
+Legendäres Event
+Alte Reliquien
+Mayas Hand!
+Raffinerie-Upgrades
+Hoher Kanturu-Turm
+Kern-Schutz!
+Elite-Event
+Supreme Belohnungen
+Legendäres Kanturu!
+Ruinen-Erkundung
+Intensives Event
+Top-Spieler!
+Kanturu-Erinnerungen
+Konzentrierte Macht
+Turm ragt auf!
+Alte Macht
+Episches Kanturu
+Raffinerie-Zugang!
+
+#MAP_80,20
+Stille Karte friedliches Training.
+Ruhiger Farming-Ort.
+Keine Ablenkungen, nur Farming.
+Verstecktes Juwel zum Leveln.
+Monster respawnen schnell.
+Stille Effizienz in Aktion.
+Solo-Trainings-Paradies.
+Geheimer Ort entdeckt.
+Zen-Farming optimiert.
+Friedlich aber produktiv.
+Stille Karte friedlich
+Ruhiges Grinden!
+Keine Ablenkungen
+Verstecktes Juwel-Spot
+Schnelles Respawnen!
+Stille Effizienz
+Solo-Trainings-Paradies
+Geheimer Ort!
+Zen-Farming
+Produktiver Frieden
+Stilles Grinden!
+Friedliches Leveln
+Schnelle Monster
+Effizientes Farming!
+Stille Erinnerungen
+Perfekter Solo-Spot
+Zen optimieren!
+Ruhige Produktivität
+Versteckter Schatz
+Friedliche Macht!
