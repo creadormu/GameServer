@@ -1,0 +1,9 @@
+[Update]
+Version=1.0.1
+DownloadUrl=http://yourwebsite.com/gameserver/updates/GameServer_1.0.1.exe
+FileName=GameServer.exe
+FileHash=
+FileSize=0
+FileType=0
+Description=Bug fixes and improvements
+Required=0

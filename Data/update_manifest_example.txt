@@ -1,0 +1,92 @@
+;=======================================================================
+; GameServer Update Manifest Example
+;=======================================================================
+; Upload this file as "update_manifest.txt" to your update server
+; along with the actual update files.
+;=======================================================================
+
+[Update]
+;-----------------------------------------------------------------------
+; Version: New version number (must be different from CurrentVersion)
+;-----------------------------------------------------------------------
+Version=1.0.1
+
+;-----------------------------------------------------------------------
+; DownloadUrl: Direct download URL to the update file
+;-----------------------------------------------------------------------
+DownloadUrl=http://yourwebsite.com/gameserver/updates/GameServer_1.0.1.exe
+
+;-----------------------------------------------------------------------
+; FileName: Target file name (what it should be named after download)
+;   - For executable: GameServer.exe
+;   - For data files: Item.txt, Monster.txt, etc.
+;-----------------------------------------------------------------------
+FileName=GameServer.exe
+
+;-----------------------------------------------------------------------
+; FileHash: MD5 or SHA256 hash for verification (optional but recommended)
+;   Use a hash calculator to generate this from your update file
+;-----------------------------------------------------------------------
+FileHash=abc123def456789
+
+;-----------------------------------------------------------------------
+; FileSize: Size in bytes (used for verification)
+;-----------------------------------------------------------------------
+FileSize=1234567
+
+;-----------------------------------------------------------------------
+; FileType: Type of update file
+;   0 = Executable (GameServer.exe) - requires server restart
+;   1 = Data file (Item.txt, etc.) - may require data reload
+;   2 = Configuration file
+;-----------------------------------------------------------------------
+FileType=0
+
+;-----------------------------------------------------------------------
+; Description: Brief description of what's new in this update
+;   Keep it concise (max 200 characters for best display)
+;-----------------------------------------------------------------------
+Description=Bug fixes, performance improvements, and new features
+
+;-----------------------------------------------------------------------
+; Required: Is this update mandatory?
+;   0 = Optional update
+;   1 = Required update (highly recommended)
+;-----------------------------------------------------------------------
+Required=0
+
+;=======================================================================
+; EXAMPLE FOR DATA FILE UPDATE:
+;=======================================================================
+; [Update]
+; Version=1.0.2
+; DownloadUrl=http://yourwebsite.com/gameserver/updates/Item_1.0.2.txt
+; FileName=Item.txt
+; FileHash=xyz789abc123
+; FileSize=524288
+; FileType=1
+; Description=New items added, balance changes
+; Required=0
+;=======================================================================
+
+;=======================================================================
+; INSTRUCTIONS FOR WEB HOSTING:
+;=======================================================================
+;
+; 1. Create a directory on your web server (e.g., /gameserver/updates/)
+;
+; 2. Upload your update files to this directory:
+;    - GameServer_1.0.1.exe (your new executable)
+;    - Item_1.0.2.txt (your new data files)
+;    - etc.
+;
+; 3. Create update_manifest.txt with the information above
+;
+; 4. Make sure the files are publicly accessible via HTTP
+;
+; 5. Test by accessing the manifest URL in a browser:
+;    http://yourwebsite.com/gameserver/updates/update_manifest.txt
+;
+; 6. Update the UpdateServerUrl in UpdateConfig.ini to match
+;
+;=======================================================================

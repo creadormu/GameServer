@@ -1,5 +1,7 @@
 #include "stdafx.h"
 #include "Resource.h"
+#include <shellapi.h>
+#pragma comment(lib, "shell32.lib")
 #include "BloodCastle.h"
 #include "CastleDeep.h"
 #include "CastleSiege.h"
@@ -40,6 +42,7 @@
 #include "Guild.h"
 #include "Path.h"
 #include "ClassConfig.h"
+#include "UpdateManager.h"
 
 
 TCHAR szTitle[MAX_LOADSTRING];
@@ -76,6 +79,8 @@ int APIENTRY WinMain(HINSTANCE hInstance,HINSTANCE hPrevInstance,LPSTR lpCmdLine
 	gServerInfo.ReadStartupInfo("GameServerInfo",".\\Data\\GameServerInfo - Common.dat");
 	// Initialize class configuration
 	g_ClassConfigManager.Initialize();
+	// Initialize update manager
+	gUpdateManager.Init(hWnd);
 
 	#if(PROTECT_STATE==1)
 
@@ -607,6 +612,22 @@ LRESULT CALLBACK WndProc(HWND hWnd,UINT message,WPARAM wParam,LPARAM lParam) // 
 				case IDM_SWAMP_OF_PIECE:
 					gSwampEvent.StartEvent();
 					break;
+				case IDM_UPDATE_CHECK:
+					gUpdateManager.ManualCheckForUpdates();
+					break;
+				case IDM_UPDATE_DOWNLOAD:
+					if(gUpdateManager.IsUpdateAvailable()) {
+						gUpdateManager.DownloadUpdate();
+					} else {
+						MessageBox(hWnd, "No update available to download.\n\nPlease check for updates first.", "No Update", MB_OK | MB_ICONINFORMATION);
+					}
+					break;
+				case IDM_UPDATE_APPLY:
+					gUpdateManager.ApplyUpdate();
+					break;
+				case IDM_UPDATE_CONFIG:
+					ShellExecute(NULL, "open", ".\\Data\\UpdateConfig.ini", NULL, NULL, SW_SHOW);
+					break;
 				default:
 					return DefWindowProc(hWnd,message,wParam,lParam);
 			}
@@ -631,6 +652,7 @@ LRESULT CALLBACK WndProc(HWND hWnd,UINT message,WPARAM wParam,LPARAM lParam) // 
 				case WM_TIMER_10000:
 					JoinServerReconnect(hWnd,WM_JOIN_SERVER_MSG_PROC);
 					DataServerReconnect(hWnd,WM_DATA_SERVER_MSG_PROC);
+					gUpdateManager.OnTimer(); // Check for updates periodically
 					break;
 			}
 			break;

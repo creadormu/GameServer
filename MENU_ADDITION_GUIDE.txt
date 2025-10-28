@@ -1,0 +1,118 @@
+================================================================================
+QUICK GUIDE: Adding Update Menu to GameServer.rc
+================================================================================
+
+OPTION 1: Using Visual Studio Resource Editor (RECOMMENDED)
+------------------------------------------------------------
+
+1. Open GameServer.sln in Visual Studio
+
+2. In Solution Explorer, expand "Resource Files"
+
+3. Double-click "GameServer.rc" to open Resource View
+
+4. Expand "Menu" → Right-click "IDC_GAMESERVER" → Select "Open"
+
+5. You'll see the visual menu editor
+
+6. Right-click in the menu bar → "Insert New" → Name it "Update"
+
+7. Under "Update" menu, add these items:
+   - "Check for Updates"        → ID: IDM_UPDATE_CHECK
+   - "Download Update"           → ID: IDM_UPDATE_DOWNLOAD
+   - "Apply Update"              → ID: IDM_UPDATE_APPLY
+   - [Separator]
+   - "Update Configuration..."   → ID: IDM_UPDATE_CONFIG
+
+8. Save and rebuild the project
+
+================================================================================
+
+OPTION 2: Manual Text Edit (If you prefer)
+-------------------------------------------
+
+1. Open GameServer.rc in a text editor that supports UTF-16 encoding
+
+2. Find this section (around line 152):
+   
+   POPUP "IA"
+   BEGIN
+       MENUITEM "Reload IA", ID_FAKEONLINE_RELOADDATA
+       ...
+   END
+
+3. Add this RIGHT AFTER the "IA" popup and BEFORE "& Buy Premium":
+
+IDC_GAMESERVER MENU
+BEGIN
+    ...existing menus...
+    
+    POPUP "IA"
+    BEGIN
+        MENUITEM "Reload IA",                                 ID_FAKEONLINE_RELOADDATA
+        MENUITEM "Add IA",                                    ID_FAKEONLINE_ADDFAKEONLINE
+        MENUITEM "Delete IA",                                 ID_FAKEONLINE_DELFAKEONLINE
+        MENUITEM "Create Multiple Bots",                     ID_FAKEONLINE_CREATEBOTS
+    END
+    
+    // ADD THIS NEW SECTION:
+    POPUP "Update"
+    BEGIN
+        MENUITEM "Check for Updates",                        IDM_UPDATE_CHECK
+        MENUITEM "Download Update",                          IDM_UPDATE_DOWNLOAD
+        MENUITEM "Apply Update",                             IDM_UPDATE_APPLY
+        MENUITEM SEPARATOR
+        MENUITEM "Update Configuration...",                  IDM_UPDATE_CONFIG
+    END
+    // END OF NEW SECTION
+    
+    POPUP "& Buy Premium"
+    BEGIN
+        MENUITEM "& Mu Alfa",                                IDM_ABOUT
+    END
+END
+
+4. Save the file (make sure it's UTF-16 encoded!)
+
+5. Rebuild the project in Visual Studio
+
+================================================================================
+
+VERIFICATION:
+-------------
+
+After rebuilding, run GameServer.exe and you should see:
+
+Menu Bar: [Close Server] [Recargar] [Eventos] [Invasion] [Custom Arena] [Tools] [IA] [Update] [& Buy Premium]
+                                                                                          ^^^^^^^^
+                                                                                          NEW!
+
+Click "Update" menu to see:
+- Check for Updates
+- Download Update  
+- Apply Update
+- ─────────────────
+- Update Configuration...
+
+================================================================================
+
+TROUBLESHOOTING:
+----------------
+
+Q: Menu doesn't appear after rebuilding
+A: Clean solution (Build → Clean Solution), then rebuild
+
+Q: Menu IDs show as errors
+A: The menu IDs are already added to resource.h automatically
+
+Q: Can't save GameServer.rc
+A: Make sure file isn't read-only, close Visual Studio resource editor first
+
+Q: Update menu appears but does nothing
+A: Make sure you rebuilt the entire solution after modifications
+
+================================================================================
+
+That's it! The auto-update system is now fully integrated!
+
+================================================================================
