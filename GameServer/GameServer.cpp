@@ -1,5 +1,7 @@
 #include "stdafx.h"
 #include "Resource.h"
+#include <shellapi.h>
+#pragma comment(lib, "shell32.lib")
 #include "BloodCastle.h"
 #include "CastleDeep.h"
 #include "CastleSiege.h"
