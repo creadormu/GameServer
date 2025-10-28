@@ -418,6 +418,15 @@ bool CUpdateManager::ApplyUpdate() {
 			return false;
 		}
 		
+		// CRITICAL: Update the version number BEFORE exiting
+		// This prevents the update from being detected again after restart
+		LogUpdate("[UpdateManager] Updating version: %s -> %s", m_CurrentVersion.c_str(), m_LatestUpdate.version.c_str());
+		m_CurrentVersion = m_LatestUpdate.version;
+		m_Status = UPDATE_STATUS_NO_UPDATE;
+		m_UpdateAvailable = false;
+		SaveConfig(".\\Data\\UpdateConfig.ini");
+		LogUpdate("[UpdateManager] Version updated in config file");
+		
 		// Create update script
 		FILE* script = NULL;
 		fopen_s(&script, ".\\Update\\apply_update.bat", "w");
