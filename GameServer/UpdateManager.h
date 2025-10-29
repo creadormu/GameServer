@@ -33,6 +33,7 @@ struct UpdateInfo {
 	DWORD fileSize;
 	UpdateFileType fileType;
 	char description[256];
+	char targetPath[512];  // NEW: Custom target path
 	bool isRequired;
 	
 	UpdateInfo() {
@@ -43,6 +44,7 @@ struct UpdateInfo {
 		fileSize = 0;
 		fileType = UPDATE_FILE_EXECUTABLE;
 		memset(description, 0, sizeof(description));
+		memset(targetPath, 0, sizeof(targetPath));  // NEW
 		isRequired = false;
 	}
 };

@@ -215,6 +215,8 @@ bool CUpdateManager::ParseUpdateManifest(const char* manifestData) {
 				m_LatestUpdate.fileType = (UpdateFileType)atoi(value);
 			} else if (_stricmp(key, "Description") == 0) {
 				strcpy_s(m_LatestUpdate.description, sizeof(m_LatestUpdate.description), value);
+			} else if (_stricmp(key, "TargetPath") == 0) {
+				strcpy_s(m_LatestUpdate.targetPath, sizeof(m_LatestUpdate.targetPath), value);
 			} else if (_stricmp(key, "Required") == 0) {
 				m_LatestUpdate.isRequired = atoi(value) ? true : false;
 			}
@@ -461,9 +463,50 @@ bool CUpdateManager::ApplyUpdate() {
 		}
 	} else {
 		// For data files, just copy directly
-		sprintf_s(targetFile, sizeof(targetFile), ".\\Data\\%s", m_LatestUpdate.fileName);
+		// Check if custom target path is specified
+		if (strlen(m_LatestUpdate.targetPath) > 0) {
+			// Use custom target path
+			strcpy_s(targetFile, sizeof(targetFile), m_LatestUpdate.targetPath);
+		} else {
+			// Use default Data folder
+			sprintf_s(targetFile, sizeof(targetFile), ".\\Data\\%s", m_LatestUpdate.fileName);
+		}
 		
 		LogUpdate("[UpdateManager] Updating file: %s", targetFile);
+		
+		// Create directory if it doesn't exist
+		char dirPath[512];
+		strcpy_s(dirPath, sizeof(dirPath), targetFile);
+		char* lastSlash = strrchr(dirPath, '\\');
+		if (lastSlash) {
+			*lastSlash = '\0';
+			// Create all directories in path
+			char* token = dirPath;
+			char currentPath[512] = {0};
+			while (*token) {
+				if (*token == '\\') {
+					*token = '\0';
+					if (strlen(currentPath) > 0) {
+						strcat_s(currentPath, sizeof(currentPath), "\\");
+					}
+					strcat_s(currentPath, sizeof(currentPath), dirPath);
+					CreateDirectoryA(currentPath, NULL);
+					dirPath[0] = '\0';
+					token++;
+					continue;
+				}
+				char temp[2] = {*token, '\0'};
+				strcat_s(dirPath, sizeof(dirPath), temp);
+				token++;
+			}
+			if (strlen(dirPath) > 0) {
+				if (strlen(currentPath) > 0) {
+					strcat_s(currentPath, sizeof(currentPath), "\\");
+				}
+				strcat_s(currentPath, sizeof(currentPath), dirPath);
+				CreateDirectoryA(currentPath, NULL);
+			}
+		}
 		
 		// Create backup
 		if (!CreateBackup(targetFile)) {
@@ -488,9 +531,11 @@ bool CUpdateManager::ApplyUpdate() {
 			sprintf_s(msg, sizeof(msg), 
 				"Update applied successfully!\n\n"
 				"File: %s\n"
+				"Path: %s\n"
 				"Version: %s\n\n"
 				"You may need to reload the data file for changes to take effect.",
 				m_LatestUpdate.fileName,
+				targetFile,
 				m_LatestUpdate.version);
 			ShowNotification(msg, MB_ICONINFORMATION);
 		}
