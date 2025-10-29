@@ -12,9 +12,9 @@ CUpdateManager::CUpdateManager() {
 	m_AutoCheck = true;
 	m_AutoDownload = false;
 	m_ShowNotifications = true;
-	m_UpdateServerUrl = "";
-	m_CurrentVersion = "1.0.0";
-	m_TempDirectory = ".\\Update\\Temp";
+	memset(m_UpdateServerUrl, 0, sizeof(m_UpdateServerUrl));
+	strcpy_s(m_CurrentVersion, sizeof(m_CurrentVersion), "1.0.0");
+	strcpy_s(m_TempDirectory, sizeof(m_TempDirectory), ".\\Update\\Temp");
 	m_Status = UPDATE_STATUS_NO_UPDATE;
 	m_hWnd = NULL;
 	m_DownloadThread = NULL;
@@ -37,15 +37,15 @@ void CUpdateManager::Init(HWND hWnd) {
 	
 	// Create temp directory if it doesn't exist
 	CreateDirectoryA(".\\Update", NULL);
-	CreateDirectoryA(m_TempDirectory.c_str(), NULL);
+	CreateDirectoryA(m_TempDirectory, NULL);
 	
 	// Load configuration
 	LoadConfig(".\\Data\\UpdateConfig.ini");
 	
 	LogUpdate("[UpdateManager] Initialized (Version: %s, Enabled: %s)", 
-		m_CurrentVersion.c_str(), m_Enabled ? "YES" : "NO");
+		m_CurrentVersion, m_Enabled ? "YES" : "NO");
 	
-	if (m_Enabled && m_UpdateServerUrl.empty()) {
+	if (m_Enabled && strlen(m_UpdateServerUrl) == 0) {
 		LogUpdate("[UpdateManager] WARNING: Auto-update is enabled but no update server URL is configured!");
 		m_Enabled = false;
 	}
@@ -63,15 +63,9 @@ void CUpdateManager::LoadConfig(const char* configFile) {
 	m_AutoDownload = GetPrivateProfileInt("UpdateManager", "AutoDownload", 0, configFile) ? true : false;
 	m_ShowNotifications = GetPrivateProfileInt("UpdateManager", "ShowNotifications", 1, configFile) ? true : false;
 	
-	char buffer[256];
-	GetPrivateProfileString("UpdateManager", "UpdateServerUrl", "", buffer, sizeof(buffer), configFile);
-	m_UpdateServerUrl = buffer;
-	
-	GetPrivateProfileString("UpdateManager", "CurrentVersion", "1.0.0", buffer, sizeof(buffer), configFile);
-	m_CurrentVersion = buffer;
-	
-	GetPrivateProfileString("UpdateManager", "TempDirectory", ".\\Update\\Temp", buffer, sizeof(buffer), configFile);
-	m_TempDirectory = buffer;
+	GetPrivateProfileString("UpdateManager", "UpdateServerUrl", "", m_UpdateServerUrl, sizeof(m_UpdateServerUrl), configFile);
+	GetPrivateProfileString("UpdateManager", "CurrentVersion", "1.0.0", m_CurrentVersion, sizeof(m_CurrentVersion), configFile);
+	GetPrivateProfileString("UpdateManager", "TempDirectory", ".\\Update\\Temp", m_TempDirectory, sizeof(m_TempDirectory), configFile);
 }
 
 void CUpdateManager::SaveConfig(const char* configFile) {
@@ -79,9 +73,9 @@ void CUpdateManager::SaveConfig(const char* configFile) {
 	WritePrivateProfileString("UpdateManager", "AutoCheck", m_AutoCheck ? "1" : "0", configFile);
 	WritePrivateProfileString("UpdateManager", "AutoDownload", m_AutoDownload ? "1" : "0", configFile);
 	WritePrivateProfileString("UpdateManager", "ShowNotifications", m_ShowNotifications ? "1" : "0", configFile);
-	WritePrivateProfileString("UpdateManager", "UpdateServerUrl", m_UpdateServerUrl.c_str(), configFile);
-	WritePrivateProfileString("UpdateManager", "CurrentVersion", m_CurrentVersion.c_str(), configFile);
-	WritePrivateProfileString("UpdateManager", "TempDirectory", m_TempDirectory.c_str(), configFile);
+	WritePrivateProfileString("UpdateManager", "UpdateServerUrl", m_UpdateServerUrl, configFile);
+	WritePrivateProfileString("UpdateManager", "CurrentVersion", m_CurrentVersion, configFile);
+	WritePrivateProfileString("UpdateManager", "TempDirectory", m_TempDirectory, configFile);
 }
 
 bool CUpdateManager::CheckForUpdates() {
@@ -90,19 +84,21 @@ bool CUpdateManager::CheckForUpdates() {
 		return false;
 	}
 	
-	if (m_UpdateServerUrl.empty()) {
+	if (strlen(m_UpdateServerUrl) == 0) {
 		LogUpdate("[UpdateManager] ERROR: Update server URL not configured");
 		return false;
 	}
 	
-	LogUpdate("[UpdateManager] Checking for updates from: %s", m_UpdateServerUrl.c_str());
+	LogUpdate("[UpdateManager] Checking for updates from: %s", m_UpdateServerUrl);
 	
 	// Download update manifest
-	std::string manifestUrl = m_UpdateServerUrl + "/update_manifest.txt";
-	std::string manifestPath = GetTempFilePath("update_manifest.txt");
+	char manifestUrl[768];
+	char manifestPath[512];
+	sprintf_s(manifestUrl, sizeof(manifestUrl), "%s/update_manifest.txt", m_UpdateServerUrl);
+	GetTempFilePath("update_manifest.txt", manifestPath, sizeof(manifestPath));
 	
 	DWORD bytesDownloaded = 0;
-	if (!DownloadFile(manifestUrl.c_str(), manifestPath.c_str(), &bytesDownloaded)) {
+	if (!DownloadFile(manifestUrl, manifestPath, &bytesDownloaded)) {
 		LogUpdate("[UpdateManager] ERROR: Failed to download update manifest");
 		m_Status = UPDATE_STATUS_ERROR;
 		return false;
@@ -110,7 +106,7 @@ bool CUpdateManager::CheckForUpdates() {
 	
 	// Read manifest file
 	FILE* file = NULL;
-	fopen_s(&file, manifestPath.c_str(), "r");
+	fopen_s(&file, manifestPath, "r");
 	if (!file) {
 		LogUpdate("[UpdateManager] ERROR: Failed to open update manifest file");
 		m_Status = UPDATE_STATUS_ERROR;
@@ -129,12 +125,12 @@ bool CUpdateManager::CheckForUpdates() {
 	}
 	
 	// Compare versions
-	if (m_LatestUpdate.version != m_CurrentVersion) {
+	if (strcmp(m_LatestUpdate.version, m_CurrentVersion) != 0) {
 		m_UpdateAvailable = true;
 		m_Status = UPDATE_STATUS_AVAILABLE;
 		LogUpdate("[UpdateManager] UPDATE AVAILABLE: %s -> %s", 
-			m_CurrentVersion.c_str(), m_LatestUpdate.version.c_str());
-		LogUpdate("[UpdateManager] Description: %s", m_LatestUpdate.description.c_str());
+			m_CurrentVersion, m_LatestUpdate.version);
+		LogUpdate("[UpdateManager] Description: %s", m_LatestUpdate.description);
 		
 		if (m_ShowNotifications) {
 			char msg[512];
@@ -144,9 +140,9 @@ bool CUpdateManager::CheckForUpdates() {
 				"New Version: %s\n\n"
 				"Description: %s\n\n"
 				"Go to menu [Update] to download and apply the update.",
-				m_CurrentVersion.c_str(), 
-				m_LatestUpdate.version.c_str(),
-				m_LatestUpdate.description.c_str());
+				m_CurrentVersion, 
+				m_LatestUpdate.version,
+				m_LatestUpdate.description);
 			ShowNotification(msg, MB_ICONINFORMATION);
 		}
 		
@@ -160,7 +156,7 @@ bool CUpdateManager::CheckForUpdates() {
 	} else {
 		m_UpdateAvailable = false;
 		m_Status = UPDATE_STATUS_NO_UPDATE;
-		LogUpdate("[UpdateManager] No updates available (Current version: %s)", m_CurrentVersion.c_str());
+		LogUpdate("[UpdateManager] No updates available (Current version: %s)", m_CurrentVersion);
 		return false;
 	}
 	
@@ -170,17 +166,6 @@ bool CUpdateManager::CheckForUpdates() {
 
 bool CUpdateManager::ParseUpdateManifest(const char* manifestData) {
 	// Simple INI-style parser
-	// Format:
-	// [Update]
-	// Version=1.0.1
-	// DownloadUrl=http://yoursite.com/updates/GameServer_1.0.1.exe
-	// FileName=GameServer.exe
-	// FileHash=abc123def456...
-	// FileSize=1234567
-	// FileType=0
-	// Description=Bug fixes and improvements
-	// Required=1
-	
 	char buffer[1024];
 	const char* ptr = manifestData;
 	
@@ -217,19 +202,19 @@ bool CUpdateManager::ParseUpdateManifest(const char* manifestData) {
 			
 			// Store values
 			if (_stricmp(key, "Version") == 0) {
-				m_LatestUpdate.version = value;
+				strcpy_s(m_LatestUpdate.version, sizeof(m_LatestUpdate.version), value);
 			} else if (_stricmp(key, "DownloadUrl") == 0) {
-				m_LatestUpdate.downloadUrl = value;
+				strcpy_s(m_LatestUpdate.downloadUrl, sizeof(m_LatestUpdate.downloadUrl), value);
 			} else if (_stricmp(key, "FileName") == 0) {
-				m_LatestUpdate.fileName = value;
+				strcpy_s(m_LatestUpdate.fileName, sizeof(m_LatestUpdate.fileName), value);
 			} else if (_stricmp(key, "FileHash") == 0) {
-				m_LatestUpdate.fileHash = value;
+				strcpy_s(m_LatestUpdate.fileHash, sizeof(m_LatestUpdate.fileHash), value);
 			} else if (_stricmp(key, "FileSize") == 0) {
 				m_LatestUpdate.fileSize = atoi(value);
 			} else if (_stricmp(key, "FileType") == 0) {
 				m_LatestUpdate.fileType = (UpdateFileType)atoi(value);
 			} else if (_stricmp(key, "Description") == 0) {
-				m_LatestUpdate.description = value;
+				strcpy_s(m_LatestUpdate.description, sizeof(m_LatestUpdate.description), value);
 			} else if (_stricmp(key, "Required") == 0) {
 				m_LatestUpdate.isRequired = atoi(value) ? true : false;
 			}
@@ -237,7 +222,7 @@ bool CUpdateManager::ParseUpdateManifest(const char* manifestData) {
 	}
 	
 	// Validate required fields
-	if (m_LatestUpdate.version.empty() || m_LatestUpdate.downloadUrl.empty() || m_LatestUpdate.fileName.empty()) {
+	if (strlen(m_LatestUpdate.version) == 0 || strlen(m_LatestUpdate.downloadUrl) == 0 || strlen(m_LatestUpdate.fileName) == 0) {
 		LogUpdate("[UpdateManager] ERROR: Invalid update manifest - missing required fields");
 		return false;
 	}
@@ -251,13 +236,14 @@ bool CUpdateManager::DownloadUpdate() {
 		return false;
 	}
 	
-	LogUpdate("[UpdateManager] Starting download: %s", m_LatestUpdate.downloadUrl.c_str());
+	LogUpdate("[UpdateManager] Starting download: %s", m_LatestUpdate.downloadUrl);
 	m_Status = UPDATE_STATUS_DOWNLOADING;
 	
-	std::string destPath = GetTempFilePath(m_LatestUpdate.fileName.c_str());
+	char destPath[512];
+	GetTempFilePath(m_LatestUpdate.fileName, destPath, sizeof(destPath));
 	
 	DWORD bytesDownloaded = 0;
-	if (!DownloadFile(m_LatestUpdate.downloadUrl.c_str(), destPath.c_str(), &bytesDownloaded)) {
+	if (!DownloadFile(m_LatestUpdate.downloadUrl, destPath, &bytesDownloaded)) {
 		LogUpdate("[UpdateManager] ERROR: Download failed");
 		m_Status = UPDATE_STATUS_ERROR;
 		if (m_ShowNotifications) {
@@ -269,9 +255,9 @@ bool CUpdateManager::DownloadUpdate() {
 	LogUpdate("[UpdateManager] Download complete: %d bytes", bytesDownloaded);
 	
 	// Verify file hash if provided
-	if (!m_LatestUpdate.fileHash.empty()) {
+	if (strlen(m_LatestUpdate.fileHash) > 0) {
 		LogUpdate("[UpdateManager] Verifying downloaded file...");
-		if (!VerifyDownloadedFile(destPath.c_str(), m_LatestUpdate.fileHash.c_str())) {
+		if (!VerifyDownloadedFile(destPath, m_LatestUpdate.fileHash)) {
 			LogUpdate("[UpdateManager] ERROR: File verification failed!");
 			m_Status = UPDATE_STATUS_ERROR;
 			if (m_ShowNotifications) {
@@ -294,8 +280,8 @@ bool CUpdateManager::DownloadUpdate() {
 			"The update is ready to be applied.\n"
 			"Go to menu [Update] -> [Apply Update] to install.\n\n"
 			"NOTE: The server will be restarted during the update process.",
-			m_LatestUpdate.version.c_str(),
-			m_LatestUpdate.fileName.c_str());
+			m_LatestUpdate.version,
+			m_LatestUpdate.fileName);
 		ShowNotification(msg, MB_ICONINFORMATION);
 	}
 	
@@ -400,17 +386,18 @@ bool CUpdateManager::ApplyUpdate() {
 	
 	LogUpdate("[UpdateManager] Applying update...");
 	
-	std::string updateFile = GetTempFilePath(m_LatestUpdate.fileName.c_str());
-	std::string targetFile;
+	char updateFile[512];
+	char targetFile[512];
+	GetTempFilePath(m_LatestUpdate.fileName, updateFile, sizeof(updateFile));
 	
 	// Determine target file path based on file type
 	if (m_LatestUpdate.fileType == UPDATE_FILE_EXECUTABLE) {
 		// For executable, we need special handling
-		targetFile = ".\\GameServer.exe";
+		strcpy_s(targetFile, sizeof(targetFile), ".\\GameServer.exe");
 		
 		// Create backup
 		LogUpdate("[UpdateManager] Creating backup of current executable...");
-		if (!CreateBackup(targetFile.c_str())) {
+		if (!CreateBackup(targetFile)) {
 			LogUpdate("[UpdateManager] ERROR: Failed to create backup");
 			if (m_ShowNotifications) {
 				ShowNotification("Failed to create backup!\n\nUpdate aborted for safety.", MB_ICONERROR);
@@ -420,8 +407,8 @@ bool CUpdateManager::ApplyUpdate() {
 		
 		// CRITICAL: Update the version number BEFORE exiting
 		// This prevents the update from being detected again after restart
-		LogUpdate("[UpdateManager] Updating version: %s -> %s", m_CurrentVersion.c_str(), m_LatestUpdate.version.c_str());
-		m_CurrentVersion = m_LatestUpdate.version;
+		LogUpdate("[UpdateManager] Updating version: %s -> %s", m_CurrentVersion, m_LatestUpdate.version);
+		strcpy_s(m_CurrentVersion, sizeof(m_CurrentVersion), m_LatestUpdate.version);
 		m_Status = UPDATE_STATUS_NO_UPDATE;
 		m_UpdateAvailable = false;
 		SaveConfig(".\\Data\\UpdateConfig.ini");
@@ -435,16 +422,16 @@ bool CUpdateManager::ApplyUpdate() {
 			fprintf(script, "echo Applying GameServer update...\n");
 			fprintf(script, "timeout /t 2 /nobreak >nul\n");
 			fprintf(script, "echo Replacing executable...\n");
-			fprintf(script, "copy /Y \"%s\" \"%s\"\n", updateFile.c_str(), targetFile.c_str());
+			fprintf(script, "copy /Y \"%s\" \"%s\"\n", updateFile, targetFile);
 			fprintf(script, "if errorlevel 1 goto error\n");
 			fprintf(script, "echo Update applied successfully!\n");
 			fprintf(script, "echo Restarting GameServer...\n");
-			fprintf(script, "start \"\" \"%s\"\n", targetFile.c_str());
+			fprintf(script, "start \"\" \"%s\"\n", targetFile);
 			fprintf(script, "goto end\n");
 			fprintf(script, ":error\n");
 			fprintf(script, "echo ERROR: Failed to apply update!\n");
 			fprintf(script, "echo Restoring backup...\n");
-			fprintf(script, "copy /Y \"%s.backup\" \"%s\"\n", targetFile.c_str(), targetFile.c_str());
+			fprintf(script, "copy /Y \"%s.backup\" \"%s\"\n", targetFile, targetFile);
 			fprintf(script, "pause\n");
 			fprintf(script, ":end\n");
 			fclose(script);
@@ -456,7 +443,10 @@ bool CUpdateManager::ApplyUpdate() {
 			PROCESS_INFORMATION pi = {0};
 			si.cb = sizeof(si);
 			
-			if (CreateProcessA(NULL, ".\\Update\\apply_update.bat", NULL, NULL, FALSE, 
+			char cmdLine[512];
+			strcpy_s(cmdLine, sizeof(cmdLine), ".\\Update\\apply_update.bat");
+			
+			if (CreateProcessA(NULL, cmdLine, NULL, NULL, FALSE, 
 				CREATE_NEW_CONSOLE, NULL, NULL, &si, &pi)) {
 				CloseHandle(pi.hProcess);
 				CloseHandle(pi.hThread);
@@ -471,17 +461,17 @@ bool CUpdateManager::ApplyUpdate() {
 		}
 	} else {
 		// For data files, just copy directly
-		targetFile = ".\\Data\\" + m_LatestUpdate.fileName;
+		sprintf_s(targetFile, sizeof(targetFile), ".\\Data\\%s", m_LatestUpdate.fileName);
 		
-		LogUpdate("[UpdateManager] Updating file: %s", targetFile.c_str());
+		LogUpdate("[UpdateManager] Updating file: %s", targetFile);
 		
 		// Create backup
-		if (!CreateBackup(targetFile.c_str())) {
+		if (!CreateBackup(targetFile)) {
 			LogUpdate("[UpdateManager] WARNING: Failed to create backup");
 		}
 		
 		// Copy file
-		if (!CopyFileA(updateFile.c_str(), targetFile.c_str(), FALSE)) {
+		if (!CopyFileA(updateFile, targetFile, FALSE)) {
 			LogUpdate("[UpdateManager] ERROR: Failed to copy file: %d", GetLastError());
 			if (m_ShowNotifications) {
 				ShowNotification("Failed to apply update!\n\nPlease check file permissions.", MB_ICONERROR);
@@ -490,7 +480,7 @@ bool CUpdateManager::ApplyUpdate() {
 		}
 		
 		LogUpdate("[UpdateManager] Update applied successfully");
-		m_CurrentVersion = m_LatestUpdate.version;
+		strcpy_s(m_CurrentVersion, sizeof(m_CurrentVersion), m_LatestUpdate.version);
 		SaveConfig(".\\Data\\UpdateConfig.ini");
 		
 		if (m_ShowNotifications) {
@@ -500,8 +490,8 @@ bool CUpdateManager::ApplyUpdate() {
 				"File: %s\n"
 				"Version: %s\n\n"
 				"You may need to reload the data file for changes to take effect.",
-				m_LatestUpdate.fileName.c_str(),
-				m_LatestUpdate.version.c_str());
+				m_LatestUpdate.fileName,
+				m_LatestUpdate.version);
 			ShowNotification(msg, MB_ICONINFORMATION);
 		}
 	}
@@ -512,21 +502,37 @@ bool CUpdateManager::ApplyUpdate() {
 }
 
 bool CUpdateManager::CreateBackup(const char* filePath) {
-	std::string backupPath = std::string(filePath) + ".backup";
+	char backupPath[512];
+	sprintf_s(backupPath, sizeof(backupPath), "%s.backup", filePath);
 	
 	if (PathFileExistsA(filePath)) {
-		if (!CopyFileA(filePath, backupPath.c_str(), FALSE)) {
+		if (!CopyFileA(filePath, backupPath, FALSE)) {
 			LogUpdate("[UpdateManager] Failed to create backup: %d", GetLastError());
 			return false;
 		}
-		LogUpdate("[UpdateManager] Backup created: %s", backupPath.c_str());
+		LogUpdate("[UpdateManager] Backup created: %s", backupPath);
 	}
 	
 	return true;
 }
 
-std::string CUpdateManager::GetTempFilePath(const char* fileName) {
-	return m_TempDirectory + "\\" + fileName;
+void CUpdateManager::GetTempFilePath(const char* fileName, char* outPath, int outPathSize) {
+	sprintf_s(outPath, outPathSize, "%s\\%s", m_TempDirectory, fileName);
+}
+
+void CUpdateManager::SetCurrentVersion(const char* version) {
+	strcpy_s(m_CurrentVersion, sizeof(m_CurrentVersion), version);
+}
+
+void CUpdateManager::SetUpdateServerUrl(const char* url) {
+	strcpy_s(m_UpdateServerUrl, sizeof(m_UpdateServerUrl), url);
+}
+
+void CUpdateManager::CalculateFileHash(const char* filePath, char* outHash, int outHashSize) {
+	// Placeholder - implement MD5/SHA256 if needed
+	if (outHash && outHashSize > 0) {
+		outHash[0] = '\0';
+	}
 }
 
 void CUpdateManager::ShowNotification(const char* message, UINT icon) {

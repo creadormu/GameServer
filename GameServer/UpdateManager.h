@@ -27,14 +27,25 @@ enum UpdateFileType {
 
 // Update information structure
 struct UpdateInfo {
-	std::string version;
-	std::string downloadUrl;
-	std::string fileName;
-	std::string fileHash;  // MD5 or SHA256 hash for verification
+	char version[32];
+	char downloadUrl[512];
+	char fileName[256];
+	char fileHash[128];
 	DWORD fileSize;
 	UpdateFileType fileType;
-	std::string description;
-	bool isRequired;       // If true, server must update
+	char description[256];
+	bool isRequired;
+	
+	UpdateInfo() {
+		memset(version, 0, sizeof(version));
+		memset(downloadUrl, 0, sizeof(downloadUrl));
+		memset(fileName, 0, sizeof(fileName));
+		memset(fileHash, 0, sizeof(fileHash));
+		fileSize = 0;
+		fileType = UPDATE_FILE_EXECUTABLE;
+		memset(description, 0, sizeof(description));
+		isRequired = false;
+	}
 };
 
 class CUpdateManager {
@@ -43,9 +54,9 @@ private:
 	bool m_AutoCheck;
 	bool m_AutoDownload;
 	bool m_ShowNotifications;
-	std::string m_UpdateServerUrl;
-	std::string m_CurrentVersion;
-	std::string m_TempDirectory;
+	char m_UpdateServerUrl[512];
+	char m_CurrentVersion[32];
+	char m_TempDirectory[256];
 	
 	UpdateStatus m_Status;
 	UpdateInfo m_LatestUpdate;
@@ -90,11 +101,11 @@ public:
 	UpdateStatus GetStatus() const { return m_Status; }
 	const char* GetStatusString() const;
 	
-	std::string GetCurrentVersion() const { return m_CurrentVersion; }
-	void SetCurrentVersion(const char* version) { m_CurrentVersion = version; }
+	const char* GetCurrentVersion() const { return m_CurrentVersion; }
+	void SetCurrentVersion(const char* version);
 	
-	std::string GetUpdateServerUrl() const { return m_UpdateServerUrl; }
-	void SetUpdateServerUrl(const char* url) { m_UpdateServerUrl = url; }
+	const char* GetUpdateServerUrl() const { return m_UpdateServerUrl; }
+	void SetUpdateServerUrl(const char* url);
 
 	// Notification
 	void ShowNotification(const char* message, UINT icon = MB_ICONINFORMATION);
@@ -104,10 +115,10 @@ private:
 	// Internal helpers
 	bool DownloadFile(const char* url, const char* destPath, DWORD* bytesDownloaded);
 	bool ParseUpdateManifest(const char* manifestData);
-	std::string CalculateFileHash(const char* filePath);
+	void CalculateFileHash(const char* filePath, char* outHash, int outHashSize);
 	bool CreateBackup(const char* filePath);
 	bool RestoreBackup(const char* filePath);
-	std::string GetTempFilePath(const char* fileName);
+	void GetTempFilePath(const char* fileName, char* outPath, int outPathSize);
 	
 	// Thread functions
 	static DWORD WINAPI DownloadThreadProc(LPVOID lpParam);
