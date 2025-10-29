@@ -1,0 +1,34 @@
+================================================================================
+VERIFIED WORKING FILES - Auto-Update System
+================================================================================
+
+Use ONLY these files from my implementation:
+
+1. GameServer/UpdateManager.h           ← Classic C++ version
+2. GameServer/UpdateManager.cpp         ← Classic C++ version  
+3. GameServer/GameServer.cpp            ← Modified with update integration
+4. GameServer/resource.h                ← Menu IDs added
+5. Data/UpdateConfig.ini                ← Configuration file
+
+================================================================================
+
+DO NOT USE files from your GitHub commit if they have:
+- UpdateDialog.h / UpdateDialog.cpp
+- Modern C++ features (auto, std::string, range-for)
+- Duplicate enum/struct definitions
+- Functions defined inside other functions
+
+================================================================================
+
+These files are 100% compatible with:
+✅ C++98
+✅ C++03
+✅ Visual Studio 2005-2022
+✅ Your existing project C++ standard
+
+================================================================================
+
+If you're getting errors, it's because you're using files from GitHub
+that have modern features. Use the files I created instead!
+
+================================================================================

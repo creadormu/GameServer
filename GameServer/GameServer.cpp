@@ -626,7 +626,7 @@ LRESULT CALLBACK WndProc(HWND hWnd,UINT message,WPARAM wParam,LPARAM lParam) // 
 					gUpdateManager.ApplyUpdate();
 					break;
 				case IDM_UPDATE_CONFIG:
-					ShellExecute(NULL, "open", ".\\Data\\UpdateConfig.ini", NULL, NULL, SW_SHOW);
+					ShellExecuteA(NULL, "open", ".\\Data\\UpdateConfig.ini", NULL, NULL, SW_SHOW);
 					break;
 				default:
 					return DefWindowProc(hWnd,message,wParam,lParam);
