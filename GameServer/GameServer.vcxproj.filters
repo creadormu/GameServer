@@ -82,9 +82,6 @@
     <Filter Include="Source Files\LuckyWheel">
       <UniqueIdentifier>{45a6a0cf-c17c-422f-b878-4d48857a3136}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\BotAlchemist">
-      <UniqueIdentifier>{b4a929b5-ba4f-48bf-ace5-7a873f6f978b}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source Files\SmithItem">
       <UniqueIdentifier>{a0844c2d-bc90-43e5-9a6e-17a958a82b6a}</UniqueIdentifier>
     </Filter>
@@ -133,6 +130,9 @@
     <Filter Include="Source Files\FakeOnline">
       <UniqueIdentifier>{62056d31-4f8a-413a-a163-e342c37b6ac6}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\ChangeClass\BotAlchemist">
+      <UniqueIdentifier>{b4a929b5-ba4f-48bf-ace5-7a873f6f978b}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="ReadMe.txt" />
@@ -155,6 +155,9 @@
       <Filter>Resource Files</Filter>
     </None>
     <None Include="icon6.ico">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\..\Media\TopBar.bmp">
       <Filter>Resource Files</Filter>
     </None>
   </ItemGroup>
@@ -931,7 +934,7 @@
       <Filter>Source Files\LuckyWheel</Filter>
     </ClInclude>
     <ClInclude Include="BotAlchemist.h">
-      <Filter>Source Files\BotAlchemist</Filter>
+      <Filter>Source Files\ChangeClass\BotAlchemist</Filter>
     </ClInclude>
     <ClInclude Include="SmithItem.h">
       <Filter>Source Files\SmithItem</Filter>
@@ -991,6 +994,21 @@
       <Filter>Source Files\Licencia</Filter>
     </ClInclude>
     <ClInclude Include="ClassConfig.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="NameManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="PhraseManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="BotCreation_StoredProcedure.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="UpdateManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="UpdateDialog.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -1752,7 +1770,7 @@
       <Filter>Source Files\LuckyWheel</Filter>
     </ClCompile>
     <ClCompile Include="BotAlchemist.cpp">
-      <Filter>Source Files\BotAlchemist</Filter>
+      <Filter>Source Files\ChangeClass\BotAlchemist</Filter>
     </ClCompile>
     <ClCompile Include="SmithItem.cpp">
       <Filter>Source Files\SmithItem</Filter>
@@ -1806,6 +1824,24 @@
       <Filter>Source Files\Licencia</Filter>
     </ClCompile>
     <ClCompile Include="ClassConfig.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="NameManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="PhraseManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="BotRole.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="BotCreation_StoredProcedure.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="UpdateManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="UpdateDialog.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

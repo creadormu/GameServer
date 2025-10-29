@@ -289,6 +289,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <None Include="..\..\Media\TopBar.bmp" />
     <None Include="icon1.ico" />
     <None Include="icon2.ico" />
     <None Include="icon3.ico" />
@@ -315,6 +316,7 @@
     <ClInclude Include="BotBuffer.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release_EX401CS|Win32'">true</ExcludedFromBuild>
     </ClInclude>
+    <ClInclude Include="BotCreation_StoredProcedure.h" />
     <ClInclude Include="BotStore.h" />
     <ClInclude Include="BotTrader.h" />
     <ClInclude Include="CannonTower.h" />
@@ -503,6 +505,7 @@
     <ClInclude Include="MultiWare.h" />
     <ClInclude Include="MuRummy.h" />
     <ClInclude Include="MuunSystem.h" />
+    <ClInclude Include="NameManager.h" />
     <ClInclude Include="NewsProtocol.h" />
     <ClInclude Include="Notice.h" />
     <ClInclude Include="NpcTalk.h" />
@@ -517,6 +520,7 @@
     <ClInclude Include="PentagramSystem.h" />
     <ClInclude Include="PersonalShop.h" />
     <ClInclude Include="PG_Custom.h" />
+    <ClInclude Include="PhraseManager.h" />
     <ClInclude Include="Protect.h" />
     <ClInclude Include="Protocol.h" />
     <ClInclude Include="pugiconfig.hpp" />
@@ -574,6 +578,8 @@
     <ClInclude Include="TuChan.h" />
     <ClInclude Include="Union.h" />
     <ClInclude Include="UnionInfo.h" />
+    <ClInclude Include="UpdateDialog.h" />
+    <ClInclude Include="UpdateManager.h" />
     <ClInclude Include="User.h" />
     <ClInclude Include="Util.h" />
     <ClInclude Include="Viewport.h" />
@@ -595,6 +601,8 @@
     <ClCompile Include="BonusManager.cpp" />
     <ClCompile Include="BotAlchemist.cpp" />
     <ClCompile Include="BotBuffer.cpp" />
+    <ClCompile Include="BotCreation_StoredProcedure.cpp" />
+    <ClCompile Include="BotRole.cpp" />
     <ClCompile Include="BotStore.cpp" />
     <ClCompile Include="BotTrader.cpp" />
     <ClCompile Include="CannonTower.cpp" />
@@ -783,6 +791,7 @@
     <ClCompile Include="MultiWare.cpp" />
     <ClCompile Include="MuRummy.cpp" />
     <ClCompile Include="MuunSystem.cpp" />
+    <ClCompile Include="NameManager.cpp" />
     <ClCompile Include="Notice.cpp" />
     <ClCompile Include="NpcTalk.cpp" />
     <ClCompile Include="ObjectManager.cpp" />
@@ -795,6 +804,7 @@
     <ClCompile Include="PcPoint.cpp" />
     <ClCompile Include="PentagramSystem.cpp" />
     <ClCompile Include="PersonalShop.cpp" />
+    <ClCompile Include="PhraseManager.cpp" />
     <ClCompile Include="Protect.cpp" />
     <ClCompile Include="Protocol.cpp" />
     <ClCompile Include="pugixml.cpp" />
@@ -856,6 +866,8 @@
     <ClCompile Include="TuChan.cpp" />
     <ClCompile Include="Union.cpp" />
     <ClCompile Include="UnionInfo.cpp" />
+    <ClCompile Include="UpdateDialog.cpp" />
+    <ClCompile Include="UpdateManager.cpp" />
     <ClCompile Include="User.cpp" />
     <ClCompile Include="Util.cpp" />
     <ClCompile Include="Viewport.cpp" />

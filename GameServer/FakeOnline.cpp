@@ -50,6 +50,7 @@
 #include "user.h"
 #include "Warehouse.h"
 #include "ResetTable.h"
+#include "PhraseManager.h"
 
 // Function to trim leading and trailing whitespace from a string
 std::string trim(const std::string& str) {
@@ -274,8 +275,8 @@ void CFakeOnline::LoadFakeData(char* path)
     this->m_Data.clear(); 
     this->m_botPVPCombatStates.clear(); 
     this->IndexMsgMax = 0; this->IndexMsgMin = 0;
-    LoadBotPhrasesFromFile(".\\IA\\Phrases\\BotPhrases.txt");
-	LoadBotKeywordResponses(".\\IA\\Answers\\Answering.txt");
+	LoadBotPhrasesFromFile(g_PhraseManager.GetBotPhrasesPath());
+	LoadBotKeywordResponses(g_PhraseManager.GetAnsweringPath());
 	this->LoadFakeBotTradeConfig(".\\IA\\Trade\\FakeBotTrade.txt");
     if (!path) { LeaveCriticalSection(&this->m_BotDataMutex); return; }
     pugi::xml_document file;
@@ -1990,15 +1991,49 @@ void CFakeOnline::TuDongDanhSkill(int aIndex)
              this->m_botPVPCombatStates[aIndex].saidInitialPVPPhrase = false; 
         }
 
-		if (SkillRender->m_skill != SKILL_FLAME && SkillRender->m_skill != SKILL_TWISTER && SkillRender->m_skill != SKILL_EVIL_SPIRIT && SkillRender->m_skill != SKILL_HELL_FIRE && SkillRender->m_skill != SKILL_AQUA_BEAM && SkillRender->m_skill != SKILL_BLAST && SkillRender->m_skill != SKILL_INFERNO && SkillRender->m_skill != SKILL_TRIPLE_SHOT && SkillRender->m_skill != SKILL_IMPALE && SkillRender->m_skill != SKILL_MONSTER_AREA_ATTACK && SkillRender->m_skill != SKILL_PENETRATION && SkillRender->m_skill != SKILL_FIRE_SLASH && SkillRender->m_skill != SKILL_FIRE_SCREAM) {
-			if (SkillRender->m_skill != SKILL_DARK_SIDE) {
-                gAttack.Attack(lpObj, lpTargetObj, SkillRender, TRUE, 1, 0, TRUE, 1); 
-			} else { 
-				this->SendRFSkillAttack(lpObj, targetIndex, SkillRender->m_index);
-			}
-		} else { 
-			this->SendMultiSkillAttack(lpObj, targetIndex, SkillRender->m_index); 
+		// Handle Elf skills: FIVE_SHOT and ICE_ARROW need duration skill attack
+		// Duration skills (single target with duration animation)
+		if (SkillRender->m_skill == SKILL_TWISTING_SLASH || SkillRender->m_skill == SKILL_ICE_STORM ||
+			SkillRender->m_skill == SKILL_FIVE_SHOT || SkillRender->m_skill == SKILL_ICE_ARROW ||
+			SkillRender->m_skill == SKILL_RED_STORM || SkillRender->m_skill == SKILL_SWORD_SLASH ||
+			SkillRender->m_skill == SKILL_LIGHTNING_STORM || SkillRender->m_skill == SKILL_DRAGON_LORE) {
+			LogAdd(LOG_GREEN, "[FakeOnline][%s] Using duration skill attack: %d", lpObj->Name, SkillRender->m_skill);
+			this->SendDurationSkillAttack(lpObj, targetIndex, SkillRender->m_index);
 		}
+
+		// Skills that need both GCSkillAttackSend + Duration (POWER_SLASH, BIRDS)
+		else if (SkillRender->m_skill == SKILL_POWER_SLASH || SkillRender->m_skill == SKILL_BIRDS) {
+			gSkillManager.GCSkillAttackSend(lpObj, SkillRender->m_index, targetIndex, 1);
+			this->SendDurationSkillAttack(lpObj, targetIndex, SkillRender->m_index);
+		}
+
+		// Multi-attack skills (area/multi-target)
+		// Multi-attack skills (area/multi-target)
+		else if (SkillRender->m_skill == SKILL_FLAME || SkillRender->m_skill == SKILL_TWISTER ||
+			SkillRender->m_skill == SKILL_EVIL_SPIRIT || SkillRender->m_skill == SKILL_HELL_FIRE ||
+			SkillRender->m_skill == SKILL_AQUA_BEAM || SkillRender->m_skill == SKILL_BLAST ||
+			SkillRender->m_skill == SKILL_INFERNO || SkillRender->m_skill == SKILL_TRIPLE_SHOT ||
+			SkillRender->m_skill == SKILL_IMPALE || SkillRender->m_skill == SKILL_MONSTER_AREA_ATTACK ||
+			SkillRender->m_skill == SKILL_PENETRATION || SkillRender->m_skill == SKILL_FIRE_SLASH ||
+			SkillRender->m_skill == SKILL_FIRE_SCREAM || SkillRender->m_skill == SKILL_DEATH_STAB ||
+			SkillRender->m_skill == SKILL_FIRE_BURST) {
+			this->SendMultiSkillAttack(lpObj, targetIndex, SkillRender->m_index);
+		}
+		// Simple skill attack (FORCE, CHAIN_LIGHTNING, etc.)
+		else if (SkillRender->m_skill == SKILL_FORCE || SkillRender->m_skill == SKILL_CHAIN_LIGHTNING ||
+			SkillRender->m_skill == SKILL_LARGE_RING_BLOWER || SkillRender->m_skill == SKILL_PHOENIX_SHOT) {
+			this->SendSkillAttack(lpObj, targetIndex, SkillRender->m_index);
+		}
+		// Rage Fighter special skill
+		else if (SkillRender->m_skill == SKILL_DARK_SIDE) {
+			this->SendRFSkillAttack(lpObj, targetIndex, SkillRender->m_index);
+		}
+		// All other skills (single target)
+
+		// All other skills (single target)
+		else {
+			gAttack.Attack(lpObj, lpTargetObj, SkillRender, TRUE, 1, 0, TRUE, 1);
+	}
 	}
     LeaveCriticalSection(&this->m_BotDataMutex);
 }
@@ -2361,7 +2396,11 @@ void CFakeOnline::ChatRecv(LPOBJ lpSender, const char* message)
 			if (replyOptions.empty()) continue;
 
 			std::string reply = replyOptions[rand() % replyOptions.size()];
-			//reply = ReplaceTradePlaceholders(reply, lpBot->Account);
+
+			// Replace trade placeholders if bot can trade
+			reply = ReplaceTradePlaceholders(reply, lpBot->Account);
+
+			// Replace player name placeholder
 			size_t pos = reply.find("{player_name}");
 			if (pos != std::string::npos)
 				reply.replace(pos, 13, lpSender->Name);
@@ -2548,7 +2587,7 @@ bool CFakeOnline::DecreaseBotJewelBank(LPOBJ lpBot, int jewelType, int count) {
 
 
 bool CFakeOnline::HandleFakeBotTrade(int playerIndex, LPOBJ lpBot) {
-	LogAdd(LOG_RED, "[FakeBotTrade] Trade attempt with %s by %s", lpBot->Name, gObj[playerIndex].Name);
+	LogAdd(LOG_RED, "[FakeBotTrade] Player %s pressed OK button on trade with bot %s", gObj[playerIndex].Name, lpBot->Name);
 
 	// Get trade configuration
 	std::string acc = trim(lpBot->Account);
@@ -2629,6 +2668,7 @@ bool CFakeOnline::HandleFakeBotTrade(int playerIndex, LPOBJ lpBot) {
 		int random = rand() % 100;
 		if (random >= config.successRate) {
 			gNotice.NewNoticeSend(playerIndex, 0, 0, 0, 0, 0, "El trade falló por suerte.");
+			LogAdd(LOG_RED, "[FakeBotTrade] Trade failed by success rate [%d/%d]", random, config.successRate);
 			return false;
 		}
 	}
@@ -2654,6 +2694,8 @@ bool CFakeOnline::HandleFakeBotTrade(int playerIndex, LPOBJ lpBot) {
 	}
 
 	gNotice.NewNoticeSend(playerIndex, 0, 0, 0, 0, 0, "Trade completado con éxito.");
+	LogAdd(LOG_GREEN, "[FakeBotTrade] Trade completed successfully between %s and %s", gObj[playerIndex].Name, lpBot->Name);
+
 
 	// Clear trade windows
 	for (int i = 0; i < TRADE_SIZE; i++) {
@@ -2916,8 +2958,19 @@ void CFakeOnline::SendBotTradeItemsToPlayer(int playerIndex, LPOBJ lpBot) {
 
 			DataSend(playerIndex, packet, 25);
 
+			BYTE ItemInfo[MAX_ITEM_INFO];
+
+			// Convert item to byte format (this is critical for visibility!)
+			gItemManager.ItemByteConvert(ItemInfo, lpBot->Trade[i]);
+
+			// Use the standard game trade function (same as BotTrader.cpp)
+			gTrade.GCTradeItemAddSend(playerIndex, i, ItemInfo);
+
+
+
 			LogAdd(LOG_BLUE, "[FakeBotTrade] Sent bot item %d (slot %d) to player %s",
-				pItem->m_Index, i, gObj[playerIndex].Name);
+				lpBot->Trade[i].m_Index, i, gObj[playerIndex].Name);
+
 		}
 	}
 }

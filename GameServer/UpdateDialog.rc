@@ -1,0 +1,57 @@
+// UpdateDialog.rc - Add this to your existing resource.rc file
+
+#include "resource.h"
+#include "UpdateDialog.h"
+
+IDD_UPDATE_DIALOG DIALOGEX 0, 0, 520, 420
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | DS_CENTER | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "MuServer Auto-Update Manager"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    // Title
+    LTEXT           "MuServer Update Manager", IDC_STATIC_TITLE, 14, 10, 490, 16, SS_LEFT
+    
+    // Version Info Group
+    GROUPBOX        "Version Information", IDC_STATIC, 14, 32, 240, 48
+    LTEXT           "Current: 1.0.0", IDC_VERSION_CURRENT, 24, 46, 220, 12
+    LTEXT           "Latest: Checking...", IDC_VERSION_LATEST, 24, 62, 220, 12
+    
+    // Settings Group
+    GROUPBOX        "Settings", IDC_STATIC, 264, 32, 242, 48
+    CONTROL         "Auto-check for updates", IDC_CHK_AUTO_UPDATE, "Button", 
+                    BS_AUTOCHECKBOX | WS_TABSTOP, 274, 46, 220, 12
+    CONTROL         "Auto-download updates", IDC_CHK_AUTO_DOWNLOAD, "Button", 
+                    BS_AUTOCHECKBOX | WS_TABSTOP, 274, 62, 220, 12
+    
+    // Update List
+    GROUPBOX        "Available Updates", IDC_STATIC, 14, 88, 492, 200
+    CONTROL         "", IDC_UPDATE_LIST, WC_LISTVIEW, 
+                    LVS_REPORT | LVS_SINGLESEL | WS_BORDER | WS_TABSTOP, 
+                    24, 102, 472, 160
+    
+    // Description
+    LTEXT           "Description:", IDC_STATIC, 24, 268, 60, 10
+    EDITTEXT        IDC_DESCRIPTION, 24, 280, 472, 32, 
+                    ES_MULTILINE | ES_AUTOVSCROLL | ES_READONLY | WS_VSCROLL
+    
+    // Progress Bar
+    CONTROL         "", IDC_PROGRESS, PROGRESS_CLASS, 
+                    PBS_SMOOTH | WS_BORDER, 14, 322, 492, 18
+    
+    // Status Text
+    LTEXT           "Ready. Click 'Check for Updates' to begin.", IDC_STATUS_TEXT, 
+                    14, 348, 492, 12, SS_LEFT
+    
+    // Action Buttons
+    PUSHBUTTON      "1. Check for Updates", IDC_BTN_CHECK, 14, 372, 115, 32
+    PUSHBUTTON      "2. Download Updates", IDC_BTN_DOWNLOAD, 139, 372, 115, 32
+    PUSHBUTTON      "3. Apply Updates", IDC_BTN_APPLY, 264, 372, 115, 32
+    PUSHBUTTON      "Verify Files", IDC_BTN_VERIFY, 389, 372, 55, 32
+    DEFPUSHBUTTON   "Close", IDC_BTN_CLOSE, 454, 372, 52, 32
+END
+
+// String Table for resource IDs
+STRINGTABLE
+BEGIN
+    IDD_UPDATE_DIALOG       "MuServer Update Manager"
+END

@@ -15,6 +15,10 @@
 #include "MuunSystem.h"
 #include "GensSystem.h"
 #include "FakeOnline.h"
+#include <string>
+#include <algorithm>
+
+
 
 ObjBotTrader BotTrader;
 
@@ -612,6 +616,29 @@ BOOL ObjBotTrader::TradeOpen(int index, int nindex)
 		if (lpObj->Interface.use > 0)
 			return 0;
 
+
+		// Get trade configuration to check if bot can trade
+		std::string acc = lpBot->Account;
+		std::transform(acc.begin(), acc.end(), acc.begin(), ::toupper);
+		auto it = s_FakeOnline.m_TradeData.find(acc);
+
+		if (it == s_FakeOnline.m_TradeData.end()) {
+			gNotice.NewNoticeSend(lpObj->Index, 0, 0, 0, 0, 0, "Este bot no puede hacer trade.");
+			return 0;
+		}
+
+		const auto& config = it->second;
+
+		// FIXED: Check if bot has required items BEFORE accepting trade
+		if (!s_FakeOnline.BotHasRewardItems(lpBot, config.rewardItems)) {
+			gNotice.NewNoticeSend(lpObj->Index, 0, 0, 0, 0, 0, "El bot no tiene los items necesarios en este momento.");
+			LogAdd(LOG_RED, "[FakeBotTrade] Bot %s cannot trade - missing items", lpBot->Name);
+			return 0;
+		}
+
+
+
+
 		for (int n = 0; n < TRADE_SIZE; n++)
 			lpObj->Trade[n].Clear();
 
@@ -636,6 +663,32 @@ BOOL ObjBotTrader::TradeOpen(int index, int nindex)
 		lpBot->Transaction = 1;
 
 		LogAdd(LOG_RED, "[FakeBotTrade] Trade abierto con %s (FAKE)", lpBot->Name);
+
+		// FIXED: Move bot items to trade window and show them to player
+// This happens when trade opens, NOT when player presses OK
+		if (!s_FakeOnline.MoveBotRewardItemsToTrade(lpBot, config.rewardItems)) {
+			gNotice.NewNoticeSend(lpObj->Index, 0, 0, 0, 0, 0, "Error preparando items del bot.");
+			// Clean up the trade state
+			lpObj->Interface.use = 0;
+			lpObj->Interface.type = 0;
+			lpObj->Interface.state = 0;
+			lpObj->TargetNumber = -1;
+			lpBot->Interface.use = 0;
+			lpBot->Interface.type = 0;
+			lpBot->Interface.state = 0;
+			lpBot->TargetNumber = -1;
+			return 0;
+		}
+
+		// Now show bot items to player (using proper visibility function)
+		s_FakeOnline.SendBotTradeItemsToPlayer(lpObj->Index, lpBot);
+
+		// Send notice to player about what items are needed
+		gNotice.NewNoticeSend(lpObj->Index, 0, 0, 0, 0, 0, "%s: Put the required items and press OK!", lpBot->Name);
+
+		LogAdd(LOG_GREEN, "[FakeBotTrade] Trade abierto con %s (FAKE) - Bot items shown", lpBot->Name);
+
+
 		return 1;
 	}
 

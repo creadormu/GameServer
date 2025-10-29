@@ -1,4 +1,4 @@
-#include "stdafx.h"
+﻿#include "stdafx.h"
 #include "Resource.h"
 #include "BloodCastle.h"
 #include "CastleDeep.h"
@@ -40,6 +40,20 @@
 #include "Guild.h"
 #include "Path.h"
 #include "ClassConfig.h"
+#include "NameManager.h"
+#include "PhraseManager.h"
+#include "pugixml.hpp"
+#include <fstream>
+#include <sstream>
+#include "BotCreation_StoredProcedure.h"
+#include <sql.h>
+#include <sqlext.h>
+#pragma comment(lib, "odbc32.lib")
+#include "UpdateManager.h"
+#include <shellapi.h>
+#pragma comment(lib, "shell32.lib")
+#include "UpdateManager.h"
+#include "UpdateDialog.h"
 
 
 TCHAR szTitle[MAX_LOADSTRING];
@@ -47,6 +61,42 @@ TCHAR szWindowClass[MAX_LOADSTRING];
 HINSTANCE hInst;
 HWND hWnd;
 int Conectar = 0;
+
+HWND hWndComboBox;
+
+
+
+// ====================================
+// ADD THESE GLOBAL VARIABLES AT THE TOP OF GameServer.cpp
+// (After #includes, before WinMain)
+// ====================================
+
+HBRUSH g_hBrushBlack = NULL;
+HBRUSH g_hBrushRed = NULL;
+HBRUSH g_hBrushDarkGray = NULL;
+
+// ====================================
+// ADD THIS FUNCTION TO CREATE BRUSHES
+// Call this in WinMain after window creation
+// ====================================
+
+void InitializeDialogBrushes()
+{
+	if (g_hBrushBlack == NULL)
+	{
+		g_hBrushBlack = CreateSolidBrush(RGB(20, 20, 20));      // Dark black
+		g_hBrushRed = CreateSolidBrush(RGB(60, 0, 0));          // Dark red
+		g_hBrushDarkGray = CreateSolidBrush(RGB(40, 40, 40));   // Dark gray
+	}
+}
+
+void CleanupDialogBrushes()
+{
+	if (g_hBrushBlack) DeleteObject(g_hBrushBlack);
+	if (g_hBrushRed) DeleteObject(g_hBrushRed);
+	if (g_hBrushDarkGray) DeleteObject(g_hBrushDarkGray);
+}
+
 
 
 int APIENTRY WinMain(HINSTANCE hInstance,HINSTANCE hPrevInstance,LPSTR lpCmdLine,int nCmdShow) // OK
@@ -76,6 +126,10 @@ int APIENTRY WinMain(HINSTANCE hInstance,HINSTANCE hPrevInstance,LPSTR lpCmdLine
 	gServerInfo.ReadStartupInfo("GameServerInfo",".\\Data\\GameServerInfo - Common.dat");
 	// Initialize class configuration
 	g_ClassConfigManager.Initialize();
+	// Initialize name manager
+	g_NameManager.Initialize();
+	g_PhraseManager.Initialize();
+
 
 	#if(PROTECT_STATE==1)
 
@@ -225,7 +279,21 @@ LRESULT CALLBACK WndProc(HWND hWnd,UINT message,WPARAM wParam,LPARAM lParam) // 
 		case WM_CREATE:
 
 		{
+			// Initialize update manager after window is created
+			gUpdateManager.Init(hWnd);
 
+			// Create update dialog instance
+			if (!g_UpdateDialog) {
+				g_UpdateDialog = new CUpdateDialog();
+			}
+
+			// Set up timer for auto-check (every 1 hour)
+			SetTimer(hWnd, UPDATE_TIMER_ID, UPDATE_CHECK_INTERVAL, NULL);
+
+			break;
+		}
+
+		{
             hWndStatusBar = CreateWindowEx(
 
             0,
@@ -336,6 +404,7 @@ LRESULT CALLBACK WndProc(HWND hWnd,UINT message,WPARAM wParam,LPARAM lParam) // 
 
 					//==================================================================================================================================================
 					//FakeOnline_EMU	
+
 #if USE_FAKE_ONLINE == TRUE
 
 				case ID_FAKEONLINE_RELOADDATA:
@@ -607,10 +676,101 @@ LRESULT CALLBACK WndProc(HWND hWnd,UINT message,WPARAM wParam,LPARAM lParam) // 
 				case IDM_SWAMP_OF_PIECE:
 					gSwampEvent.StartEvent();
 					break;
+
+				case IDM_UPDATE_DIALOG:
+					// Open the modern update dialog (RECOMMENDED)
+					gUpdateManager.ShowUpdateDialog();
+					break;
+
+				case IDM_UPDATE_CHECK:
+					// Quick check from menu
+				{
+					if (gUpdateManager.CheckForUpdates()) {
+						if (gUpdateManager.IsUpdateAvailable()) {
+							MessageBox(hWnd,
+								"Updates are available!\n\n"
+								"Open Update Manager to download and apply them.",
+								"Updates Available",
+								MB_ICONINFORMATION);
+						}
+						else {
+							MessageBox(hWnd,
+								"Your server is up to date!",
+								"No Updates",
+								MB_ICONINFORMATION);
+						}
+					}
+					else {
+						MessageBox(hWnd,
+							"Failed to check for updates.\n"
+							"Please check your internet connection.",
+							"Update Check Failed",
+							MB_ICONERROR);
+					}
+				}
+				break;
+
+				case IDM_UPDATE_DOWNLOAD:
+					// Quick download (not recommended - use dialog instead)
+				{
+					auto updates = gUpdateManager.GetAvailableUpdates();
+					if (updates.empty()) {
+						MessageBox(hWnd,
+							"No updates available.\n"
+							"Please check for updates first.",
+							"No Updates",
+							MB_ICONINFORMATION);
+					}
+					else {
+						MessageBox(hWnd,
+							"Please use the Update Manager dialog for downloading.\n\n"
+							"Menu: Update → Update Manager",
+							"Use Update Manager",
+							MB_ICONINFORMATION);
+					}
+				}
+				break;
+
+				case IDM_UPDATE_APPLY:
+					// Quick apply (not recommended - use dialog instead)
+				{
+					MessageBox(hWnd,
+						"Please use the Update Manager dialog for applying updates.\n\n"
+						"Menu: Update → Update Manager\n\n"
+						"This ensures proper verification and backup.",
+						"Use Update Manager",
+						MB_ICONINFORMATION);
+				}
+				break;
+
+
+				case IDM_UPDATE_CONFIG:
+					// Open configuration dialog
+				{
+					char msg[512];
+					sprintf_s(msg, sizeof(msg),
+						"Update Configuration:\n\n"
+						"Enabled: %s\n"
+						"Auto-Check: %s\n"
+						"Auto-Download: %s\n"
+						"Server URL: %s\n"
+						"Current Version: %s\n\n"
+						"Edit Data\\UpdateConfig.ini to change settings.",
+						gUpdateManager.IsEnabled() ? "Yes" : "No",
+						gUpdateManager.IsAutoCheckEnabled() ? "Yes" : "No",
+						gUpdateManager.IsAutoDownloadEnabled() ? "Yes" : "No",
+						gUpdateManager.GetUpdateServerUrl().c_str(),
+						gUpdateManager.GetCurrentVersion().c_str());
+
+					MessageBox(hWnd, msg, "Update Configuration", MB_ICONINFORMATION);
+				}
+				break;
+
 				default:
-					return DefWindowProc(hWnd,message,wParam,lParam);
+					return DefWindowProc(hWnd, message, wParam, lParam);
 			}
 			break;
+	
 		case WM_CLOSE:
 			if (MessageBox(0, "Close GameServer?", "GameServer", MB_OKCANCEL) == IDOK)
 			{
@@ -619,6 +779,15 @@ LRESULT CALLBACK WndProc(HWND hWnd,UINT message,WPARAM wParam,LPARAM lParam) // 
 			break;
 		case WM_TIMER:
 			switch(wParam)
+
+			{
+				if (wParam == UPDATE_TIMER_ID) {
+					// Automatic update check
+					gUpdateManager.OnTimer();
+				}
+				break;
+			}
+
 			{
 				case WM_TIMER_1000:
 					GJServerUserInfoSend();
@@ -666,6 +835,16 @@ LRESULT CALLBACK WndProc(HWND hWnd,UINT message,WPARAM wParam,LPARAM lParam) // 
 		return 0;
 		break;
 		case WM_DESTROY:
+
+		{
+			// Cleanup
+			KillTimer(hWnd, UPDATE_TIMER_ID);
+
+			if (g_UpdateDialog) {
+				delete g_UpdateDialog;
+				g_UpdateDialog = nullptr;
+			}
+
 			PostQuitMessage(0);
 			break;
 		default:
@@ -674,6 +853,356 @@ LRESULT CALLBACK WndProc(HWND hWnd,UINT message,WPARAM wParam,LPARAM lParam) // 
 
 	return 0;
 }
+
+
+// Alternative: Simplified menu for console app
+void HandleUpdateMenu()
+{
+	printf("\n╔════════════════════════════════════════╗\n");
+	printf("║       MuServer Update Manager          ║\n");
+	printf("╠════════════════════════════════════════╣\n");
+	printf("║  1. Open Update Manager Dialog         ║\n");
+	printf("║  2. Quick Check for Updates            ║\n");
+	printf("║  3. View Current Configuration         ║\n");
+	printf("║  4. Enable/Disable Auto-Update         ║\n");
+	printf("║  0. Back to Main Menu                  ║\n");
+	printf("╚════════════════════════════════════════╝\n");
+	printf("Select option: ");
+
+	int choice;
+	scanf("%d", &choice);
+
+	switch (choice)
+	{
+	case 1:
+		gUpdateManager.ShowUpdateDialog();
+		break;
+
+	case 2:
+		printf("\nChecking for updates...\n");
+		if (gUpdateManager.CheckForUpdates()) {
+			auto updates = gUpdateManager.GetAvailableUpdates();
+			if (updates.empty()) {
+				printf("✓ Server is up to date!\n");
+			}
+			else {
+				printf("! %d update(s) available:\n", (int)updates.size());
+				for (const auto& update : updates) {
+					printf("  - %s (%s -> %s)\n",
+						update.fileName.c_str(),
+						update.currentVersion.c_str(),
+						update.version.c_str());
+				}
+				printf("\nUse Update Manager dialog to download and apply.\n");
+			}
+		}
+		else {
+			printf("✗ Failed to check for updates.\n");
+		}
+		break;
+
+	case 3:
+		printf("\n╔════════════════════════════════════════╗\n");
+		printf("║       Update Configuration             ║\n");
+		printf("╠════════════════════════════════════════╣\n");
+		printf("║ Enabled:       %-23s ║\n",
+			gUpdateManager.IsEnabled() ? "Yes" : "No");
+		printf("║ Auto-Check:    %-23s ║\n",
+			gUpdateManager.IsAutoCheckEnabled() ? "Yes" : "No");
+		printf("║ Auto-Download: %-23s ║\n",
+			gUpdateManager.IsAutoDownloadEnabled() ? "Yes" : "No");
+		printf("║ Version:       %-23s ║\n",
+			gUpdateManager.GetCurrentVersion().c_str());
+		printf("║ Status:        %-23s ║\n",
+			gUpdateManager.GetStatusString());
+		printf("╚════════════════════════════════════════╝\n");
+		break;
+
+	case 4:
+	{
+		bool current = gUpdateManager.IsEnabled();
+		gUpdateManager.SetEnabled(!current);
+		printf("\nAuto-Update %s\n", !current ? "ENABLED" : "DISABLED");
+	}
+	break;
+
+	}
+
+
+
+	// Notification example - call this when updates are found
+	void NotifyUpdatesAvailable()
+	{
+		if (!gUpdateManager.IsUpdateAvailable()) {
+			return;
+		}
+
+		auto updates = gUpdateManager.GetAvailableUpdates();
+
+		char notification[512];
+		sprintf_s(notification, sizeof(notification),
+			"═══════════════════════════════════════\n"
+			"  SERVER UPDATES AVAILABLE\n"
+			"═══════════════════════════════════════\n"
+			"\n"
+			"%d file(s) have updates ready:\n\n",
+			(int)updates.size());
+
+		std::string fileList;
+		for (size_t i = 0; i < updates.size() && i < 5; i++) {
+			char line[128];
+			sprintf_s(line, "  • %s v%s\n",
+				updates[i].fileName.c_str(),
+				updates[i].version.c_str());
+			fileList += line;
+		}
+
+		if (updates.size() > 5) {
+			fileList += "  ... and more\n";
+		}
+
+		fileList += "\nOpen Update Manager to install.\n";
+
+		strcat_s(notification, fileList.c_str());
+
+		LogAdd(LOG_RED, notification);
+	}
+
+
+// ====================================
+// BOT AUTOMATION HELPER FUNCTIONS
+// ====================================
+
+// Execute SQL file using SQLCMD (SQL Server command-line tool)
+bool ExecuteSQLFile(const char* sqlFilePath, const char* serverName, const char* databaseName, char* errorMsg, int errorMsgSize)
+{
+	// Build SQLCMD command with Windows Authentication
+	char cmdLine[1024];
+	sprintf_s(cmdLine, sizeof(cmdLine),
+		"sqlcmd -S \"%s\" -d \"%s\" -E -i \"%s\" -o \"IA\\Generated\\SQLOutput.log\"",
+		serverName, databaseName, sqlFilePath);
+
+	LogAdd(LOG_BLUE, "[ExecuteSQL] Command: %s", cmdLine);
+
+	// Execute SQLCMD
+	STARTUPINFOA si = { sizeof(si) };
+	PROCESS_INFORMATION pi;
+	si.dwFlags = STARTF_USESHOWWINDOW;
+	si.wShowWindow = SW_HIDE;
+
+	if (!CreateProcessA(NULL, cmdLine, NULL, NULL, FALSE, CREATE_NO_WINDOW, NULL, NULL, &si, &pi))
+	{
+		sprintf_s(errorMsg, errorMsgSize, "Failed to start SQLCMD.\nError: %d\n\nMake sure SQL Server tools are installed!", GetLastError());
+		LogAdd(LOG_RED, "[ExecuteSQL] CreateProcess failed: %d", GetLastError());
+		return false;
+	}
+
+	// Wait for completion (timeout: 60 seconds)
+	DWORD waitResult = WaitForSingleObject(pi.hProcess, 60000);
+
+	DWORD exitCode = 0;
+	GetExitCodeProcess(pi.hProcess, &exitCode);
+
+	CloseHandle(pi.hProcess);
+	CloseHandle(pi.hThread);
+
+	if (waitResult == WAIT_TIMEOUT)
+	{
+		sprintf_s(errorMsg, errorMsgSize, "SQL execution timeout (>60s)");
+		LogAdd(LOG_RED, "[ExecuteSQL] Timeout");
+		return false;
+	}
+
+	if (exitCode != 0)
+	{
+		sprintf_s(errorMsg, errorMsgSize, "SQLCMD failed with exit code: %d\n\nCheck IA\\Generated\\SQLOutput.log for details", exitCode);
+		LogAdd(LOG_RED, "[ExecuteSQL] Exit code: %d", exitCode);
+		return false;
+	}
+
+	LogAdd(LOG_GREEN, "[ExecuteSQL] Success!");
+	return true;
+}
+
+// Update or Replace Accounts.xml from IA_Accounts.xml
+bool UpdateAccountsXML(bool replaceMode, char* errorMsg, int errorMsgSize)
+{
+	using namespace pugi;
+
+	const char* sourceFile = "IA\\Generated\\IA_Accounts.xml";
+	const char* targetFile = "IA\\Accounts.xml";
+	const char* backupFile = "IA\\Accounts_Backup.xml";
+
+	// Load source file (generated bots)
+	xml_document sourceDoc;
+	xml_parse_result sourceResult = sourceDoc.load_file(sourceFile);
+
+	if (!sourceResult)
+	{
+		sprintf_s(errorMsg, errorMsgSize, "Failed to load source file:\n%s\n\nError: %s", sourceFile, sourceResult.description());
+		LogAdd(LOG_RED, "[UpdateXML] Failed to load source: %s", sourceResult.description());
+		return false;
+	}
+
+	xml_node sourceRoot = sourceDoc.child("FakeOnlineData");
+	if (!sourceRoot)
+	{
+		sprintf_s(errorMsg, errorMsgSize, "Invalid XML format in source file!");
+		LogAdd(LOG_RED, "[UpdateXML] No FakeOnlineData root in source");
+		return false;
+	}
+
+	if (replaceMode)
+	{
+		// REPLACE MODE: Create backup and copy source to target
+		LogAdd(LOG_BLUE, "[UpdateXML] REPLACE mode");
+
+		// Backup existing file if it exists
+		if (GetFileAttributesA(targetFile) != INVALID_FILE_ATTRIBUTES)
+		{
+			if (!CopyFileA(targetFile, backupFile, FALSE))
+			{
+				sprintf_s(errorMsg, errorMsgSize, "Failed to create backup file!");
+				LogAdd(LOG_RED, "[UpdateXML] Backup failed");
+				return false;
+			}
+			LogAdd(LOG_GREEN, "[UpdateXML] Backup created: %s", backupFile);
+		}
+
+		// Copy source to target
+		if (!CopyFileA(sourceFile, targetFile, FALSE))
+		{
+			sprintf_s(errorMsg, errorMsgSize, "Failed to copy file!");
+			LogAdd(LOG_RED, "[UpdateXML] Copy failed");
+			return false;
+		}
+
+		LogAdd(LOG_GREEN, "[UpdateXML] REPLACE completed!");
+		return true;
+	}
+	else
+	{
+		// UPDATE MODE: Merge new bots into existing file
+		LogAdd(LOG_BLUE, "[UpdateXML] UPDATE mode");
+
+		xml_document targetDoc;
+		xml_parse_result targetResult = targetDoc.load_file(targetFile);
+
+		// If target doesn't exist or is invalid, create new
+		if (!targetResult)
+		{
+			LogAdd(LOG_BLUE, "[UpdateXML] Target doesn't exist, creating new");
+			if (!CopyFileA(sourceFile, targetFile, FALSE))
+			{
+				sprintf_s(errorMsg, errorMsgSize, "Failed to create target file!");
+				return false;
+			}
+			return true;
+		}
+
+		xml_node targetRoot = targetDoc.child("FakeOnlineData");
+		if (!targetRoot)
+		{
+			// Create root if missing
+			targetRoot = targetDoc.append_child("FakeOnlineData");
+		}
+
+		// Backup existing file
+		if (!CopyFileA(targetFile, backupFile, FALSE))
+		{
+			LogAdd(LOG_RED, "[UpdateXML] Warning: Backup failed");
+		}
+
+		// Build map of existing accounts for duplicate checking
+		std::map<std::string, xml_node> existingAccounts;
+		for (xml_node info = targetRoot.child("Info"); info; info = info.next_sibling("Info"))
+		{
+			const char* account = info.attribute("Account").value();
+			if (account && account[0] != '\\0')
+			{
+				existingAccounts[account] = info;
+			}
+		}
+
+		// Merge new bots
+		int addedCount = 0;
+		int updatedCount = 0;
+
+		for (xml_node sourceInfo = sourceRoot.child("Info"); sourceInfo; sourceInfo = sourceInfo.next_sibling("Info"))
+		{
+			const char* account = sourceInfo.attribute("Account").value();
+			if (!account || account[0] == '\\0')
+				continue;
+
+			auto it = existingAccounts.find(account);
+			if (it != existingAccounts.end())
+			{
+				// Update existing
+				xml_node existingNode = it->second;
+
+				// Copy all attributes
+				for (xml_attribute attr = sourceInfo.first_attribute(); attr; attr = attr.next_attribute())
+				{
+					existingNode.attribute(attr.name()).set_value(attr.value());
+				}
+
+				updatedCount++;
+			}
+			else
+			{
+				// Add new
+				targetRoot.append_copy(sourceInfo);
+				addedCount++;
+			}
+		}
+
+		// Copy MSGThongBao and Config from source if they exist
+		xml_node sourceMSG = sourceDoc.child("MSGThongBao");
+		if (sourceMSG)
+		{
+			xml_node targetMSG = targetDoc.child("MSGThongBao");
+			if (!targetMSG)
+			{
+				targetDoc.prepend_copy(sourceMSG);
+			}
+		}
+
+		xml_node sourceConfig = sourceDoc.child("Config");
+		if (sourceConfig)
+		{
+			xml_node targetConfig = targetDoc.child("Config");
+			if (!targetConfig)
+			{
+				xml_node msgNode = targetDoc.child("MSGThongBao");
+				if (msgNode)
+				{
+					targetDoc.insert_copy_after(sourceConfig, msgNode);
+				}
+				else
+				{
+					targetDoc.prepend_copy(sourceConfig);
+				}
+			}
+		}
+
+		// Save merged file
+		if (!targetDoc.save_file(targetFile))
+		{
+			sprintf_s(errorMsg, errorMsgSize, "Failed to save merged file!");
+			LogAdd(LOG_RED, "[UpdateXML] Save failed");
+			return false;
+		}
+
+		LogAdd(LOG_GREEN, "[UpdateXML] UPDATE completed! Added: %d, Updated: %d", addedCount, updatedCount);
+
+		// Store counts for message box
+		sprintf_s(errorMsg, errorMsgSize, "Added: %d new bots\\nUpdated: %d existing bots", addedCount, updatedCount);
+		return true;
+	}
+}
+
+
+
 
 // ====================================
 // CLASS CONFIGURATION DIALOG
@@ -775,15 +1304,301 @@ INT_PTR CALLBACK ConfigClassDialogProc(HWND hDlg, UINT message, WPARAM wParam, L
 			return TRUE;
 		}
 		else if (LOWORD(wParam) == IDCANCEL)
+
+		{
+
+			EndDialog(hDlg, IDCANCEL);
+			return TRUE;
+		}
+
+		else if (LOWORD(wParam) == IDC_BTN_TESTCONNECTION)
+		{
+			// Test SQL Connection button
+			char serverName[128] = ".\\SQLEXPRESS";
+			GetDlgItemTextA(hDlg, IDC_EDIT_SQLSERVER, serverName, sizeof(serverName));
+
+			// Use default if empty
+			if (strlen(serverName) == 0)
+				strcpy_s(serverName, ".\\SQLEXPRESS");
+
+			EnableWindow(hDlg, FALSE);
+			SetCursor(LoadCursor(NULL, IDC_WAIT));
+
+			std::vector<std::string> databases;
+			char errorMsg[512];
+
+			if (TestSQLConnection(serverName, databases, errorMsg, sizeof(errorMsg)))
+			{
+				// Populate database combo
+				HWND hComboDb = GetDlgItem(hDlg, IDC_COMBO_DATABASES);
+				SendMessage(hComboDb, CB_RESETCONTENT, 0, 0);
+
+				for (size_t i = 0; i < databases.size(); i++)
+				{
+					SendMessage(hComboDb, CB_ADDSTRING, 0, (LPARAM)databases[i].c_str());
+				}
+
+				// Auto-select MuOnline if it exists
+				int muIndex = SendMessage(hComboDb, CB_FINDSTRINGEXACT, -1, (LPARAM)"MuOnline");
+				if (muIndex != CB_ERR)
+				{
+					SendMessage(hComboDb, CB_SETCURSEL, muIndex, 0);
+				}
+				else if (databases.size() > 0)
+				{
+					SendMessage(hComboDb, CB_SETCURSEL, 0, 0);
+				}
+
+				SetCursor(LoadCursor(NULL, IDC_ARROW));
+				EnableWindow(hDlg, TRUE);
+
+				char successMsg[512];
+				sprintf_s(successMsg, sizeof(successMsg),
+					"? Connection successful!\n\nServer: %s\n\nFound %d databases.\nSelect one from the dropdown.",
+					serverName, databases.size());
+				MessageBox(hDlg, successMsg, "SQL Connection Test", MB_OK | MB_ICONINFORMATION);
+			}
+			else
+			{
+				SetCursor(LoadCursor(NULL, IDC_ARROW));
+				EnableWindow(hDlg, TRUE);
+				MessageBox(hDlg, errorMsg, "Connection Test Failed", MB_OK | MB_ICONERROR);
+			}
+
+			return TRUE;
+		}
+		else if (LOWORD(wParam) == IDC_BTN_REFRESHDB)
+		{
+			// Refresh database list - same as test connection
+			SendMessage(hDlg, WM_COMMAND, MAKEWPARAM(IDC_BTN_TESTCONNECTION, BN_CLICKED), (LPARAM)GetDlgItem(hDlg, IDC_BTN_TESTCONNECTION));
+			return TRUE;
+		}
+		else if (LOWORD(wParam) == WM_CLOSE)
 		{
 			EndDialog(hDlg, IDCANCEL);
 			return TRUE;
 		}
+
+
+
 		break;
 	}
+
+		case WM_CLOSE:  // ADD THIS
+			EndDialog(hDlg, IDCANCEL);
+			return TRUE;
+
 	}
 
 	return FALSE;
+}
+
+
+
+
+// Redirect old function to new implementation
+bool CreateMultipleBotsAdvanced(int botCount, int startFrom, int gateNumber, int mapNumber, int mapX, int mapY,
+	int minLevel, int maxLevel, int selectedClass, int phamViTrain, int moveRange, int timeReturn,
+	int tuNhatItem, int tuDongReset, int partyMode, int pvpMode, int postKhiDie, int enabledConfigs)
+{
+	LogAdd(LOG_BLACK, (char*)"[CreateBots] ===== START =====");
+	LogAdd(LOG_BLACK, (char*)"[CreateBots] Count=%d, StartFrom=%d, EnabledConfigs=%d", botCount, startFrom, enabledConfigs);
+
+	// SAFETY CHECKS
+	if (botCount > 1000 || botCount < 1)
+	{
+		LogAdd(LOG_RED, (char*)"[CreateBots] ERROR: Invalid bot count");
+		return false;
+	}
+
+	if (startFrom < 1)
+	{
+		LogAdd(LOG_RED, (char*)"[CreateBots] ERROR: Invalid start number");
+		return false;
+	}
+
+	// Class configuration
+	struct ClassConfig {
+		int classCode;
+		const char* className;
+		int mainSkill;
+		int secondarySkill;
+		int buff1, buff2, buff3;
+		int percentage;
+		int str, dex, vit, ene, cmd;
+		bool useFemaleNames;
+	};
+
+	ClassConfig classes[] = {
+		{0,  "DW",  9,   12,  16,  -1,  -1, 15, 2000, 2000, 2000, 5000, 0,    false},
+		{16, "DK",  44,  41,  48,  -1,  -1, 30, 5000, 4500, 5500, 4000, 0,    false},
+		{32, "ELF", 24,  52,  26,  27,  28, 20, 2500, 4500, 2500, 3000, 0,    true},
+		{48, "MG",  8,  55,   -1,  -1,  -1, 10, 4000, 3000, 4000, 4000, 0,    false},
+		{64, "DL",  65,  61,  64,  -1,  -1, 10, 4500, 3500, 4500, 2500, 5000, false},
+		{80, "SUM", 214, 215, 217, 218, -1, 10, 2000, 2000, 2000, 5000, 0,    true},
+		{96, "RF",  264, 263, 266, 268, -1, 5,  4500, 4500, 4500, 2000, 0,    false}
+	};
+
+	int classCount = sizeof(classes) / sizeof(classes[0]);
+
+	// Calculate cumulative percentages
+	int cumulativePercentages[10];
+	int total = 0;
+	for (int i = 0; i < classCount; i++)
+	{
+		total += classes[i].percentage;
+		cumulativePercentages[i] = total;
+	}
+
+	LogAdd(LOG_BLACK, (char*)"[CreateBots] Opening XML file...");
+
+	// Open ONLY XML file (no SQL file!)
+	FILE* xmlFile = NULL;
+	errno_t err = fopen_s(&xmlFile, "IA\\Generated\\IA_Accounts.xml", "w");
+	if (err != 0 || !xmlFile)
+	{
+		LogAdd(LOG_RED, (char*)"[CreateBots] FAILED to open XML file! Error: %d", err);
+		return false;
+	}
+	LogAdd(LOG_GREEN, (char*)"[CreateBots] XML file opened successfully");
+
+	// Write XML header
+	fputs("<?xml version=\"1.0\" encoding=\"utf-8\"?>\n\n", xmlFile);
+	fputs("<MSGThongBao IndexMesMin=\"3020\" IndexMesMax=\"3030\"/>\n\n", xmlFile);
+	fputs("<Config DelayRange=\"40000\" />\n\n", xmlFile);
+	fputs("<FakeOnlineData>\n", xmlFile);
+
+	LogAdd(LOG_GREEN, (char*)"[CreateBots] Starting bot generation...");
+
+	// Process bots
+	int successCount = 0;
+	int failCount = 0;
+
+	for (int i = 0; i < botCount; i++)
+	{
+		int botNumber = startFrom + i;
+		char account[11];
+		char charName[11];
+
+		sprintf_s(account, sizeof(account), "Bot%04d", botNumber);
+
+		// Select class
+		ClassConfig* selectedClassConfig = NULL;
+
+		if (selectedClass == -1)
+		{
+			int randValue = i % 100;
+			for (int j = 0; j < classCount; j++)
+			{
+				if (randValue < cumulativePercentages[j])
+				{
+					selectedClassConfig = &classes[j];
+					break;
+				}
+			}
+		}
+		else
+		{
+			for (int j = 0; j < classCount; j++)
+			{
+				if (classes[j].classCode == selectedClass)
+				{
+					selectedClassConfig = &classes[j];
+					break;
+				}
+			}
+		}
+
+		if (!selectedClassConfig) selectedClassConfig = &classes[0];
+
+		// Select random config
+		int configIndex = g_ClassConfigManager.GetRandomConfigIndex(enabledConfigs);
+
+		// Verify class is configured
+		if (!g_ClassConfigManager.IsClassConfigured(selectedClassConfig->classCode, configIndex))
+		{
+			LogAdd(LOG_RED, (char*)"[CreateBots] Class %s NOT configured in Config %d!",
+				selectedClassConfig->className, configIndex);
+			fclose(xmlFile);
+			return false;
+		}
+
+		// Generate name
+		if (selectedClassConfig->useFemaleNames)
+		{
+			sprintf_s(charName, sizeof(charName), "%s%d",
+				g_NameManager.GetRandomFemaleName(), GetLargeRand() % 90 + 10);
+		}
+		else
+		{
+			sprintf_s(charName, sizeof(charName), "%s%d",
+				g_NameManager.GetRandomMaleName(), GetLargeRand() % 90 + 10);
+		}
+
+		int level = minLevel + (GetLargeRand() % (maxLevel - minLevel + 1));
+		int finalMapX = mapX + ((i % 20) - 10);
+		int finalMapY = mapY + (((i / 20) % 20) - 10);
+
+		// Write to XML (KEEP THIS!)
+		fprintf(xmlFile,
+			"  <Info Account=\"%s\" Password=\"123456\" Name=\"%s\" "
+			"SkillID=\"%d\" SecondarySkillID=\"%d\" "
+			"UseBuffs_0=\"%d\" UseBuffs_1=\"%d\" UseBuffs_2=\"%d\" "
+			"GateNumber=\"%d\" Map=\"%d\" MapX=\"%d\" MapY=\"%d\" "
+			"PhamViTrain=\"%d\" MoveRange=\"%d\" TimeReturn=\"%d\" "
+			"TuNhatItem=\"%d\" TuDongReset=\"%d\" "
+			"PartyMode=\"%d\" PVPMode=\"%d\" PostKhiDie=\"%d\" />\n",
+			account, charName,
+			selectedClassConfig->mainSkill, selectedClassConfig->secondarySkill,
+			selectedClassConfig->buff1, selectedClassConfig->buff2, selectedClassConfig->buff3,
+			gateNumber, mapNumber, finalMapX, finalMapY,
+			phamViTrain, moveRange, timeReturn,
+			tuNhatItem, tuDongReset,
+			partyMode, pvpMode, postKhiDie
+		);
+
+		// Get hex data
+		const char* invHex = g_ClassConfigManager.GetInventoryHex(selectedClassConfig->classCode, configIndex);
+		const char* magicHex = g_ClassConfigManager.GetMagicListHex(selectedClassConfig->classCode, configIndex);
+
+		if (!invHex || !magicHex)
+		{
+			LogAdd(LOG_RED, (char*)"[CreateBots] Bot %d: Failed to get hex data", i + 1);
+			failCount++;
+			continue;
+		}
+
+		// =====================================================
+		// NEW: Call stored procedure instead of writing SQL file
+		// =====================================================
+		if (CallBotStoredProcedure(account, charName, selectedClassConfig->classCode,
+			level, mapNumber, finalMapX, finalMapY,
+			selectedClassConfig->str, selectedClassConfig->dex,
+			selectedClassConfig->vit, selectedClassConfig->ene,
+			selectedClassConfig->cmd, invHex, magicHex))
+		{
+			successCount++;
+			if ((i + 1) % 10 == 0)
+			{
+				LogAdd(LOG_BLUE, (char*)"[CreateBots] Progress: %d/%d", i + 1, botCount);
+			}
+		}
+		else
+		{
+			failCount++;
+			LogAdd(LOG_RED, (char*)"[CreateBots] Bot %d (%s) creation failed", i + 1, account);
+		}
+	}
+
+	// Write XML footer
+	fputs("</FakeOnlineData>\n", xmlFile);
+	fclose(xmlFile);
+
+	LogAdd(LOG_GREEN, (char*)"[CreateBots] ===== COMPLETED =====");
+	LogAdd(LOG_GREEN, (char*)"[CreateBots] Success: %d, Failed: %d", successCount, failCount);
+	LogAdd(LOG_GREEN, (char*)"[CreateBots] XML file: IA\\Generated\\IA_Accounts.xml");
+
+	return (successCount > 0);
 }
 
 
@@ -794,19 +1609,23 @@ INT_PTR CALLBACK ConfigClassDialogProc(HWND hDlg, UINT message, WPARAM wParam, L
 
 INT_PTR CALLBACK CreateBotsDialogProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 {
-	static HWND hComboClass, hComboPartyMode, hComboPVPMode;
+	static HWND hComboClass, hComboPartyMode, hComboPVPMode, hComboLanguage, hComboDatabase;
+	static HBRUSH hBrushBg = NULL;
 
 	switch (message)
 	{
 	case WM_INITDIALOG:
 	{
-		// Basic config
+		// Create custom brush for dialog background
+		hBrushBg = CreateSolidBrush(RGB(25, 25, 25)); // Dark background
+
+		// Basic config - DEFAULTS
 		SetDlgItemInt(hDlg, IDC_EDIT_BOTCOUNT, 50, FALSE);
 		SetDlgItemInt(hDlg, IDC_EDIT_STARTFROM, 1, FALSE);
-		SetDlgItemInt(hDlg, IDC_EDIT_GATENUMBER, 614, FALSE);
+		SetDlgItemInt(hDlg, IDC_EDIT_GATENUMBER, 17, FALSE);
 		SetDlgItemInt(hDlg, IDC_EDIT_MAP, 0, FALSE);
-		SetDlgItemInt(hDlg, IDC_EDIT_MAPX, 110, FALSE);
-		SetDlgItemInt(hDlg, IDC_EDIT_MAPY, 200, FALSE);
+		SetDlgItemInt(hDlg, IDC_EDIT_MAPX, 125, FALSE);
+		SetDlgItemInt(hDlg, IDC_EDIT_MAPY, 125, FALSE);
 		SetDlgItemInt(hDlg, IDC_EDIT_MINLEVEL, 250, FALSE);
 		SetDlgItemInt(hDlg, IDC_EDIT_MAXLEVEL, 400, FALSE);
 
@@ -818,7 +1637,7 @@ INT_PTR CALLBACK CreateBotsDialogProc(HWND hDlg, UINT message, WPARAM wParam, LP
 		CheckDlgButton(hDlg, IDC_CHECK_TUDONGRESET, BST_UNCHECKED);
 		CheckDlgButton(hDlg, IDC_CHECK_POSTKHIDIE, BST_CHECKED);
 
-		// NEW: Config checkboxes (default: only Config 1 enabled)
+		// Config checkboxes
 		CheckDlgButton(hDlg, IDC_CHECK_CONFIG1, BST_CHECKED);
 		CheckDlgButton(hDlg, IDC_CHECK_CONFIG2, BST_UNCHECKED);
 		CheckDlgButton(hDlg, IDC_CHECK_CONFIG3, BST_UNCHECKED);
@@ -826,13 +1645,6 @@ INT_PTR CALLBACK CreateBotsDialogProc(HWND hDlg, UINT message, WPARAM wParam, LP
 		CheckDlgButton(hDlg, IDC_CHECK_CONFIG5, BST_UNCHECKED);
 		CheckDlgButton(hDlg, IDC_CHECK_CONFIG6, BST_UNCHECKED);
 		CheckDlgButton(hDlg, IDC_CHECK_CONFIG7, BST_UNCHECKED);
-
-		// Show info about available configs
-		int availableConfigs = g_ClassConfigManager.GetAvailableConfigCount();
-		char configInfo[256];
-		sprintf_s(configInfo, sizeof(configInfo),
-			"Available Configs: %d/7\n(Check multiple for variety)", availableConfigs);
-		SetDlgItemText(hDlg, IDC_STATIC_CONFIGINFO, configInfo);
 
 		// Class combo
 		hComboClass = GetDlgItem(hDlg, IDC_COMBO_CLASS);
@@ -862,27 +1674,169 @@ INT_PTR CALLBACK CreateBotsDialogProc(HWND hDlg, UINT message, WPARAM wParam, LP
 		SendMessage(hComboPVPMode, CB_ADDSTRING, 0, (LPARAM)"2 - Attack All Players");
 		SendMessage(hComboPVPMode, CB_SETCURSEL, 1, 0);
 
+		// Language combo
+		hComboLanguage = GetDlgItem(hDlg, IDC_COMBO_LANGUAGE);
+		if (hComboLanguage)
+		{
+			int langCount = g_NameManager.GetAvailableLanguageCount();
+			if (langCount > 0)
+			{
+				for (int i = 0; i < langCount; i++)
+				{
+					const char* langName = g_NameManager.GetLanguageName(i);
+					SendMessage(hComboLanguage, CB_ADDSTRING, 0, (LPARAM)langName);
+				}
+				const char* currentLang = g_NameManager.GetCurrentLanguage();
+				int selIdx = (int)SendMessage(hComboLanguage, CB_FINDSTRINGEXACT, -1, (LPARAM)currentLang);
+				SendMessage(hComboLanguage, CB_SETCURSEL, (selIdx != CB_ERR) ? selIdx : 0, 0);
+			}
+			else
+			{
+				SendMessage(hComboLanguage, CB_ADDSTRING, 0, (LPARAM)"Default (Spanish)");
+				SendMessage(hComboLanguage, CB_SETCURSEL, 0, 0);
+			}
+		}
+
+		// Database combo
+		hComboDatabase = GetDlgItem(hDlg, IDC_COMBO_DATABASES);
+		SendMessage(hComboDatabase, CB_ADDSTRING, 0, (LPARAM)"MuOnline");
+		SendMessage(hComboDatabase, CB_SETCURSEL, 0, 0);
+
+		// Set default server
+		SetDlgItemText(hDlg, IDC_EDIT_SQLSERVER, ".\\SQLEXPRESS");
+
 		return TRUE;
+	}
+
+	case WM_CTLCOLORDLG:
+		return (INT_PTR)hBrushBg;
+
+	case WM_CTLCOLORSTATIC:
+	{
+		HDC hdcStatic = (HDC)wParam;
+		SetTextColor(hdcStatic, RGB(220, 220, 220)); // Light gray text
+		SetBkMode(hdcStatic, TRANSPARENT);
+		return (INT_PTR)hBrushBg;
+	}
+
+	case WM_CTLCOLORBTN:
+	{
+		HDC hdcButton = (HDC)wParam;
+		SetTextColor(hdcButton, RGB(255, 255, 255));
+		SetBkMode(hdcButton, TRANSPARENT);
+		return (INT_PTR)CreateSolidBrush(RGB(180, 0, 0)); // Red buttons
 	}
 
 	case WM_COMMAND:
 	{
-		if (LOWORD(wParam) == IDC_BTN_CONFIGCLASS)
+		// Language changed
+		if (LOWORD(wParam) == IDC_COMBO_LANGUAGE && HIWORD(wParam) == CBN_SELCHANGE)
+		{
+			int selIdx = (int)SendMessage(hComboLanguage, CB_GETCURSEL, 0, 0);
+			if (selIdx != CB_ERR)
+			{
+				char langName[50];
+				SendMessage(hComboLanguage, CB_GETLBTEXT, selIdx, (LPARAM)langName);
+
+				bool namesOK = g_NameManager.LoadLanguage(langName);
+				bool phrasesOK = g_PhraseManager.LoadLanguage(langName);
+
+				if (namesOK || phrasesOK)
+				{
+					LogAdd(LOG_GREEN, "[Language] Changed to: %s", langName);
+#if USE_FAKE_ONLINE == TRUE
+					LoadBotPhrasesFromFile(g_PhraseManager.GetBotPhrasesPath());
+					LoadBotKeywordResponses(g_PhraseManager.GetAnsweringPath());
+#endif
+				}
+			}
+			return TRUE;
+		}
+		// Configure Class Equipment
+		else if (LOWORD(wParam) == IDC_BTN_CONFIGCLASS)
 		{
 			HWND hConfigDlg = CreateDialog(hInst, MAKEINTRESOURCE(IDD_CONFIGCLASS), hDlg, ConfigClassDialogProc);
-			if (hConfigDlg == NULL)
-			{
-				char errMsg[256];
-				sprintf_s(errMsg, sizeof(errMsg), "Failed to open config dialog!\nError: %d", GetLastError());
-				MessageBox(hDlg, errMsg, "Warning", MB_OK | MB_ICONWARNING);
-				LogAdd(LOG_RED, "[CreateBots] Failed to open IDD_CONFIGCLASS dialog, error: %d", GetLastError());
-			}
-			else
+			if (hConfigDlg)
 			{
 				ShowWindow(hConfigDlg, SW_SHOW);
 			}
 			return TRUE;
 		}
+		// Test Connection Button - FIXED VERSION
+		else if (LOWORD(wParam) == IDC_BTN_TESTCONNECTION)
+		{
+			char serverName[128] = { 0 };
+			GetDlgItemTextA(hDlg, IDC_EDIT_SQLSERVER, serverName, sizeof(serverName));
+
+			// Trim whitespace
+			int len = strlen(serverName);
+			while (len > 0 && (serverName[len - 1] == ' ' || serverName[len - 1] == '\t'))
+			{
+				serverName[--len] = '\0';
+			}
+
+			// Use default if empty
+			if (len == 0)
+			{
+				strcpy_s(serverName, ".\\SQLEXPRESS");
+			}
+
+			LogAdd(LOG_BLUE, "[TestConnection] Testing server: '%s'", serverName);
+
+			EnableWindow(hDlg, FALSE);
+			SetCursor(LoadCursor(NULL, IDC_WAIT));
+
+			std::vector<std::string> databases;
+			char errorMsg[512];
+
+			if (TestSQLConnection(serverName, databases, errorMsg, sizeof(errorMsg)))
+			{
+				// Populate database combo
+				hComboDatabase = GetDlgItem(hDlg, IDC_COMBO_DATABASES);
+				SendMessage(hComboDatabase, CB_RESETCONTENT, 0, 0);
+
+				for (size_t i = 0; i < databases.size(); i++)
+				{
+					SendMessage(hComboDatabase, CB_ADDSTRING, 0, (LPARAM)databases[i].c_str());
+				}
+
+				// Auto-select MuOnline if exists
+				int muIndex = SendMessage(hComboDatabase, CB_FINDSTRINGEXACT, -1, (LPARAM)"MuOnline");
+				if (muIndex != CB_ERR)
+				{
+					SendMessage(hComboDatabase, CB_SETCURSEL, muIndex, 0);
+				}
+				else if (databases.size() > 0)
+				{
+					SendMessage(hComboDatabase, CB_SETCURSEL, 0, 0);
+				}
+
+				SetCursor(LoadCursor(NULL, IDC_ARROW));
+				EnableWindow(hDlg, TRUE);
+
+				char successMsg[512];
+				sprintf_s(successMsg, sizeof(successMsg),
+					"Connection successful!\n\nServer: %s\nFound %d databases\n\nSelect database from dropdown.",
+					serverName, (int)databases.size());
+				MessageBox(hDlg, successMsg, "SQL Connection Test", MB_OK | MB_ICONINFORMATION);
+			}
+			else
+			{
+				SetCursor(LoadCursor(NULL, IDC_ARROW));
+				EnableWindow(hDlg, TRUE);
+				MessageBox(hDlg, errorMsg, "Connection Test Failed", MB_OK | MB_ICONERROR);
+			}
+
+			return TRUE;
+		}
+		// Refresh Database List
+		else if (LOWORD(wParam) == IDC_BTN_REFRESHDB)
+		{
+			SendMessage(hDlg, WM_COMMAND, MAKEWPARAM(IDC_BTN_TESTCONNECTION, BN_CLICKED),
+				(LPARAM)GetDlgItem(hDlg, IDC_BTN_TESTCONNECTION));
+			return TRUE;
+		}
+		// CREATE BOTS Button
 		else if (LOWORD(wParam) == IDC_BTN_CREATEBOTS)
 		{
 			BOOL bSuccess;
@@ -891,7 +1845,7 @@ INT_PTR CALLBACK CreateBotsDialogProc(HWND hDlg, UINT message, WPARAM wParam, LP
 			int botCount = GetDlgItemInt(hDlg, IDC_EDIT_BOTCOUNT, &bSuccess, FALSE);
 			if (!bSuccess || botCount < 1 || botCount > 1000)
 			{
-				MessageBox(hDlg, "Bot count: 1-1000", "Error", MB_OK | MB_ICONERROR);
+				MessageBox(hDlg, "Bot count must be between 1-1000", "Error", MB_OK | MB_ICONERROR);
 				return TRUE;
 			}
 
@@ -929,7 +1883,7 @@ INT_PTR CALLBACK CreateBotsDialogProc(HWND hDlg, UINT message, WPARAM wParam, LP
 			int idx = SendMessage(hComboClass, CB_GETCURSEL, 0, 0);
 			int selectedClass = (int)SendMessage(hComboClass, CB_GETITEMDATA, idx, 0);
 
-			// NEW: Get enabled configs (bitmask)
+			// Get enabled configs
 			int enabledConfigs = 0;
 			if (IsDlgButtonChecked(hDlg, IDC_CHECK_CONFIG1) == BST_CHECKED) enabledConfigs |= (1 << 0);
 			if (IsDlgButtonChecked(hDlg, IDC_CHECK_CONFIG2) == BST_CHECKED) enabledConfigs |= (1 << 1);
@@ -941,18 +1895,49 @@ INT_PTR CALLBACK CreateBotsDialogProc(HWND hDlg, UINT message, WPARAM wParam, LP
 
 			if (enabledConfigs == 0)
 			{
-				MessageBox(hDlg, "Please select at least one Config to use!", "Error", MB_OK | MB_ICONERROR);
+				MessageBox(hDlg, "Please select at least one Config!", "Error", MB_OK | MB_ICONERROR);
 				return TRUE;
 			}
 
-			// Show progress warning for large batches
+			// Get database settings
+			char serverName[128] = { 0 };
+			char dbName[64] = { 0 };
+			GetDlgItemTextA(hDlg, IDC_EDIT_SQLSERVER, serverName, sizeof(serverName));
+			GetDlgItemTextA(hDlg, IDC_COMBO_DATABASES, dbName, sizeof(dbName));
+
+			// Trim whitespace from server name
+			int len = strlen(serverName);
+			while (len > 0 && (serverName[len - 1] == ' ' || serverName[len - 1] == '\t'))
+			{
+				serverName[--len] = '\0';
+			}
+
+			// Use defaults if empty
+			if (len == 0) strcpy_s(serverName, ".\\SQLEXPRESS");
+			if (strlen(dbName) == 0) strcpy_s(dbName, "MuOnline");
+
+			LogAdd(LOG_BLUE, "[CreateBots] Server: '%s', Database: '%s'", serverName, dbName);
+
+			// Initialize database connection
+			if (!InitializeBotODBC(serverName, dbName, "", ""))
+			{
+				MessageBox(hDlg,
+					"❌ Failed to connect to database!\n\n"
+					"Check:\n"
+					"• SQL Server is running\n"
+					"• Server name is correct\n"
+					"• Database name is correct\n"
+					"• Windows Authentication is enabled",
+					"Database Error", MB_OK | MB_ICONERROR);
+				return TRUE;
+			}
+
+			// Warn for large batches
 			if (botCount > 100)
 			{
 				char msg[256];
 				sprintf_s(msg, sizeof(msg),
-					"WARNING: Creating %d bots at once may cause instability.\n\n"
-					"Recommended: Create in batches of 50-100.\n\n"
-					"Continue anyway?", botCount);
+					"⚠ Creating %d bots at once.\n\nThis may take a while...\n\nContinue?", botCount);
 				if (MessageBox(hDlg, msg, "Warning", MB_YESNO | MB_ICONWARNING) != IDYES)
 					return TRUE;
 			}
@@ -961,42 +1946,125 @@ INT_PTR CALLBACK CreateBotsDialogProc(HWND hDlg, UINT message, WPARAM wParam, LP
 			EnableWindow(hDlg, FALSE);
 			SetCursor(LoadCursor(NULL, IDC_WAIT));
 
-			// Call creation function with config selection
-			if (CreateMultipleBotsAdvanced(botCount, startFrom, gateNumber, mapNumber, mapX, mapY,
+			// Call creation function
+			if (CreateMultipleBotsAdvanced_StoredProc(botCount, startFrom, gateNumber, mapNumber, mapX, mapY,
 				minLevel, maxLevel, selectedClass, phamViTrain, moveRange, timeReturn,
 				tuNhatItem, tuDongReset, partyMode, pvpMode, postKhiDie, enabledConfigs))
 			{
-				// Count how many configs were used
 				int configCount = 0;
 				for (int i = 0; i < 7; i++)
 				{
 					if (enabledConfigs & (1 << i)) configCount++;
 				}
 
-				char szMsg[512];
+				char szMsg[1024];
 				sprintf_s(szMsg, sizeof(szMsg),
-					"Successfully created %d bots!\n\n"
-					"Range: Bot%04d to Bot%04d\n"
-					"Location: %s\n"
-					"Levels: %d-%d\n"
-					"Config Variations: %d\n\n"
-					"Files:\n- Generated\\IA_Accounts.xml\n- Generated\\CreateBots.sql\n\n"
-					"How to use:\nExecute CreateBots.sql, then update:\nAccounts.xml with IA_Accounts.xml\n\n"
-					"Finally: 1) Reload IA, 2) ADD IA",
+					"✅ Successfully created %d bots!\n\n"
+					"📋 Details:\n"
+					"  • Range: Bot%04d to Bot%04d\n"
+					"  • Location: %s\n"
+					"  • Levels: %d-%d\n"
+					"  • Configs Used: %d\n"
+					"  • Database: %s\n\n"
+					"📝 Files Generated:\n"
+					"  • IA\\Generated\\IA_Accounts.xml\n\n"
+					"═══════════════════════════════\n"
+					"🎯 NEXT STEPS:\n"
+					"═══════════════════════════════\n"
+					"1️⃣ Click 'UPDATE ACCOUNTS.XML' button\n"
+					"2️⃣ Go to GameServer menu\n"
+					"3️⃣ Click 'Reload IA Data'\n"
+					"4️⃣ Click 'Add Fake Online'\n\n"
+					"✨ Your bots are ready to use!",
 					botCount, startFrom, startFrom + botCount - 1,
 					(gateNumber > 0) ? "Gate" : "Custom Coords",
-					minLevel, maxLevel, configCount);
+					minLevel, maxLevel, configCount, dbName);
 
 				SetCursor(LoadCursor(NULL, IDC_ARROW));
 				EnableWindow(hDlg, TRUE);
-				MessageBox(hDlg, szMsg, "Success", MB_OK | MB_ICONINFORMATION);
-				EndDialog(hDlg, IDOK);
+				MessageBox(hDlg, szMsg, "🎉 Bots Created!", MB_OK | MB_ICONINFORMATION);
 			}
 			else
 			{
 				SetCursor(LoadCursor(NULL, IDC_ARROW));
 				EnableWindow(hDlg, TRUE);
-				MessageBox(hDlg, "Failed to create bots.\n\nCheck console logs for details.", "Error", MB_OK | MB_ICONERROR);
+				MessageBox(hDlg,
+					"❌ Failed to create bots!\n\n"
+					"Check:\n"
+					"• Database connection is working\n"
+					"• Stored procedure exists\n"
+					"• Console logs for details",
+					"Error", MB_OK | MB_ICONERROR);
+			}
+
+			return TRUE;
+		}
+		// UPDATE ACCOUNTS.XML Button
+		else if (LOWORD(wParam) == IDC_BTN_UPDATEXML)
+		{
+			int choice = MessageBox(hDlg,
+				"Choose update mode:\n\n"
+				"✅ UPDATE (Yes):\n"
+				"  • Merges new bots with existing\n"
+				"  • Keeps existing bots\n"
+				"  • Creates backup\n\n"
+				"🔄 REPLACE (No):\n"
+				"  • Replaces entire file\n"
+				"  • Deletes existing bots\n"
+				"  • Creates backup\n\n"
+				"Choose UPDATE?",
+				"Update Accounts.xml", MB_YESNOCANCEL | MB_ICONQUESTION);
+
+			if (choice == IDCANCEL)
+				return TRUE;
+
+			bool updateMode = (choice == IDYES);
+
+			EnableWindow(hDlg, FALSE);
+			SetCursor(LoadCursor(NULL, IDC_WAIT));
+
+			char resultMsg[512];
+			if (UpdateAccountsXML(updateMode == false, resultMsg, sizeof(resultMsg)))
+			{
+				SetCursor(LoadCursor(NULL, IDC_ARROW));
+				EnableWindow(hDlg, TRUE);
+
+				char successMsg[1024];
+				if (updateMode)
+				{
+					sprintf_s(successMsg, sizeof(successMsg),
+						"[OK] Accounts.xml UPDATED!\n\n"
+						"%s\n\n"
+						"[OK] Backup: IA\\Accounts_Backup.xml\n\n"
+						"═══════════════════════════════\n"
+						"[OK] FINAL STEPS:\n"
+						"═══════════════════════════════\n"
+						"1 Menu → Reload IA Data\n"
+						"2 Menu → Add Fake Online\n\n"
+						"[OK] Bots ready!",
+						resultMsg);
+				}
+				else
+				{
+					sprintf_s(successMsg, sizeof(successMsg),
+						"[OK] Accounts.xml REPLACED!\n\n"
+						"All previous bots removed.\n\n"
+						"Backup: IA\\Accounts_Backup.xml\n\n"
+						"═══════════════════════════════\n"
+						"[OK] FINAL STEPS:\n"
+						"═══════════════════════════════\n"
+						"1 Menu → Reload IA Data\n"
+						"2 Menu → Add Fake Online\n\n"
+						"[OK] Bots ready!");
+				}
+
+				MessageBox(hDlg, successMsg, "🎉 Success!", MB_OK | MB_ICONINFORMATION);
+			}
+			else
+			{
+				SetCursor(LoadCursor(NULL, IDC_ARROW));
+				EnableWindow(hDlg, TRUE);
+				MessageBox(hDlg, resultMsg, "❌ Update Failed", MB_OK | MB_ICONERROR);
 			}
 
 			return TRUE;
@@ -1008,353 +2076,25 @@ INT_PTR CALLBACK CreateBotsDialogProc(HWND hDlg, UINT message, WPARAM wParam, LP
 		}
 		break;
 	}
+
+	case WM_DESTROY:
+		if (hBrushBg)
+		{
+			DeleteObject(hBrushBg);
+			hBrushBg = NULL;
+		}
+		break;
+
+	case WM_CLOSE:
+		EndDialog(hDlg, IDCANCEL);
+		return TRUE;
 	}
 
 	return FALSE;
 }
 
-// ====================================
-// ADVANCED BOT CREATION WITH DELAYS
-// ====================================
 
-// Updated CreateMultipleBotsAdvanced with multi-config support
-// Add this parameter to the function signature:
-bool CreateMultipleBotsAdvanced(int botCount, int startFrom, int gateNumber, int mapNumber, int mapX, int mapY,
-	int minLevel, int maxLevel, int selectedClass, int phamViTrain, int moveRange, int timeReturn,
-	int tuNhatItem, int tuDongReset, int partyMode, int pvpMode, int postKhiDie, int enabledConfigs) // NEW PARAMETER
-{
-	// SAFETY CHECKS
-	if (botCount > 1000 || botCount < 1)
-	{
-		LogAdd(LOG_RED, "[CreateBots] ERROR: Bot count must be 1-1000");
-		return false;
-	}
 
-	if (startFrom < 1)
-	{
-		LogAdd(LOG_RED, "[CreateBots] ERROR: Start From must be >= 1!");
-		return false;
-	}
-
-	LogAdd(LOG_BLACK, "[CreateBots] Starting: Count=%d, StartFrom=%d, EnabledConfigs=%d",
-		botCount, startFrom, enabledConfigs);
-
-	// Class configuration
-	struct ClassConfig {
-		int classCode;
-		const char* className;
-		int mainSkill;
-		int secondarySkill;
-		int buff1, buff2, buff3;
-		int percentage;
-		int str, dex, vit, ene, cmd;
-		bool useFemaleNames;
-	};
-
-	ClassConfig classes[] = {
-		{0,  "DW",  9,   12,  16,  -1,  -1, 15, 2000, 2000, 2000, 5000, 0,    false},
-		{16, "DK",  44,  41,  48,  -1,  -1, 30, 5000, 4500, 5500, 4000, 0,    false},
-		{32, "ELF", 24,  52,  26,  27,  28, 20, 2500, 4500, 2500, 3000, 0,    true},
-		{48, "MG",  8,  55,   -1,  -1,  -1, 10, 4000, 3000, 4000, 4000, 0,    false},
-		{64, "DL",  65,  61,  64,  -1,  -1, 10, 4500, 3500, 4500, 2500, 5000, false},
-		{80, "SUM", 214, 215, 217, 218, -1, 10, 2000, 2000, 2000, 5000, 0,    true},
-		{96, "RF",  264, 263, 266, 268, -1, 5,  4500, 4500, 4500, 2000, 0,    false}
-	};
-
-	const char* maleNames[] = {
-		"Carlos","Diego","Miguel","Juan","Pedro","Luis","Jorge","Fernando","Ricardo","Roberto",
-		"Sergio","Andres","Javier","Marco","Oscar","Daniel","Gabriel","Rafael","Adrian","Mario",
-		"Eduardo","Ernesto","Pablo","Raul","Alberto","Victor","Manuel","Felipe","Emilio","Hugo"
-	};
-
-	const char* femaleNames[] = {
-		"Maria","Ana","Sofia","Isabella","Valentina","Camila","Victoria","Lucia","Elena","Paula",
-		"Carmen","Laura","Diana","Andrea","Natalia","Carolina","Gabriela","Daniela","Alejandra","Fernanda"
-	};
-
-	int maleNamesCount = sizeof(maleNames) / sizeof(maleNames[0]);
-	int femaleNamesCount = sizeof(femaleNames) / sizeof(femaleNames[0]);
-	int classCount = sizeof(classes) / sizeof(classes[0]);
-
-	// Calculate cumulative percentages
-	int cumulativePercentages[10];
-	int total = 0;
-	for (int i = 0; i < classCount; i++)
-	{
-		total += classes[i].percentage;
-		cumulativePercentages[i] = total;
-	}
-
-	// Bot data structure - CRITICAL: Use heap allocation for large batches
-	struct BotData {
-		char account[11];
-		char charName[11];
-		ClassConfig* classInfo;
-		int level;
-		int finalMapX;
-		int finalMapY;
-		int configIndex; // NEW: Which config to use (1-7)
-	};
-
-	// CRITICAL FIX: Use dynamic allocation instead of vector for large batches
-	BotData* botList = (BotData*)malloc(sizeof(BotData) * botCount);
-	if (!botList)
-	{
-		LogAdd(LOG_RED, "[CreateBots] CRITICAL: Memory allocation failed!");
-		return false;
-	}
-	memset(botList, 0, sizeof(BotData) * botCount);
-
-	// Generate bot data
-	for (int i = 0; i < botCount; i++)
-	{
-		BotData* bot = &botList[i];
-		int botNumber = startFrom + i;
-
-		// SAFE string formatting
-		if (sprintf_s(bot->account, sizeof(bot->account), "Bot%04d", botNumber) < 0)
-		{
-			LogAdd(LOG_RED, "[CreateBots] String formatting error at bot %d", i);
-			free(botList);
-			return false;
-		}
-
-		// Select class
-		ClassConfig* selectedClassConfig = NULL;
-
-		if (selectedClass == -1)
-		{
-			int randValue = i % 100;
-			for (int j = 0; j < classCount; j++)
-			{
-				if (randValue < cumulativePercentages[j])
-				{
-					selectedClassConfig = &classes[j];
-					break;
-				}
-			}
-		}
-		else
-		{
-			for (int j = 0; j < classCount; j++)
-			{
-				if (classes[j].classCode == selectedClass)
-				{
-					selectedClassConfig = &classes[j];
-					break;
-				}
-			}
-		}
-
-		if (!selectedClassConfig) selectedClassConfig = &classes[0];
-		bot->classInfo = selectedClassConfig;
-
-		// NEW: Randomly select a config from enabled ones
-		bot->configIndex = g_ClassConfigManager.GetRandomConfigIndex(enabledConfigs);
-
-		// Check class configuration
-		if (!g_ClassConfigManager.IsClassConfigured(selectedClassConfig->classCode, bot->configIndex))
-		{
-			LogAdd(LOG_RED, "[CreateBots] ERROR: Class %s not configured in Config %d!",
-				selectedClassConfig->className, bot->configIndex);
-
-			char errMsg[256];
-			sprintf_s(errMsg, sizeof(errMsg),
-				"Class '%s' is not configured in Config %d!\n\nConfigure it first.",
-				selectedClassConfig->className, bot->configIndex);
-			MessageBox(NULL, errMsg, "Error", MB_OK | MB_ICONWARNING);
-			free(botList);
-			return false;
-		}
-
-		// Generate character name SAFELY
-		if (selectedClassConfig->useFemaleNames)
-		{
-			int nameIdx = GetLargeRand() % femaleNamesCount;
-			sprintf_s(bot->charName, sizeof(bot->charName), "%s%d", femaleNames[nameIdx], GetLargeRand() % 90 + 10);
-		}
-		else
-		{
-			int nameIdx = GetLargeRand() % maleNamesCount;
-			sprintf_s(bot->charName, sizeof(bot->charName), "%s%d", maleNames[nameIdx], GetLargeRand() % 90 + 10);
-		}
-
-		// Random level
-		bot->level = minLevel + (GetLargeRand() % (maxLevel - minLevel + 1));
-
-		// Calculate position
-		bot->finalMapX = mapX + ((i % 20) - 10);
-		bot->finalMapY = mapY + (((i / 20) % 20) - 10);
-	}
-
-	// =====================================================
-	// GENERATE XML FILE WITH CHUNKED WRITING
-	// =====================================================
-	char xmlPath[260];
-	sprintf_s(xmlPath, sizeof(xmlPath), "IA\\Generated\\IA_Accounts.xml");
-
-	FILE* xmlFile = NULL;
-	errno_t err = fopen_s(&xmlFile, xmlPath, "w");
-	if (err != 0 || !xmlFile)
-	{
-		LogAdd(LOG_RED, "[CreateBots] ERROR: Cannot create XML file (error %d)", err);
-		free(botList);
-		return false;
-	}
-
-	// Set larger buffer for file operations
-	setvbuf(xmlFile, NULL, _IOFBF, 32768);
-
-	fprintf(xmlFile, "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n\n");
-	fprintf(xmlFile, "<MSGThongBao IndexMesMin=\"3020\" IndexMesMax=\"3030\"/>\n\n");
-	fprintf(xmlFile, "<Config DelayRange=\"40000\" />\n\n");
-	fprintf(xmlFile, "<FakeOnlineData>\n");
-
-	// CRITICAL: Write in chunks with error checking
-	for (int i = 0; i < botCount; i++)
-	{
-		const BotData* bot = &botList[i];
-
-		int result = fprintf(xmlFile,
-			"  <Info Account=\"%s\" Password=\"123456\" Name=\"%s\" "
-			"SkillID=\"%d\" SecondarySkillID=\"%d\" "
-			"UseBuffs_0=\"%d\" UseBuffs_1=\"%d\" UseBuffs_2=\"%d\" "
-			"GateNumber=\"%d\" Map=\"%d\" MapX=\"%d\" MapY=\"%d\" "
-			"PhamViTrain=\"%d\" MoveRange=\"%d\" TimeReturn=\"%d\" "
-			"TuNhatItem=\"%d\" TuDongReset=\"%d\" "
-			"PartyMode=\"%d\" PVPMode=\"%d\" PostKhiDie=\"%d\" />\n",
-			bot->account, bot->charName,
-			bot->classInfo->mainSkill, bot->classInfo->secondarySkill,
-			bot->classInfo->buff1, bot->classInfo->buff2, bot->classInfo->buff3,
-			gateNumber, mapNumber, bot->finalMapX, bot->finalMapY,
-			phamViTrain, moveRange, timeReturn,
-			tuNhatItem, tuDongReset,
-			partyMode, pvpMode, postKhiDie
-		);
-
-		if (result < 0)
-		{
-			LogAdd(LOG_RED, "[CreateBots] XML write error at bot %d", i);
-			fclose(xmlFile);
-			free(botList);
-			return false;
-		}
-
-		// Flush every 10 bots
-		if ((i + 1) % 10 == 0)
-		{
-			fflush(xmlFile);
-			if ((i + 1) % 50 == 0)
-			{
-				LogAdd(LOG_BLUE, "[CreateBots] XML: %d/%d", i + 1, botCount);
-			}
-		}
-	}
-
-	fprintf(xmlFile, "</FakeOnlineData>\n");
-	fflush(xmlFile);
-	fclose(xmlFile);
-
-	LogAdd(LOG_GREEN, "[CreateBots] XML completed");
-
-	// =====================================================
-	// GENERATE SQL FILE WITH CHUNKED WRITING
-	// =====================================================
-	char sqlPath[260];
-	sprintf_s(sqlPath, sizeof(sqlPath), "IA\\Generated\\CreateBots.sql");
-
-	FILE* sqlFile = NULL;
-	err = fopen_s(&sqlFile, sqlPath, "w");
-	if (err != 0 || !sqlFile)
-	{
-		LogAdd(LOG_RED, "[CreateBots] ERROR: Cannot create SQL file (error %d)", err);
-		free(botList);
-		return false;
-	}
-
-	// Set larger buffer
-	setvbuf(sqlFile, NULL, _IOFBF, 65536);
-
-	fprintf(sqlFile, "USE MuOnline\nGO\n\n");
-	fprintf(sqlFile, "-- Generated SQL for %d bots (Bot%04d to Bot%04d)\n",
-		botCount, startFrom, startFrom + botCount - 1);
-	fprintf(sqlFile, "-- Using %d different config variations\n\n",
-		__popcnt(enabledConfigs)); // Count set bits
-
-	SYSTEMTIME st;
-	GetLocalTime(&st);
-	fprintf(sqlFile, "-- Date: %04d-%02d-%02d %02d:%02d:%02d\n\n",
-		st.wYear, st.wMonth, st.wDay, st.wHour, st.wMinute, st.wSecond);
-
-	// Generate SQL with error checking
-	for (int i = 0; i < botCount; i++)
-	{
-		const BotData* bot = &botList[i];
-
-		// NEW: Get hex from specific config
-		const char* invHex = g_ClassConfigManager.GetInventoryHex(bot->classInfo->classCode, bot->configIndex);
-		const char* magicHex = g_ClassConfigManager.GetMagicListHex(bot->classInfo->classCode, bot->configIndex);
-
-		// CRITICAL: Check hex data validity
-		if (!invHex || !magicHex || strlen(invHex) < 10 || strlen(magicHex) < 10)
-		{
-			LogAdd(LOG_RED, "[CreateBots] Invalid hex data for class %d in config %d",
-				bot->classInfo->classCode, bot->configIndex);
-			fclose(sqlFile);
-			free(botList);
-			return false;
-		}
-
-		fprintf(sqlFile, "-- Bot %d: %s (%s - %s) [Config %d]\n",
-			i + 1, bot->account, bot->charName, bot->classInfo->className, bot->configIndex);
-
-		// MEMB_INFO
-		fprintf(sqlFile, "IF NOT EXISTS (SELECT 1 FROM MEMB_INFO WHERE memb___id = '%s')\n", bot->account);
-		fprintf(sqlFile, "BEGIN\n");
-		fprintf(sqlFile, "    INSERT INTO MEMB_INFO (memb___id, memb__pwd, memb_name, sno__numb, mail_addr, bloc_code, ctl1_code)\n");
-		fprintf(sqlFile, "    VALUES ('%s', '123456', '%s', '123456789', 'bot@email.com', 0, 0)\n", bot->account, bot->account);
-		fprintf(sqlFile, "END\n\n");
-
-		// Character
-		fprintf(sqlFile, "IF NOT EXISTS (SELECT 1 FROM Character WHERE Name = '%s')\n", bot->charName);
-		fprintf(sqlFile, "BEGIN\n");
-		fprintf(sqlFile, "    INSERT INTO Character (Name, cLevel, Class, Strength, Dexterity, Vitality, Energy, Leadership, Money, MapNumber, MapPosX, MapPosY, AccountID, Inventory, MagicList)\n");
-		fprintf(sqlFile, "    VALUES ('%s', %d, %d, %d, %d, %d, %d, %d, 20000000, %d, %d, %d, '%s', %s, %s)\n",
-			bot->charName, bot->level, bot->classInfo->classCode,
-			bot->classInfo->str, bot->classInfo->dex, bot->classInfo->vit,
-			bot->classInfo->ene, bot->classInfo->cmd,
-			mapNumber, bot->finalMapX, bot->finalMapY, bot->account, invHex, magicHex);
-		fprintf(sqlFile, "END\n\n");
-
-		// AccountCharacter
-		fprintf(sqlFile, "IF NOT EXISTS (SELECT 1 FROM AccountCharacter WHERE Id = '%s')\n", bot->account);
-		fprintf(sqlFile, "    INSERT INTO AccountCharacter (Id, GameID1) VALUES ('%s', '%s')\n", bot->account, bot->charName);
-		fprintf(sqlFile, "ELSE\n");
-		fprintf(sqlFile, "    UPDATE AccountCharacter SET GameID1 = '%s' WHERE Id = '%s'\n\n", bot->charName, bot->account);
-
-		// Flush periodically
-		if ((i + 1) % 10 == 0)
-		{
-			fflush(sqlFile);
-			if ((i + 1) % 50 == 0)
-			{
-				LogAdd(LOG_BLUE, "[CreateBots] SQL: %d/%d", i + 1, botCount);
-			}
-		}
-	}
-
-	fprintf(sqlFile, "\nPRINT 'Created %d bots (Bot%04d-Bot%04d) with %d config variations'\nGO\n",
-		botCount, startFrom, startFrom + botCount - 1, __popcnt(enabledConfigs));
-	fflush(sqlFile);
-	fclose(sqlFile);
-
-	// CRITICAL: Free memory
-	free(botList);
-
-	LogAdd(LOG_GREEN, "[CreateBots] COMPLETED: %d bots with %d config variations",
-		botCount, __popcnt(enabledConfigs));
-	return true;
-}
 
 LRESULT CALLBACK About(HWND hDlg,UINT message,WPARAM wParam,LPARAM lParam) // OK
 {
