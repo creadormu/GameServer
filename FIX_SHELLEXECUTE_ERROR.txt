@@ -1,0 +1,106 @@
+================================================================================
+🔧 ERROR: ShellExecuteA no está definido
+================================================================================
+
+SOLUCIÓN RÁPIDA:
+================================================================================
+
+Agrega estas 2 líneas al INICIO de GameServer.cpp (después de #include "Resource.h"):
+
+#include <shellapi.h>
+#pragma comment(lib, "shell32.lib")
+
+
+PASO A PASO:
+================================================================================
+
+1. Abre GameServer.cpp
+
+2. Busca estas líneas al principio:
+
+#include "stdafx.h"
+#include "Resource.h"
+#include "BloodCastle.h"
+
+3. Cambia a esto:
+
+#include "stdafx.h"
+#include "Resource.h"
+#include <shellapi.h>
+#pragma comment(lib, "shell32.lib")
+#include "BloodCastle.h"
+
+4. Guarda el archivo
+
+5. Rebuild el proyecto
+
+✅ El error desaparecerá!
+
+
+EXPLICACIÓN:
+================================================================================
+
+ShellExecuteA es parte de la API de Windows Shell.
+Necesitas incluir la librería shellapi.h para usarla.
+
+La línea #pragma comment(lib, "shell32.lib") le dice al linker
+que incluya la librería shell32.lib automáticamente.
+
+
+CÓDIGO COMPLETO DEL INICIO DE GameServer.cpp:
+================================================================================
+
+#include "stdafx.h"
+#include "Resource.h"
+#include <shellapi.h>
+#pragma comment(lib, "shell32.lib")
+#include "BloodCastle.h"
+#include "CastleDeep.h"
+#include "CastleSiege.h"
+#include "ChaosCastle.h"
+#include "Crywolf.h"
+// ... resto de includes
+
+
+ALTERNATIVA (Si no quieres usar ShellExecuteA):
+================================================================================
+
+En vez de ShellExecuteA, puedes usar system():
+
+Cambia esto:
+    ShellExecuteA(NULL, "open", ".\\Data\\UpdateConfig.ini", NULL, NULL, SW_SHOW);
+
+Por esto:
+    system("notepad .\\Data\\UpdateConfig.ini");
+
+Pero ShellExecuteA es mejor porque:
+✅ Usa el editor predeterminado del usuario
+✅ Más profesional
+✅ No abre ventana de consola
+
+Así que mejor usa la solución con #include <shellapi.h>
+
+
+VERIFICACIÓN:
+================================================================================
+
+Después de agregar las líneas, tu GameServer.cpp debería compilar sin errores.
+
+Si aún tienes error, verifica:
+[ ] Las líneas están ANTES de todos los demás #include
+[ ] No hay errores de tipeo (shellapi.h en minúsculas)
+[ ] Guardaste el archivo
+[ ] Hiciste Rebuild (no solo Build)
+
+
+RESUMEN:
+================================================================================
+
+✅ Agrega: #include <shellapi.h>
+✅ Agrega: #pragma comment(lib, "shell32.lib")
+✅ Posición: Después de #include "Resource.h"
+✅ Rebuild: Clean + Rebuild Solution
+
+¡Listo! 🎉
+
+================================================================================
