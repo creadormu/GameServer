@@ -1,0 +1,207 @@
+================================================================================
+📋 PASO A PASO: AGREGAR DIÁLOGOS AL GAMESERVER.RC
+================================================================================
+
+Necesitas agregar 2 diálogos al archivo GameServer.rc
+
+================================================================================
+MÉTODO 1: VISUAL STUDIO (MÁS FÁCIL) ⭐ RECOMENDADO
+================================================================================
+
+Paso 1: Abre Visual Studio
+---------------------------
+1. Abre GameServer.sln
+2. En Solution Explorer, busca "Resource Files"
+3. Haz doble clic en "GameServer.rc"
+
+Paso 2: Agregar Diálogo de Configuración
+-----------------------------------------
+1. En Resource View → Right-click "Dialog" → "Insert Dialog"
+2. Se crea un diálogo vacío
+3. Right-click en el diálogo → Properties
+4. Cambia el ID a: IDD_UPDATE_CONFIG
+5. Cambia el Caption a: "Update Configuration"
+6. Cambia el tamaño a: Width=320, Height=280
+
+7. Ahora agrega los controles (desde Toolbox):
+
+   a) GROUPBOX "Auto-Update Settings" (ID: IDC_STATIC)
+      Position: X=7, Y=7, Width=306, Height=80
+   
+   b) CHECKBOX "Enable Auto-Update System" (ID: IDC_CHECK_ENABLED)
+      Position: X=20, Y=25
+   
+   c) CHECKBOX "Auto-Check for Updates (every hour)" (ID: IDC_CHECK_AUTOCHECK)
+      Position: X=20, Y=45
+   
+   d) CHECKBOX "Auto-Download Updates" (ID: IDC_CHECK_AUTODOWNLOAD)
+      Position: X=20, Y=65
+   
+   e) CHECKBOX "Show Notification Popups" (ID: IDC_CHECK_SHOWNOTIFICATIONS)
+      Position: X=170, Y=25
+   
+   f) GROUPBOX "Server Configuration" (ID: IDC_STATIC)
+      Position: X=7, Y=95, Width=306, Height=100
+   
+   g) STATIC TEXT "Update Server URL:" (ID: IDC_STATIC)
+      Position: X=20, Y=115
+   
+   h) EDITTEXT (ID: IDC_EDIT_UPDATEURL)
+      Position: X=20, Y=130, Width=280, Height=14
+   
+   i) STATIC TEXT "Current Version:" (ID: IDC_STATIC)
+      Position: X=20, Y=155
+   
+   j) EDITTEXT (ID: IDC_EDIT_CURRENTVERSION)
+      Position: X=20, Y=170, Width=100, Height=14
+   
+   k) GROUPBOX "Information" (ID: IDC_STATIC)
+      Position: X=7, Y=205, Width=306, Height=45
+   
+   l) STATIC TEXT "• Enable Auto-Update to check automatically" (ID: IDC_STATIC)
+      Position: X=20, Y=220
+   
+   m) STATIC TEXT "• Auto-Download will download updates immediately" (ID: IDC_STATIC)
+      Position: X=20, Y=232
+   
+   n) BUTTON "Save Configuration" (ID: IDC_BTN_SAVE_UPDATECONFIG)
+      Position: X=100, Y=258, Width=80, Height=16
+      Style: Default Button
+   
+   o) BUTTON "Cancel" (ID: IDCANCEL)
+      Position: X=190, Y=258, Width=50, Height=16
+
+8. Guarda (Ctrl+S)
+
+Paso 3: Agregar Diálogo de Progreso
+------------------------------------
+1. Resource View → Right-click "Dialog" → "Insert Dialog"
+2. Right-click → Properties
+3. ID: IDD_PROGRESS_DIALOG
+4. Caption: "Downloading Update..."
+5. Size: Width=300, Height=100
+
+6. Agrega controles:
+
+   a) ICON (ID: IDC_STATIC)
+      Position: X=14, Y=14, Icon: IDI_GAMESERVER
+   
+   b) STATIC TEXT "Downloading:" (ID: IDC_STATIC)
+      Position: X=45, Y=14
+   
+   c) STATIC TEXT "filename.txt" (ID: IDC_STATIC_FILENAME)
+      Position: X=100, Y=14, Width=180
+   
+   d) PROGRESS BAR (ID: IDC_PROGRESS_BAR)
+      Position: X=14, Y=40, Width=272, Height=14
+      Class: "msctls_progress32"
+   
+   e) STATIC TEXT "0%" (ID: IDC_STATIC_PROGRESS)
+      Position: X=14, Y=60
+   
+   f) STATIC TEXT "0.00 MB / 0.00 MB" (ID: IDC_STATIC_SIZE)
+      Position: X=200, Y=60
+   
+   g) STATIC TEXT "Please wait..." (ID: IDC_STATIC)
+      Position: X=14, Y=78
+
+7. Guarda (Ctrl+S)
+
+Paso 4: Rebuild
+---------------
+Build → Rebuild Solution
+
+¡Listo! ✅
+
+================================================================================
+MÉTODO 2: CÓDIGO DIRECTO (SI VISUAL STUDIO NO FUNCIONA)
+================================================================================
+
+Abre GameServer.rc con un editor de texto y agrega al final de la sección
+de DIALOG (antes de STRING TABLE):
+
+---COPIA DESDE AQUÍ---
+
+IDD_UPDATE_CONFIG DIALOGEX 0, 0, 320, 280
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Update Configuration"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    GROUPBOX        "Auto-Update Settings",IDC_STATIC,7,7,306,80
+    CONTROL         "Enable Auto-Update System",IDC_CHECK_ENABLED,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,20,25,130,10
+    CONTROL         "Auto-Check for Updates (every hour)",IDC_CHECK_AUTOCHECK,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,20,45,150,10
+    CONTROL         "Auto-Download Updates",IDC_CHECK_AUTODOWNLOAD,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,20,65,100,10
+    CONTROL         "Show Notification Popups",IDC_CHECK_SHOWNOTIFICATIONS,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,170,25,120,10
+    
+    GROUPBOX        "Server Configuration",IDC_STATIC,7,95,306,100
+    LTEXT           "Update Server URL:",IDC_STATIC,20,115,70,8
+    EDITTEXT        IDC_EDIT_UPDATEURL,20,130,280,14,ES_AUTOHSCROLL
+    LTEXT           "Current Version:",IDC_STATIC,20,155,60,8
+    EDITTEXT        IDC_EDIT_CURRENTVERSION,20,170,100,14,ES_AUTOHSCROLL
+    
+    GROUPBOX        "Information",IDC_STATIC,7,205,306,45
+    LTEXT           "• Enable Auto-Update to check for updates automatically",IDC_STATIC,20,220,280,8
+    LTEXT           "• Auto-Download will download updates immediately when found",IDC_STATIC,20,232,280,8
+    
+    DEFPUSHBUTTON   "Save Configuration",IDC_BTN_SAVE_UPDATECONFIG,100,258,80,16
+    PUSHBUTTON      "Cancel",IDCANCEL,190,258,50,16
+END
+
+IDD_PROGRESS_DIALOG DIALOGEX 0, 0, 300, 100
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION
+CAPTION "Downloading Update..."
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    ICON            IDI_GAMESERVER,IDC_STATIC,14,14,20,20
+    LTEXT           "Downloading:",IDC_STATIC,45,14,50,8
+    LTEXT           "filename.txt",IDC_STATIC_FILENAME,100,14,180,8
+    
+    CONTROL         "",IDC_PROGRESS_BAR,"msctls_progress32",WS_BORDER,14,40,272,14
+    
+    LTEXT           "0%",IDC_STATIC_PROGRESS,14,60,30,8
+    LTEXT           "0.00 MB / 0.00 MB",IDC_STATIC_SIZE,200,60,86,8
+    
+    LTEXT           "Please wait while the update is being downloaded...",IDC_STATIC,14,78,272,8
+END
+
+---COPIA HASTA AQUÍ---
+
+Guarda el archivo y rebuild.
+
+================================================================================
+VERIFICACIÓN:
+================================================================================
+
+Después de agregar los diálogos, verifica en resource.h que existan:
+
+#define IDD_UPDATE_CONFIG      32900
+#define IDC_CHECK_ENABLED      32901
+#define IDC_EDIT_UPDATEURL     32905
+#define IDD_PROGRESS_DIALOG    32910
+#define IDC_PROGRESS_BAR       32911
+
+Si NO existen, agrégalos manualmente a resource.h
+
+================================================================================
+PRUEBA:
+================================================================================
+
+1. Rebuild el proyecto
+2. Ejecuta GameServer.exe
+3. Update → Config Updates → Debe aparecer el diálogo visual ✅
+4. Update → Check for Updates → Si hay update, aparece barra de progreso ✅
+
+================================================================================
+SI HAY ERRORES:
+================================================================================
+
+Error: "IDD_UPDATE_CONFIG not found"
+Fix: Los IDs no están en resource.h, agrégalos manualmente
+
+Error: "Dialog appears empty"
+Fix: Los controles no se agregaron correctamente, usa MÉTODO 1
+
+Error: "Cannot compile .rc"
+Fix: Sintaxis incorrecta, verifica las comas y paréntesis
+
+================================================================================

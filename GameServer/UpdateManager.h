@@ -92,6 +92,7 @@ public:
 	// Manual operations
 	void ShowUpdateDialog();
 	void ManualCheckForUpdates();
+	void ShowConfigDialog();
 	
 	// Automatic operations
 	void EnableAutoUpdate(bool enable);
@@ -100,6 +101,9 @@ public:
 	// Progress tracking
 	void SetDownloadProgress(int percent);
 	int GetDownloadProgress() const { return m_DownloadProgress; }
+	void ShowProgressDialog(const char* fileName);
+	void UpdateProgressDialog(int percent, DWORD current, DWORD total);
+	void CloseProgressDialog();
 	
 	// Getters/Setters
 	bool IsEnabled() const { return m_Enabled; }

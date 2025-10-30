@@ -1,0 +1,116 @@
+================================================================================
+DIÁLOGOS PARA AGREGAR A GameServer.rc
+================================================================================
+
+Abre GameServer.rc en Visual Studio y agrega estos dos diálogos al final
+de la sección de DIALOG (antes de la sección de STRING TABLE):
+
+================================================================================
+1. DIÁLOGO DE CONFIGURACIÓN
+================================================================================
+
+IDD_UPDATE_CONFIG DIALOGEX 0, 0, 320, 280
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Update Configuration"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    GROUPBOX        "Auto-Update Settings",IDC_STATIC,7,7,306,80
+    CONTROL         "Enable Auto-Update System",IDC_CHECK_ENABLED,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,20,25,130,10
+    CONTROL         "Auto-Check for Updates (every hour)",IDC_CHECK_AUTOCHECK,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,20,45,150,10
+    CONTROL         "Auto-Download Updates",IDC_CHECK_AUTODOWNLOAD,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,20,65,100,10
+    CONTROL         "Show Notification Popups",IDC_CHECK_SHOWNOTIFICATIONS,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,170,25,120,10
+    
+    GROUPBOX        "Server Configuration",IDC_STATIC,7,95,306,100
+    LTEXT           "Update Server URL:",IDC_STATIC,20,115,70,8
+    EDITTEXT        IDC_EDIT_UPDATEURL,20,130,280,14,ES_AUTOHSCROLL
+    LTEXT           "Current Version:",IDC_STATIC,20,155,60,8
+    EDITTEXT        IDC_EDIT_CURRENTVERSION,20,170,100,14,ES_AUTOHSCROLL
+    
+    GROUPBOX        "Information",IDC_STATIC,7,205,306,45
+    LTEXT           "• Enable Auto-Update to check for updates automatically",IDC_STATIC,20,220,280,8
+    LTEXT           "• Auto-Download will download updates immediately when found",IDC_STATIC,20,232,280,8
+    
+    DEFPUSHBUTTON   "Save Configuration",IDC_BTN_SAVE_UPDATECONFIG,100,258,80,16
+    PUSHBUTTON      "Cancel",IDCANCEL,190,258,50,16
+END
+
+================================================================================
+2. DIÁLOGO DE PROGRESO
+================================================================================
+
+IDD_PROGRESS_DIALOG DIALOGEX 0, 0, 300, 100
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION
+CAPTION "Downloading Update..."
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    ICON            IDI_GAMESERVER,IDC_STATIC,14,14,20,20
+    LTEXT           "Downloading:",IDC_STATIC,45,14,50,8
+    LTEXT           "filename.txt",IDC_STATIC_FILENAME,100,14,180,8
+    
+    CONTROL         "",IDC_PROGRESS_BAR,"msctls_progress32",WS_BORDER,14,40,272,14
+    
+    LTEXT           "0%",IDC_STATIC_PROGRESS,14,60,30,8
+    LTEXT           "0.00 MB / 0.00 MB",IDC_STATIC_SIZE,200,60,86,8
+    
+    LTEXT           "Please wait while the update is being downloaded...",IDC_STATIC,14,78,272,8
+END
+
+================================================================================
+INSTRUCCIONES PARA AGREGAR:
+================================================================================
+
+OPCIÓN A: Visual Studio (Recomendado)
+--------------------------------------
+1. Abre GameServer.sln en Visual Studio
+2. En Solution Explorer → Expande "Resource Files"
+3. Doble clic en "GameServer.rc"
+4. En Resource View → Right-click "Dialog" → Add Resource → Dialog
+5. Copia y pega el código de arriba en modo texto (View → Code)
+6. O usa el editor visual para crear los controles
+
+OPCIÓN B: Editor de Texto
+--------------------------
+1. Abre GameServer.rc con Notepad++
+2. Busca la sección que dice "DIALOG" o "DIALOGEX"
+3. Ve al final de esa sección (antes de STRING TABLE)
+4. Copia y pega los dos diálogos de arriba
+5. Guarda el archivo
+
+================================================================================
+CONTROLES USADOS:
+================================================================================
+
+Diálogo de Configuración:
+- 4 Checkboxes (Enable, AutoCheck, AutoDownload, ShowNotifications)
+- 2 Edit boxes (URL, Version)
+- 2 Botones (Save, Cancel)
+- 3 GroupBoxes (para organizar visualmente)
+- Labels informativos
+
+Diálogo de Progreso:
+- 1 Icon (icono del GameServer)
+- 1 Progress Bar (barra de progreso animada)
+- 3 Labels dinámicos (FileName, Progress %, Size)
+- Labels estáticos
+
+================================================================================
+VERIFICACIÓN:
+================================================================================
+
+Después de agregar los diálogos:
+
+1. Rebuild el proyecto
+2. Si hay errores, verifica:
+   - Los IDs están definidos en resource.h ✓
+   - La sintaxis del .rc es correcta
+   - No hay IDs duplicados
+
+3. Prueba los diálogos:
+   - Update → Config Updates (abre configuración)
+   - Update → Check for Updates (muestra progreso al descargar)
+
+================================================================================
+NOTA: 
+Si prefieres, puedo crear estos diálogos de manera programática (sin .rc)
+usando CreateWindowEx, pero el método .rc es más estándar y fácil de mantener.
+================================================================================

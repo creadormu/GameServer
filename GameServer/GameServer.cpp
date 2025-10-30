@@ -615,18 +615,8 @@ LRESULT CALLBACK WndProc(HWND hWnd,UINT message,WPARAM wParam,LPARAM lParam) // 
 				case IDM_UPDATE_CHECK:
 					gUpdateManager.ManualCheckForUpdates();
 					break;
-				case IDM_UPDATE_DOWNLOAD:
-					if(gUpdateManager.IsUpdateAvailable()) {
-						gUpdateManager.DownloadUpdate();
-					} else {
-						MessageBox(hWnd, "No update available to download.\n\nPlease check for updates first.", "No Update", MB_OK | MB_ICONINFORMATION);
-					}
-					break;
-				case IDM_UPDATE_APPLY:
-					gUpdateManager.ApplyUpdate();
-					break;
 				case IDM_UPDATE_CONFIG:
-					ShellExecuteA(NULL, "open", ".\\Data\\UpdateConfig.ini", NULL, NULL, SW_SHOW);
+					gUpdateManager.ShowConfigDialog();
 					break;
 				default:
 					return DefWindowProc(hWnd,message,wParam,lParam);

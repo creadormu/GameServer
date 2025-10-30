@@ -244,6 +244,9 @@ bool CUpdateManager::DownloadUpdate() {
 	m_Status = UPDATE_STATUS_DOWNLOADING;
 	m_DownloadProgress = 0;
 	
+	// Show progress dialog
+	ShowProgressDialog(m_LatestUpdate.fileName);
+	
 	char destPath[512];
 	GetTempFilePath(m_LatestUpdate.fileName, destPath, sizeof(destPath));
 	
@@ -251,6 +254,7 @@ bool CUpdateManager::DownloadUpdate() {
 	if (!DownloadFileWithProgress(m_LatestUpdate.downloadUrl, destPath, &bytesDownloaded)) {
 		LogUpdate("[UpdateManager] ERROR: Download failed");
 		m_Status = UPDATE_STATUS_ERROR;
+		CloseProgressDialog();
 		if (m_ShowNotifications) {
 			ShowNotification("Update download failed!\n\nPlease try again later or download manually.", MB_ICONERROR);
 		}
@@ -258,6 +262,9 @@ bool CUpdateManager::DownloadUpdate() {
 	}
 	
 	LogUpdate("[UpdateManager] Download complete: %d bytes", bytesDownloaded);
+	
+	// Close progress dialog
+	CloseProgressDialog();
 	
 	// Verify file hash if provided
 	if (strlen(m_LatestUpdate.fileHash) > 0) {
@@ -329,10 +336,13 @@ bool CUpdateManager::DownloadFileWithProgress(const char* url, const char* destP
 		int progress = 0;
 		if (fileSize > 0) {
 			progress = (int)((totalBytes * 100) / fileSize);
-			if (progress != lastProgress && progress % 10 == 0) {
+			if (progress != lastProgress) {
 				LogUpdate("[UpdateManager] Download progress: %d%% (%d / %d bytes)", 
 					progress, totalBytes, fileSize);
 				lastProgress = progress;
+				
+				// Update progress dialog
+				UpdateProgressDialog(progress, totalBytes, fileSize);
 			}
 		} else if (totalBytes % (1024 * 100) == 0) {
 			LogUpdate("[UpdateManager] Downloaded: %d KB", totalBytes / 1024);
@@ -819,4 +829,149 @@ void CUpdateManager::EnableAutoUpdate(bool enable) {
 	m_Enabled = enable;
 	SaveConfig(".\\Data\\UpdateConfig.ini");
 	LogUpdate("[UpdateManager] Auto-update %s", enable ? "ENABLED" : "DISABLED");
+}
+
+// Config Dialog Callback
+INT_PTR CALLBACK UpdateConfigDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam) {
+	static CUpdateManager* pManager = NULL;
+	
+	switch (message) {
+		case WM_INITDIALOG:
+		{
+			pManager = (CUpdateManager*)lParam;
+			
+			// Set checkboxes
+			CheckDlgButton(hDlg, IDC_CHECK_ENABLED, pManager->IsEnabled() ? BST_CHECKED : BST_UNCHECKED);
+			CheckDlgButton(hDlg, IDC_CHECK_AUTOCHECK, 
+				GetPrivateProfileInt("UpdateManager", "AutoCheck", 1, ".\\Data\\UpdateConfig.ini") ? BST_CHECKED : BST_UNCHECKED);
+			CheckDlgButton(hDlg, IDC_CHECK_AUTODOWNLOAD, 
+				GetPrivateProfileInt("UpdateManager", "AutoDownload", 0, ".\\Data\\UpdateConfig.ini") ? BST_CHECKED : BST_UNCHECKED);
+			CheckDlgButton(hDlg, IDC_CHECK_SHOWNOTIFICATIONS, 
+				GetPrivateProfileInt("UpdateManager", "ShowNotifications", 1, ".\\Data\\UpdateConfig.ini") ? BST_CHECKED : BST_UNCHECKED);
+			
+			// Set text fields
+			SetDlgItemText(hDlg, IDC_EDIT_UPDATEURL, pManager->GetUpdateServerUrl());
+			SetDlgItemText(hDlg, IDC_EDIT_CURRENTVERSION, pManager->GetCurrentVersion());
+			
+			return TRUE;
+		}
+		
+		case WM_COMMAND:
+		{
+			if (LOWORD(wParam) == IDC_BTN_SAVE_UPDATECONFIG || LOWORD(wParam) == IDOK) {
+				// Get values
+				bool enabled = IsDlgButtonChecked(hDlg, IDC_CHECK_ENABLED) == BST_CHECKED;
+				bool autoCheck = IsDlgButtonChecked(hDlg, IDC_CHECK_AUTOCHECK) == BST_CHECKED;
+				bool autoDownload = IsDlgButtonChecked(hDlg, IDC_CHECK_AUTODOWNLOAD) == BST_CHECKED;
+				bool showNotifications = IsDlgButtonChecked(hDlg, IDC_CHECK_SHOWNOTIFICATIONS) == BST_CHECKED;
+				
+				char updateUrl[512];
+				char currentVersion[32];
+				GetDlgItemText(hDlg, IDC_EDIT_UPDATEURL, updateUrl, sizeof(updateUrl));
+				GetDlgItemText(hDlg, IDC_EDIT_CURRENTVERSION, currentVersion, sizeof(currentVersion));
+				
+				// Validate URL
+				if (strlen(updateUrl) == 0) {
+					MessageBoxA(hDlg, "Update Server URL cannot be empty!", "Validation Error", MB_OK | MB_ICONERROR);
+					return TRUE;
+				}
+				
+				// Save to file
+				WritePrivateProfileString("UpdateManager", "Enabled", enabled ? "1" : "0", ".\\Data\\UpdateConfig.ini");
+				WritePrivateProfileString("UpdateManager", "AutoCheck", autoCheck ? "1" : "0", ".\\Data\\UpdateConfig.ini");
+				WritePrivateProfileString("UpdateManager", "AutoDownload", autoDownload ? "1" : "0", ".\\Data\\UpdateConfig.ini");
+				WritePrivateProfileString("UpdateManager", "ShowNotifications", showNotifications ? "1" : "0", ".\\Data\\UpdateConfig.ini");
+				WritePrivateProfileString("UpdateManager", "UpdateServerUrl", updateUrl, ".\\Data\\UpdateConfig.ini");
+				WritePrivateProfileString("UpdateManager", "CurrentVersion", currentVersion, ".\\Data\\UpdateConfig.ini");
+				
+				// Reload config
+				pManager->LoadConfig(".\\Data\\UpdateConfig.ini");
+				
+				MessageBoxA(hDlg, "Configuration saved successfully!", "Success", MB_OK | MB_ICONINFORMATION);
+				EndDialog(hDlg, IDOK);
+				return TRUE;
+			}
+			else if (LOWORD(wParam) == IDCANCEL) {
+				EndDialog(hDlg, IDCANCEL);
+				return TRUE;
+			}
+			break;
+		}
+	}
+	
+	return FALSE;
+}
+
+void CUpdateManager::ShowConfigDialog() {
+	DialogBoxParam(GetModuleHandle(NULL), MAKEINTRESOURCE(IDD_UPDATE_CONFIG), m_hWnd, UpdateConfigDlgProc, (LPARAM)this);
+}
+
+// Progress Dialog Callback
+INT_PTR CALLBACK ProgressDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam) {
+	switch (message) {
+		case WM_INITDIALOG:
+		{
+			// Center dialog
+			RECT rc;
+			GetWindowRect(hDlg, &rc);
+			int x = (GetSystemMetrics(SM_CXSCREEN) - (rc.right - rc.left)) / 2;
+			int y = (GetSystemMetrics(SM_CYSCREEN) - (rc.bottom - rc.top)) / 2;
+			SetWindowPos(hDlg, NULL, x, y, 0, 0, SWP_NOSIZE | SWP_NOZORDER);
+			
+			// Set progress bar range
+			SendDlgItemMessage(hDlg, IDC_PROGRESS_BAR, PBM_SETRANGE, 0, MAKELPARAM(0, 100));
+			SendDlgItemMessage(hDlg, IDC_PROGRESS_BAR, PBM_SETPOS, 0, 0);
+			
+			return TRUE;
+		}
+	}
+	
+	return FALSE;
+}
+
+void CUpdateManager::ShowProgressDialog(const char* fileName) {
+	if (m_hProgressWnd != NULL) {
+		return; // Already showing
+	}
+	
+	m_hProgressWnd = CreateDialogParam(GetModuleHandle(NULL), MAKEINTRESOURCE(IDD_PROGRESS_DIALOG), 
+		m_hWnd, ProgressDlgProc, (LPARAM)this);
+	
+	if (m_hProgressWnd) {
+		SetDlgItemText(m_hProgressWnd, IDC_STATIC_FILENAME, fileName);
+		ShowWindow(m_hProgressWnd, SW_SHOW);
+	}
+}
+
+void CUpdateManager::UpdateProgressDialog(int percent, DWORD current, DWORD total) {
+	if (m_hProgressWnd == NULL) {
+		return;
+	}
+	
+	// Update progress bar
+	SendDlgItemMessage(m_hProgressWnd, IDC_PROGRESS_BAR, PBM_SETPOS, percent, 0);
+	
+	// Update text
+	char progressText[128];
+	sprintf_s(progressText, sizeof(progressText), "%d%%", percent);
+	SetDlgItemText(m_hProgressWnd, IDC_STATIC_PROGRESS, progressText);
+	
+	char sizeText[128];
+	sprintf_s(sizeText, sizeof(sizeText), "%.2f MB / %.2f MB", 
+		current / 1024.0 / 1024.0, total / 1024.0 / 1024.0);
+	SetDlgItemText(m_hProgressWnd, IDC_STATIC_SIZE, sizeText);
+	
+	// Process messages to update UI
+	MSG msg;
+	while (PeekMessage(&msg, m_hProgressWnd, 0, 0, PM_REMOVE)) {
+		TranslateMessage(&msg);
+		DispatchMessage(&msg);
+	}
+}
+
+void CUpdateManager::CloseProgressDialog() {
+	if (m_hProgressWnd != NULL) {
+		DestroyWindow(m_hProgressWnd);
+		m_hProgressWnd = NULL;
+	}
 }

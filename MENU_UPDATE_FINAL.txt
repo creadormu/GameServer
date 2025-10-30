@@ -1,0 +1,121 @@
+================================================================================
+📋 MENÚ FINAL ACTUALIZADO - GameServer.rc
+================================================================================
+
+ACTUALIZA TU MENÚ "Update" PARA QUE SE VEA ASÍ:
+
+================================================================================
+CÓDIGO PARA GameServer.rc:
+================================================================================
+
+Busca el menú "Update" en tu GameServer.rc y reemplázalo con esto:
+
+POPUP "Update"
+BEGIN
+    MENUITEM "Check for Updates",          IDM_UPDATE_CHECK
+    MENUITEM SEPARATOR
+    MENUITEM "Config Updates",             IDM_UPDATE_CONFIG
+END
+
+================================================================================
+EXPLICACIÓN:
+================================================================================
+
+ANTES tenías 4 opciones:
+❌ Check for Updates
+❌ Download Update          (eliminado - ahora automático)
+❌ Apply Update              (eliminado - ahora automático)  
+❌ Update Configuration      (renombrado)
+
+AHORA solo 2 opciones:
+✅ Check for Updates         (hace todo: check, download, apply)
+✅ Config Updates            (diálogo visual para configurar)
+
+================================================================================
+EN VISUAL STUDIO:
+================================================================================
+
+1. Abre GameServer.rc en Visual Studio
+2. Busca el POPUP "Update"
+3. Elimina las líneas:
+   - "Download Update"
+   - "Apply Update"
+4. Cambia "Update Configuration" por "Config Updates"
+5. Guarda
+
+================================================================================
+RESULTADO VISUAL DEL MENÚ:
+================================================================================
+
+Tu barra de menú se verá así:
+
+[Close Server] [Recargar] [Eventos] [Invasion] [Update] [IA] [& Buy Premium]
+                                                   │
+                                                   └─ Check for Updates
+                                                      ─────────────────
+                                                      Config Updates
+
+Más simple, más limpio, más profesional! ✅
+
+================================================================================
+FLUJO DE USUARIO:
+================================================================================
+
+CONFIGURAR AUTO-UPDATE:
+1. Click: Update → Config Updates
+2. Cambia checkboxes y URL visual
+3. Click: Save Configuration
+4. ¡Listo!
+
+ACTUALIZAR GAMESERVER:
+1. Click: Update → Check for Updates
+2. Si hay update: "Download now?" → Yes
+3. Ventana progreso aparece automáticamente
+4. Después descarga: "Apply now?" → Yes
+5. ¡Servidor actualizado!
+
+TOTAL: 2 clicks para configurar, 2 clicks para actualizar! 🎉
+
+================================================================================
+UBICACIÓN EN EL ARCHIVO .rc:
+================================================================================
+
+Busca algo como esto en tu GameServer.rc:
+
+POPUP "IA"
+BEGIN
+    MENUITEM "Reload IA", ID_FAKEONLINE_RELOADDATA
+    MENUITEM "Add IA", ID_FAKEONLINE_ADDFAKEONLINE
+    MENUITEM "Delete IA", ID_FAKEONLINE_DELFAKEONLINE
+    MENUITEM "Create Multiple Bots", ID_FAKEONLINE_CREATEBOTS
+END
+
+← AGREGA AQUÍ EL MENÚ UPDATE ↓
+
+POPUP "Update"
+BEGIN
+    MENUITEM "Check for Updates",          IDM_UPDATE_CHECK
+    MENUITEM SEPARATOR
+    MENUITEM "Config Updates",             IDM_UPDATE_CONFIG
+END
+
+POPUP "& Buy Premium"
+BEGIN
+    MENUITEM "& Mu Alfa", IDM_ABOUT
+END
+
+================================================================================
+NOTA IMPORTANTE:
+================================================================================
+
+El archivo .rc está en formato UTF-16, así que si lo abres con Notepad
+puede verse raro (con caracteres raros entre letras).
+
+SOLUCIÓN: Usa Visual Studio para editarlo, o un editor que soporte UTF-16.
+
+Si ves esto en Notepad:
+P O P U P   " U p d a t e "
+
+Es normal - es UTF-16. Visual Studio lo mostrará correctamente.
+
+================================================================================
