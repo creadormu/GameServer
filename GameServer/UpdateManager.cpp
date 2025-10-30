@@ -37,12 +37,12 @@ CUpdateManager::~CUpdateManager() {
 void CUpdateManager::Init(HWND hWnd) {
 	m_hWnd = hWnd;
 	
-	// Create temp directory if it doesn't exist
+	// Load configuration first
+	LoadConfig(".\\Data\\UpdateConfig.ini");
+	
+	// Create directories after loading config (in case TempDirectory changed)
 	CreateDirectoryA(".\\Update", NULL);
 	CreateDirectoryA(m_TempDirectory, NULL);
-	
-	// Load configuration
-	LoadConfig(".\\Data\\UpdateConfig.ini");
 	
 	LogUpdate("[UpdateManager] Initialized (Version: %s, Enabled: %s)", 
 		m_CurrentVersion, m_Enabled ? "YES" : "NO");
@@ -151,7 +151,19 @@ bool CUpdateManager::CheckForUpdates() {
 		// Auto-download if enabled
 		if (m_AutoDownload) {
 			LogUpdate("[UpdateManager] Auto-download is enabled, starting download...");
-			DownloadUpdate();
+			if (DownloadUpdate()) {
+				// Ask user if they want to apply the update
+				int result = MessageBoxA(m_hWnd,
+					"Update downloaded successfully!\n\n"
+					"Do you want to apply the update now?\n"
+					"(The server will restart if updating executable)",
+					"Apply Update?", MB_YESNO | MB_ICONQUESTION);
+				if (result == IDYES) {
+					ApplyUpdate();
+				} else {
+					LogUpdate("[UpdateManager] User postponed update application");
+				}
+			}
 		}
 		
 		return true;
@@ -769,58 +781,75 @@ void CUpdateManager::ManualCheckForUpdates() {
 	if (!m_Enabled) {
 		MessageBoxA(m_hWnd, 
 			"Auto-update system is disabled.\n\n"
-			"Enable it in Data\\UpdateConfig.ini to check for updates.",
+			"Enable it in Update → Config Updates to check for updates.",
 			"Auto-Update Disabled", MB_ICONINFORMATION);
 		return;
 	}
 	
-	if (CheckForUpdates()) {
-		if (!m_UpdateAvailable) {
-			MessageBoxA(m_hWnd, 
-				"Your GameServer is up to date!\n\n"
-				"No new updates are available at this time.",
-				"No Updates Available", MB_ICONINFORMATION);
-		} else {
-			// Show dialog with download option
-			char msg[768];
-			sprintf_s(msg, sizeof(msg), 
-				"UPDATE AVAILABLE!\n\n"
-				"Current Version: %s\n"
-				"New Version: %s\n"
-				"File: %s\n"
-				"Size: %.2f MB\n\n"
-				"Description:\n%s\n\n"
-				"Do you want to download and install this update now?",
-				m_CurrentVersion,
-				m_LatestUpdate.version,
-				m_LatestUpdate.fileName,
-				m_LatestUpdate.fileSize / 1024.0 / 1024.0,
-				m_LatestUpdate.description);
-			
-			int result = MessageBoxA(m_hWnd, msg, "Update Available", MB_YESNO | MB_ICONQUESTION);
-			
-			if (result == IDYES) {
-				// Download with progress
-				if (DownloadUpdate()) {
-					// Ask to apply now
-					int applyResult = MessageBoxA(m_hWnd,
-						"Download completed successfully!\n\n"
-						"Do you want to apply the update now?\n"
-						"(The server will restart if updating executable)",
-						"Apply Update?", MB_YESNO | MB_ICONQUESTION);
-					
-					if (applyResult == IDYES) {
-						ApplyUpdate();
-					}
+	if (!CheckForUpdates()) {
+		// Error occurred during check
+		if (m_Status == UPDATE_STATUS_ERROR) {
+			MessageBoxA(m_hWnd,
+				"Failed to check for updates.\n\n"
+				"Please check:\n"
+				"• Your internet connection\n"
+				"• Update server URL is correct\n"
+				"• Update server is online\n\n"
+				"Check the console for details.",
+				"Update Check Failed", MB_ICONERROR);
+		}
+		return;
+	}
+	
+	// Check completed successfully
+	if (!m_UpdateAvailable) {
+		// No update available - show success message
+		char msg[256];
+		sprintf_s(msg, sizeof(msg),
+			"You have the latest version of Mu Alfa!\n\n"
+			"Current Version: %s\n\n"
+			"No update needed.",
+			m_CurrentVersion);
+		MessageBoxA(m_hWnd, msg, "Up to Date", MB_ICONINFORMATION);
+		return;
+	}
+	
+	// Update available - show unified dialog
+	char msg[768];
+	sprintf_s(msg, sizeof(msg), 
+		"UPDATE AVAILABLE!\n\n"
+		"Current Version: %s\n"
+		"New Version: %s\n"
+		"File: %s\n"
+		"Size: %.2f MB\n\n"
+		"Description:\n%s\n\n"
+		"Do you want to download and install this update now?",
+		m_CurrentVersion,
+		m_LatestUpdate.version,
+		m_LatestUpdate.fileName,
+		m_LatestUpdate.fileSize / 1024.0 / 1024.0,
+		m_LatestUpdate.description);
+	
+	int result = MessageBoxA(m_hWnd, msg, "Update Available", MB_YESNO | MB_ICONQUESTION);
+	if (result == IDYES) {
+		if (DownloadUpdate()) {
+			int applyResult = MessageBoxA(m_hWnd,
+				"Download completed successfully!\n\n"
+				"Do you want to apply the update now?\n"
+				"(The server will restart if updating executable)",
+				"Apply Update?", MB_YESNO | MB_ICONQUESTION);
+			if (applyResult == IDYES) {
+				ApplyUpdate();
+			} else {
+				LogUpdate("[UpdateManager] User postponed update application");
+				if (m_ShowNotifications) {
+					MessageBoxA(m_hWnd,
+						"Update downloaded but not applied.\n\n"
+						"You can apply it later, but remember to delete\n"
+						"the Update folder manually if you cancel.",
+						"Update Postponed", MB_ICONWARNING);
 				}
 			}
-		}
-	} else {
-		if (m_Status == UPDATE_STATUS_ERROR) {
-			MessageBoxA(m_hWnd, 
-				"Failed to check for updates.\n\n"
-				"Please verify your internet connection and update server URL.",
-				"Update Check Failed", MB_ICONERROR);
 		}
 	}
 }
