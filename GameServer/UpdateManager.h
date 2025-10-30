@@ -67,6 +67,8 @@ private:
 	
 	bool m_UpdateAvailable;
 	DWORD m_LastCheckTime;
+	int m_DownloadProgress;
+	HWND m_hProgressWnd;
 
 public:
 	CUpdateManager();
@@ -95,6 +97,10 @@ public:
 	void EnableAutoUpdate(bool enable);
 	void OnTimer();
 	
+	// Progress tracking
+	void SetDownloadProgress(int percent);
+	int GetDownloadProgress() const { return m_DownloadProgress; }
+	
 	// Getters/Setters
 	bool IsEnabled() const { return m_Enabled; }
 	void SetEnabled(bool enabled) { m_Enabled = enabled; }
@@ -115,11 +121,14 @@ public:
 private:
 	// Internal helpers
 	bool DownloadFile(const char* url, const char* destPath, DWORD* bytesDownloaded);
+	bool DownloadFileWithProgress(const char* url, const char* destPath, DWORD* bytesDownloaded);
 	bool ParseUpdateManifest(const char* manifestData);
 	void CalculateFileHash(const char* filePath, char* outHash, int outHashSize);
 	bool CreateBackup(const char* filePath);
 	bool RestoreBackup(const char* filePath);
 	void GetTempFilePath(const char* fileName, char* outPath, int outPathSize);
+	void CleanupTempFiles();
+	bool DeleteDirectoryRecursive(const char* dirPath);
 	
 	// Thread functions
 	static DWORD WINAPI DownloadThreadProc(LPVOID lpParam);

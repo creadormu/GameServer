@@ -20,6 +20,8 @@ CUpdateManager::CUpdateManager() {
 	m_DownloadThread = NULL;
 	m_UpdateAvailable = false;
 	m_LastCheckTime = 0;
+	m_DownloadProgress = 0;
+	m_hProgressWnd = NULL;
 	
 	InitializeCriticalSection(&m_CriticalSection);
 }
@@ -240,12 +242,13 @@ bool CUpdateManager::DownloadUpdate() {
 	
 	LogUpdate("[UpdateManager] Starting download: %s", m_LatestUpdate.downloadUrl);
 	m_Status = UPDATE_STATUS_DOWNLOADING;
+	m_DownloadProgress = 0;
 	
 	char destPath[512];
 	GetTempFilePath(m_LatestUpdate.fileName, destPath, sizeof(destPath));
 	
 	DWORD bytesDownloaded = 0;
-	if (!DownloadFile(m_LatestUpdate.downloadUrl, destPath, &bytesDownloaded)) {
+	if (!DownloadFileWithProgress(m_LatestUpdate.downloadUrl, destPath, &bytesDownloaded)) {
 		LogUpdate("[UpdateManager] ERROR: Download failed");
 		m_Status = UPDATE_STATUS_ERROR;
 		if (m_ShowNotifications) {
@@ -273,20 +276,81 @@ bool CUpdateManager::DownloadUpdate() {
 	m_Status = UPDATE_STATUS_READY;
 	LogUpdate("[UpdateManager] Update ready to install");
 	
-	if (m_ShowNotifications) {
-		char msg[512];
-		sprintf_s(msg, sizeof(msg), 
-			"Update downloaded successfully!\n\n"
-			"Version: %s\n"
-			"File: %s\n\n"
-			"The update is ready to be applied.\n"
-			"Go to menu [Update] -> [Apply Update] to install.\n\n"
-			"NOTE: The server will be restarted during the update process.",
-			m_LatestUpdate.version,
-			m_LatestUpdate.fileName);
-		ShowNotification(msg, MB_ICONINFORMATION);
+	return true;
+}
+
+bool CUpdateManager::DownloadFileWithProgress(const char* url, const char* destPath, DWORD* bytesDownloaded) {
+	HINTERNET hInternet = InternetOpenA("GameServer UpdateManager/1.0", 
+		INTERNET_OPEN_TYPE_PRECONFIG, NULL, NULL, 0);
+	if (!hInternet) {
+		LogUpdate("[UpdateManager] ERROR: InternetOpen failed: %d", GetLastError());
+		return false;
 	}
 	
+	HINTERNET hUrl = InternetOpenUrlA(hInternet, url, NULL, 0, 
+		INTERNET_FLAG_RELOAD | INTERNET_FLAG_NO_CACHE_WRITE, 0);
+	if (!hUrl) {
+		LogUpdate("[UpdateManager] ERROR: InternetOpenUrl failed: %d", GetLastError());
+		InternetCloseHandle(hInternet);
+		return false;
+	}
+	
+	// Get file size
+	DWORD fileSize = 0;
+	DWORD bufferSize = sizeof(fileSize);
+	HttpQueryInfoA(hUrl, HTTP_QUERY_CONTENT_LENGTH | HTTP_QUERY_FLAG_NUMBER, 
+		&fileSize, &bufferSize, NULL);
+	
+	if (fileSize == 0) {
+		fileSize = m_LatestUpdate.fileSize;
+	}
+	
+	// Open destination file
+	FILE* file = NULL;
+	fopen_s(&file, destPath, "wb");
+	if (!file) {
+		LogUpdate("[UpdateManager] ERROR: Failed to create file: %s", destPath);
+		InternetCloseHandle(hUrl);
+		InternetCloseHandle(hInternet);
+		return false;
+	}
+	
+	// Download in chunks with progress
+	BYTE buffer[8192];
+	DWORD totalBytes = 0;
+	DWORD dwRead = 0;
+	int lastProgress = -1;
+	
+	while (InternetReadFile(hUrl, buffer, sizeof(buffer), &dwRead) && dwRead > 0) {
+		fwrite(buffer, 1, dwRead, file);
+		totalBytes += dwRead;
+		
+		// Calculate and log progress
+		int progress = 0;
+		if (fileSize > 0) {
+			progress = (int)((totalBytes * 100) / fileSize);
+			if (progress != lastProgress && progress % 10 == 0) {
+				LogUpdate("[UpdateManager] Download progress: %d%% (%d / %d bytes)", 
+					progress, totalBytes, fileSize);
+				lastProgress = progress;
+			}
+		} else if (totalBytes % (1024 * 100) == 0) {
+			LogUpdate("[UpdateManager] Downloaded: %d KB", totalBytes / 1024);
+		}
+		
+		m_DownloadProgress = progress;
+	}
+	
+	fclose(file);
+	InternetCloseHandle(hUrl);
+	InternetCloseHandle(hInternet);
+	
+	if (bytesDownloaded) {
+		*bytesDownloaded = totalBytes;
+	}
+	
+	m_DownloadProgress = 100;
+	LogUpdate("[UpdateManager] Download complete: %d bytes", totalBytes);
 	return true;
 }
 
@@ -543,7 +607,67 @@ bool CUpdateManager::ApplyUpdate() {
 	
 	m_Status = UPDATE_STATUS_NO_UPDATE;
 	m_UpdateAvailable = false;
+	
+	// Clean up temp files after successful update
+	LogUpdate("[UpdateManager] Cleaning up temporary files...");
+	CleanupTempFiles();
+	
 	return true;
+}
+
+void CUpdateManager::CleanupTempFiles() {
+	// Delete the Update/Temp folder and its contents
+	if (DeleteDirectoryRecursive(m_TempDirectory)) {
+		LogUpdate("[UpdateManager] Temporary files cleaned up successfully");
+	} else {
+		LogUpdate("[UpdateManager] WARNING: Failed to clean up some temporary files");
+	}
+	
+	// Optionally delete the entire Update folder
+	char updateFolder[256];
+	strcpy_s(updateFolder, sizeof(updateFolder), ".\\Update");
+	if (DeleteDirectoryRecursive(updateFolder)) {
+		LogUpdate("[UpdateManager] Update folder cleaned up successfully");
+	}
+}
+
+bool CUpdateManager::DeleteDirectoryRecursive(const char* dirPath) {
+	WIN32_FIND_DATAA findData;
+	HANDLE hFind;
+	char searchPath[512];
+	char filePath[512];
+	
+	// First, delete all files in the directory
+	sprintf_s(searchPath, sizeof(searchPath), "%s\\*.*", dirPath);
+	hFind = FindFirstFileA(searchPath, &findData);
+	
+	if (hFind != INVALID_HANDLE_VALUE) {
+		do {
+			// Skip . and ..
+			if (strcmp(findData.cFileName, ".") == 0 || strcmp(findData.cFileName, "..") == 0) {
+				continue;
+			}
+			
+			sprintf_s(filePath, sizeof(filePath), "%s\\%s", dirPath, findData.cFileName);
+			
+			if (findData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) {
+				// Recursively delete subdirectory
+				DeleteDirectoryRecursive(filePath);
+			} else {
+				// Delete file
+				DeleteFileA(filePath);
+			}
+		} while (FindNextFileA(hFind, &findData));
+		
+		FindClose(hFind);
+	}
+	
+	// Now delete the directory itself
+	return RemoveDirectoryA(dirPath) ? true : false;
+}
+
+void CUpdateManager::SetDownloadProgress(int percent) {
+	m_DownloadProgress = percent;
 }
 
 bool CUpdateManager::CreateBackup(const char* filePath) {
@@ -646,6 +770,40 @@ void CUpdateManager::ManualCheckForUpdates() {
 				"Your GameServer is up to date!\n\n"
 				"No new updates are available at this time.",
 				"No Updates Available", MB_ICONINFORMATION);
+		} else {
+			// Show dialog with download option
+			char msg[768];
+			sprintf_s(msg, sizeof(msg), 
+				"UPDATE AVAILABLE!\n\n"
+				"Current Version: %s\n"
+				"New Version: %s\n"
+				"File: %s\n"
+				"Size: %.2f MB\n\n"
+				"Description:\n%s\n\n"
+				"Do you want to download and install this update now?",
+				m_CurrentVersion,
+				m_LatestUpdate.version,
+				m_LatestUpdate.fileName,
+				m_LatestUpdate.fileSize / 1024.0 / 1024.0,
+				m_LatestUpdate.description);
+			
+			int result = MessageBoxA(m_hWnd, msg, "Update Available", MB_YESNO | MB_ICONQUESTION);
+			
+			if (result == IDYES) {
+				// Download with progress
+				if (DownloadUpdate()) {
+					// Ask to apply now
+					int applyResult = MessageBoxA(m_hWnd,
+						"Download completed successfully!\n\n"
+						"Do you want to apply the update now?\n"
+						"(The server will restart if updating executable)",
+						"Apply Update?", MB_YESNO | MB_ICONQUESTION);
+					
+					if (applyResult == IDYES) {
+						ApplyUpdate();
+					}
+				}
+			}
 		}
 	} else {
 		if (m_Status == UPDATE_STATUS_ERROR) {
