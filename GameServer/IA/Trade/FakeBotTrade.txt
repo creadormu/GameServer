@@ -1,0 +1,11 @@
+; Fake bot trade configuration placeholder
+; Configure trade requirements and rewards per bot account here.
+; Format:
+; [BOT_ACCOUNT]
+; REQUIRED = type,level,exc,skill,luck,dur
+; REWARD   = type,level,exc,skill,luck,dur
+;
+; Example:
+; [BOT0001]
+; REQUIRED = 14,13,0,0,0,0
+; REWARD   = 14,22,0,0,0,0

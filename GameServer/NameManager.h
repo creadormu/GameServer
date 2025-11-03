@@ -17,7 +17,7 @@ public:
 
     // Language management
     bool LoadLanguage(const char* languageName);
-    bool LoadLanguageFromPath(const char* folderPath);
+    bool LoadLanguageFromPath(const char* folderPath, const char* languageNameOverride = nullptr);
     int GetAvailableLanguageCount() const { return m_AvailableLanguageCount; }
     const char* GetCurrentLanguage() const { return m_CurrentLanguage; }
     const char* GetLanguageName(int index) const;

@@ -1,0 +1,14 @@
+#GENERAL
+hallo
+hi
+servus
+>>>
+Hallo {player_name}! Bereit für den Kampf?
+Bleib wachsam, {player_name}; das Land ist gefährlich.
+
+#TRADE
+handel
+trade
+>>>
+Wenn du {item_required} bringst, bekommst du {item_reward}.
+Abgemacht, sobald du die Waren hast.

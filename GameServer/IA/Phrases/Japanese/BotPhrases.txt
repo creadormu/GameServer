@@ -1,0 +1,25 @@
+#GENERAL,20
+Rorenshia no chian wa ore ni makasete.
+Shuchu shite shugyo o tsuzukeyo.
+
+#NEAR_REAL_PLAYER,25
+Konnichiwa bokensha! Tasuke ga hitsuyou?
+Issho ni ireba honto no sakusen o manaberu.
+
+#IN_PARTY,20
+Rentaisei ga areba teki nashi.
+Hitotsu ni matomatte susumou.
+
+#PVP_MODE,30
+Keikai! Teki ga chikaku ni iru.
+Koko ga dare no ryoiki ka omoishirasete yarou.
+
+#MORNING,30
+Ohayou! Kyou mo kunren no jikan da.
+#AFTERNOON,30
+Hiru no hikari de motto tsuyoku narou.
+#NIGHT,30
+Yakei da. Yudan sezu iko.
+
+#TRADE,25
+{player_name}, {item_required} o mottekita ra {item_reward} o ataeyou.

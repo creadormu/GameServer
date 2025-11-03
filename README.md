@@ -36,10 +36,20 @@ Bienvenido al repositorio oficial del **GameServer** de [MU ALFA Season 6](https
 
 GameServer/
 ├── FakeOnline.cpp/.h ← Lógica central de bots con IA
-├── BotPhrases.txt ← Frases de bots por situación
-├── Answering.txt ← Palabras clave + respuestas por categoría
+├── IA/Phrases/<Idioma>/BotPhrases.txt ← Frases de bots por situación
+├── IA/Answers/<Idioma>/Answering.txt ← Palabras clave + respuestas por categoría
 ├── IA.xml ← Configuración individual de cada bot
 ├── ...
+
+## 🌍 Sistema de idiomas modular
+
+- Define los idiomas disponibles en `GameServer/IA/languages.ini`.
+- Cada idioma apunta a carpetas dedicadas:
+  - `IA/Names/<Idioma>/MaleNames.txt` y `FemaleNames.txt` para nombres.
+  - `IA/Phrases/<Idioma>/BotPhrases.txt` para frases contextuales.
+  - `IA/Answers/<Idioma>/Answering.txt` para respuestas por palabras clave.
+- La interfaz del bot creator y el servidor sólo muestran idiomas registrados en `languages.ini`, evitando conflictos con entradas antiguas.
+- Puedes agregar nuevos idiomas copiando una carpeta existente, ajustando los textos y registrándolos en `languages.ini`.
 
 
 > 💡 ¿Quieres que tu bot diga “¡Hola {player_name}!” cuando alguien lo saluda? Solo edita `Answering.txt`.  

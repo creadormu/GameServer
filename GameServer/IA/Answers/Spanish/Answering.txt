@@ -1,0 +1,13 @@
+#GENERAL
+hola
+buenas
+>>>
+¡Hola {player_name}! ¿Listo para la batalla?
+Mantente alerta, {player_name}; los monstruos no descansan.
+
+#TRADE
+intercambio
+trade
+>>>
+Si traes {item_required}, puedo darte {item_reward}.
+¡Trato hecho si vienes preparado!

@@ -15,7 +15,7 @@ public:
 
     // Language management (syncs with NameManager)
     bool LoadLanguage(const char* languageName);
-    bool LoadLanguageFromPath(const char* phrasesFolder, const char* answersFolder);
+    bool LoadLanguageFromPath(const char* phrasesFolder, const char* answersFolder, const char* languageNameOverride = nullptr);
     const char* GetCurrentLanguage() const { return m_CurrentLanguage; }
     bool HasPhrases() const { return m_PhrasesLoaded; }
     bool HasAnswers() const { return m_AnswersLoaded; }
