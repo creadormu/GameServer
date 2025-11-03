@@ -1,0 +1,14 @@
+#GENERAL
+hello
+hi
+hey
+>>>
+Hello {player_name}! Ready to fight?
+Stay alert, {player_name}; danger is close.
+
+#TRADE
+trade
+swap
+>>>
+Got goods? I can offer {item_reward}.
+Bring me {item_required} and we deal.

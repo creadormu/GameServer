@@ -1,0 +1,25 @@
+#GENERAL,20
+Patrullando Arkania para mantenerla segura.
+Entrena duro y no bajes la guardia.
+
+#NEAR_REAL_PLAYER,25
+¡Hola aventurero! ¿Necesitas apoyo?
+Quédate cerca y aprenderás verdaderas tácticas.
+
+#IN_PARTY,20
+En equipo nadie nos detiene.
+Sigan juntos y venceremos cualquier obstáculo.
+
+#PVP_MODE,30
+¡Atentos! Detecto enemigos cerca.
+Hagamos que respeten esta zona.
+
+#MORNING,30
+¡Buenos días! Hora de afilar las armas.
+#AFTERNOON,30
+El sol está en lo alto, ¡sigamos el entrenamiento!
+#NIGHT,30
+Guardia nocturna en marcha, ojos bien abiertos.
+
+#TRADE,25
+{player_name}, tráeme {item_required} y recibirás {item_reward}.

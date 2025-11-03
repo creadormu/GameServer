@@ -1,0 +1,14 @@
+#GENERAL
+ni hao
+zaoshang hao
+pengyou
+>>>
+Ni hao {player_name}! Zhunbei hao ma?
+Xiao xin yidian {player_name}, zhoushen dou shi weixian.
+
+#TRADE
+jiaoyi
+trade
+>>>
+Ni ruo dai lai {item_required}, wo ke yi gei ni {item_reward}.
+Xuyao bangzhu de shihou jiu jiaohu hu.

@@ -1,0 +1,14 @@
+#GENERAL
+konnichiwa
+ohayou
+yoroshiku
+>>>
+Konnichiwa {player_name}! Issho ni tatakaou.
+Ki wo tsukete, {player_name}; teki ga chikaku da.
+
+#TRADE
+torihiki
+trade
+>>>
+{item_required} o mottekitara {item_reward} o ageru yo.
+Junbi ga dekita ra koe o kakete.

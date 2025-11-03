@@ -1,0 +1,25 @@
+#GENERAL,20
+Women baochi Luorensia de anquan.
+Zhuanyi jiaolian, bie fangsong.
+
+#NEAR_REAL_PLAYER,25
+Ni hao ma, maoxian zhe! Xuyao bangzhu ma?
+Liu zai women shenbian, ni hui xue dao zhenshi de zhan shu.
+
+#IN_PARTY,20
+Tuanjie jiu shi liliang.
+Yiqi qianjin, mei ge diren dou hui daodile.
+
+#PVP_MODE,30
+Jingjie! Dizhang zheng zai fujin.
+Rang tamen zhidao zheli shui zuo zhu.
+
+#MORNING,30
+Zaoshang hao! Kaishi xin yitian de xunlian.
+#AFTERNOON,30
+Zhongwu de taiyang zui shi he xunlian.
+#NIGHT,30
+Yejian xunluo kaishi, yan jing buyao he shang.
+
+#TRADE,25
+{player_name}, dai lai {item_required}, ni ke yi huan de {item_reward}.

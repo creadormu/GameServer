@@ -2,7 +2,9 @@
 #include "stdafx.h"
 #include "NameManager.h"
 #include "Util.h"
+#include "LanguageConfig.h"
 #include <fstream>
+#include <algorithm>
 #include <windows.h>
 
 CNameManager g_NameManager;
@@ -25,6 +27,8 @@ CNameManager::~CNameManager()
 void CNameManager::Initialize()
 {
     LogAdd(LOG_BLACK, "[NameManager] Initializing...");
+
+    g_LanguageConfig.Load("IA\\languages.ini");
 
     // Scan for available language folders
     if (!ScanAvailableLanguages())
@@ -65,6 +69,35 @@ void CNameManager::Initialize()
 bool CNameManager::ScanAvailableLanguages()
 {
     m_AvailableLanguageCount = 0;
+
+    if (g_LanguageConfig.GetLanguageCount() > 0)
+    {
+        const std::vector<LanguageConfigEntry>& languages = g_LanguageConfig.GetLanguages();
+
+        for (size_t i = 0; i < languages.size() && m_AvailableLanguageCount < MAX_LANGUAGES; ++i)
+        {
+            const LanguageConfigEntry& entry = languages[i];
+
+            if (!entry.HasNames())
+            {
+                LogAdd(LOG_RED, "[NameManager] Language '%s' ignored: NamesDir missing", entry.name.c_str());
+                continue;
+            }
+
+            strncpy_s(m_AvailableLanguages[m_AvailableLanguageCount], sizeof(m_AvailableLanguages[m_AvailableLanguageCount]), entry.name.c_str(), _TRUNCATE);
+            m_AvailableLanguageCount++;
+        }
+
+        if (m_AvailableLanguageCount > 0)
+        {
+            LogAdd(LOG_GREEN, "[NameManager] Languages from config: %d", m_AvailableLanguageCount);
+            for (int i = 0; i < m_AvailableLanguageCount; ++i)
+            {
+                LogAdd(LOG_BLACK, "  - %s", m_AvailableLanguages[i]);
+            }
+            return true;
+        }
+    }
 
     WIN32_FIND_DATA findData;
     char searchPath[260];
@@ -115,39 +148,72 @@ bool CNameManager::LoadLanguage(const char* languageName)
         return false;
     }
 
+    const LanguageConfigEntry* entry = g_LanguageConfig.FindLanguage(languageName);
+    if (entry && entry->HasNames())
+    {
+        if (LoadLanguageFromPath(entry->namesDir.c_str(), languageName))
+        {
+            return true;
+        }
+
+        LogAdd(LOG_RED, "[NameManager] Failed to load names for '%s' from config path: %s", languageName, entry->namesDir.c_str());
+    }
+
     char languagePath[260];
     sprintf_s(languagePath, sizeof(languagePath), "%s%s\\", m_BasePath, languageName);
 
-    return LoadLanguageFromPath(languagePath);
+    return LoadLanguageFromPath(languagePath, languageName);
 }
 
-bool CNameManager::LoadLanguageFromPath(const char* folderPath)
+bool CNameManager::LoadLanguageFromPath(const char* folderPath, const char* languageNameOverride)
 {
     ClearNames();
 
+    if (folderPath == nullptr || folderPath[0] == 0)
+    {
+        LogAdd(LOG_RED, "[NameManager] Invalid language folder path");
+        return false;
+    }
+
+    std::string basePath = folderPath;
+    std::replace(basePath.begin(), basePath.end(), '/', '\\');
+
+    if (!basePath.empty() && basePath[basePath.length() - 1] != '\\')
+    {
+        basePath += "\\";
+    }
+
     char malePath[260];
     char femalePath[260];
-    sprintf_s(malePath, sizeof(malePath), "%sMaleNames.txt", folderPath);
-    sprintf_s(femalePath, sizeof(femalePath), "%sFemaleNames.txt", folderPath);
+    sprintf_s(malePath, sizeof(malePath), "%sMaleNames.txt", basePath.c_str());
+    sprintf_s(femalePath, sizeof(femalePath), "%sFemaleNames.txt", basePath.c_str());
 
     bool maleLoaded = LoadNamesFromFile(malePath, true);
     bool femaleLoaded = LoadNamesFromFile(femalePath, false);
 
     if (maleLoaded || femaleLoaded)
     {
-        // Extract language name from path
-        const char* lastSlash = strrchr(folderPath, '\\');
-        if (lastSlash)
+        if (languageNameOverride && languageNameOverride[0])
         {
-            const char* prevSlash = lastSlash - 1;
-            while (prevSlash > folderPath && *prevSlash != '\\') prevSlash--;
-            if (*prevSlash == '\\') prevSlash++;
-
-            size_t len = lastSlash - prevSlash;
-            if (len > 0 && len < sizeof(m_CurrentLanguage))
+            strncpy_s(m_CurrentLanguage, sizeof(m_CurrentLanguage), languageNameOverride, _TRUNCATE);
+        }
+        else
+        {
+            // Extract language name from path
+            const char* folderCStr = basePath.c_str();
+            const char* lastSlash = strrchr(folderCStr, '\\');
+            if (lastSlash)
             {
-                memcpy(m_CurrentLanguage, prevSlash, len);
-                m_CurrentLanguage[len] = 0;
+                const char* prevSlash = lastSlash - 1;
+                while (prevSlash > folderCStr && *prevSlash != '\\') prevSlash--;
+                if (*prevSlash == '\\') prevSlash++;
+
+                size_t len = lastSlash - prevSlash;
+                if (len > 0 && len < sizeof(m_CurrentLanguage))
+                {
+                    memcpy(m_CurrentLanguage, prevSlash, len);
+                    m_CurrentLanguage[len] = 0;
+                }
             }
         }
 

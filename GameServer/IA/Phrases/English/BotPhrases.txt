@@ -1,0 +1,25 @@
+#GENERAL,20
+Keeping the roads safe for travelers.
+Stay focused and keep your skills sharp.
+
+#NEAR_REAL_PLAYER,25
+Greetings, adventurer! Need assistance?
+Stay close if you want to see real tactics.
+
+#IN_PARTY,20
+Party synergy makes us unstoppable.
+Stick together and no foe will break us.
+
+#PVP_MODE,30
+Shields up! Hostile forces detected.
+Let them taste our blades!
+
+#MORNING,30
+Good morning! Stretch and ready your magic.
+#AFTERNOON,30
+Sun high? Perfect time for training.
+#NIGHT,30
+Night patrol reporting in. Eyes open.
+
+#TRADE,25
+{player_name}, trade me {item_required} and I'll reward you with {item_reward}.

@@ -2,6 +2,8 @@
 #include "stdafx.h"
 #include "PhraseManager.h"
 #include "Util.h"
+#include "LanguageConfig.h"
+#include <algorithm>
 #include <windows.h>
 
 CPhraseManager g_PhraseManager;
@@ -25,6 +27,11 @@ void CPhraseManager::Initialize()
 {
     LogAdd(LOG_BLACK, "[PhraseManager] Initializing...");
 
+    if (!g_LanguageConfig.IsLoaded())
+    {
+        g_LanguageConfig.Load("IA\\languages.ini");
+    }
+
     // Try to load Spanish by default
     if (!LoadLanguage("Spanish"))
     {
@@ -40,35 +47,97 @@ bool CPhraseManager::LoadLanguage(const char* languageName)
         return false;
     }
 
+    const LanguageConfigEntry* entry = g_LanguageConfig.FindLanguage(languageName);
+    if (entry)
+    {
+        const char* phrasesPath = entry->HasPhrases() ? entry->phrasesDir.c_str() : nullptr;
+        const char* answersPath = entry->HasAnswers() ? entry->answersDir.c_str() : nullptr;
+
+        if (LoadLanguageFromPath(phrasesPath, answersPath, languageName))
+        {
+            return true;
+        }
+
+        LogAdd(LOG_RED, "[PhraseManager] Failed to load language '%s' from config", languageName);
+    }
+
     char phrasesFolder[260];
     char answersFolder[260];
-    
+
     sprintf_s(phrasesFolder, sizeof(phrasesFolder), "%s%s\\", m_PhrasesBasePath, languageName);
     sprintf_s(answersFolder, sizeof(answersFolder), "%s%s\\", m_AnswersBasePath, languageName);
 
-    return LoadLanguageFromPath(phrasesFolder, answersFolder);
+    return LoadLanguageFromPath(phrasesFolder, answersFolder, languageName);
 }
 
-bool CPhraseManager::LoadLanguageFromPath(const char* phrasesFolder, const char* answersFolder)
+bool CPhraseManager::LoadLanguageFromPath(const char* phrasesFolder, const char* answersFolder, const char* languageNameOverride)
 {
-    m_PhrasesLoaded = LoadPhrasesPath(phrasesFolder);
-    m_AnswersLoaded = LoadAnswersPath(answersFolder);
+    m_PhrasesLoaded = false;
+    m_AnswersLoaded = false;
+
+    auto NormalizeFolder = [](const char* folder) -> std::string
+    {
+        if (folder == nullptr)
+        {
+            return std::string();
+        }
+
+        std::string normalized = folder;
+        std::replace(normalized.begin(), normalized.end(), '/', '\\');
+        if (!normalized.empty() && normalized.back() != '\\')
+        {
+            normalized.push_back('\\');
+        }
+        return normalized;
+    };
+
+    std::string normalizedPhrases = NormalizeFolder(phrasesFolder);
+    std::string normalizedAnswers = NormalizeFolder(answersFolder);
+
+    if (!normalizedPhrases.empty())
+    {
+        m_PhrasesLoaded = LoadPhrasesPath(normalizedPhrases.c_str());
+    }
+
+    if (!normalizedAnswers.empty())
+    {
+        m_AnswersLoaded = LoadAnswersPath(normalizedAnswers.c_str());
+    }
 
     if (m_PhrasesLoaded || m_AnswersLoaded)
     {
-        // Extract language name from path
-        const char* lastSlash = strrchr(phrasesFolder, '\\');
-        if (lastSlash && lastSlash > phrasesFolder)
+        if (languageNameOverride && languageNameOverride[0])
         {
-            const char* prevSlash = lastSlash - 1;
-            while (prevSlash > phrasesFolder && *prevSlash != '\\') prevSlash--;
-            if (*prevSlash == '\\') prevSlash++;
-
-            size_t len = lastSlash - prevSlash;
-            if (len > 0 && len < sizeof(m_CurrentLanguage))
+            strncpy_s(m_CurrentLanguage, sizeof(m_CurrentLanguage), languageNameOverride, _TRUNCATE);
+        }
+        else
+        {
+            const char* source = nullptr;
+            if (!normalizedPhrases.empty())
             {
-                memcpy(m_CurrentLanguage, prevSlash, len);
-                m_CurrentLanguage[len] = 0;
+                source = normalizedPhrases.c_str();
+            }
+            else if (!normalizedAnswers.empty())
+            {
+                source = normalizedAnswers.c_str();
+            }
+
+            if (source)
+            {
+                const char* lastSlash = strrchr(source, '\\');
+                if (lastSlash && lastSlash > source)
+                {
+                    const char* prevSlash = lastSlash - 1;
+                    while (prevSlash > source && *prevSlash != '\\') prevSlash--;
+                    if (*prevSlash == '\\') prevSlash++;
+
+                    size_t len = lastSlash - prevSlash;
+                    if (len > 0 && len < sizeof(m_CurrentLanguage))
+                    {
+                        memcpy(m_CurrentLanguage, prevSlash, len);
+                        m_CurrentLanguage[len] = 0;
+                    }
+                }
             }
         }
 

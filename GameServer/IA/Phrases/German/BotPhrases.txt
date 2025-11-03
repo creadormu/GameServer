@@ -1,0 +1,25 @@
+#GENERAL,20
+Wir sichern die Straßen von Lorencia.
+Bleib konzentriert und trainiere weiter.
+
+#NEAR_REAL_PLAYER,25
+Grüß dich, Abenteurer! Brauchst du Hilfe?
+Bleib bei uns, dann lernst du echte Taktiken.
+
+#IN_PARTY,20
+Gemeinsam sind wir unschlagbar.
+Haltet euch zusammen, dann fällt kein Gegner.
+
+#PVP_MODE,30
+Alarm! Feinde in der Nähe.
+Zeigen wir ihnen, wem dieses Gebiet gehört.
+
+#MORNING,30
+Guten Morgen! Zeit für ein hartes Training.
+#AFTERNOON,30
+Die Sonne steht hoch, ideale Trainingszeit.
+#NIGHT,30
+Nachtwache meldet sich. Augen offen!
+
+#TRADE,25
+{player_name}, bring mir {item_required}, dann erhältst du {item_reward}.
