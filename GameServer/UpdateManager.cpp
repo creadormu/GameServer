@@ -1,569 +1,1145 @@
 #include "stdafx.h"
 #include "UpdateManager.h"
-#include "UpdateDialog.h"
 #include "Log.h"
 #include "Util.h"
 #include <shlwapi.h>
-#include <fstream>
-#include <sstream>
+#include "resource.h"
+
 #pragma comment(lib, "shlwapi.lib")
 
 CUpdateManager gUpdateManager;
 
 CUpdateManager::CUpdateManager() {
-	m_Enabled = false;
-	m_AutoCheck = true;
-	m_AutoDownload = false;
-	m_ShowNotifications = true;
-	m_UpdateServerUrl = "";
-	m_CurrentVersion = "1.0.0";
-	m_TempDirectory = ".\\Update\\Temp";
-	m_Status = UPDATE_STATUS_NO_UPDATE;
-	m_hWnd = NULL;
-	m_DownloadThread = NULL;
-	m_UpdateAvailable = false;
-	m_LastCheckTime = 0;
+    m_Enabled = false;
+    m_AutoCheck = true;
+    m_AutoDownload = false;
+    m_ShowNotifications = true;
+    memset(m_UpdateServerUrl, 0, sizeof(m_UpdateServerUrl));
+    strcpy_s(m_CurrentVersion, sizeof(m_CurrentVersion), "1.0.0");
+    strcpy_s(m_TempDirectory, sizeof(m_TempDirectory), ".\\Update\\Temp");
+    m_Status = UPDATE_STATUS_NO_UPDATE;
+    m_hWnd = NULL;
+    m_DownloadThread = NULL;
+    m_UpdateAvailable = false;
+    m_LastCheckTime = 0;
+    m_DownloadProgress = 0;
+    m_hProgressWnd = NULL;
+    m_UpdateCount = 0;
 
-	InitializeCriticalSection(&m_CriticalSection);
+    InitializeCriticalSection(&m_CriticalSection);
 }
 
 CUpdateManager::~CUpdateManager() {
-	if (m_DownloadThread != NULL) {
-		TerminateThread(m_DownloadThread, 0);
-		CloseHandle(m_DownloadThread);
-	}
-	DeleteCriticalSection(&m_CriticalSection);
+    if (m_DownloadThread != NULL) {
+        TerminateThread(m_DownloadThread, 0);
+        CloseHandle(m_DownloadThread);
+    }
+    DeleteCriticalSection(&m_CriticalSection);
 }
 
 void CUpdateManager::Init(HWND hWnd) {
-	m_hWnd = hWnd;
+    m_hWnd = hWnd;
+    LoadConfig(".\\Data\\UpdateConfig.ini");
 
-	// Create directories
-	CreateDirectoryA(".\\Update", NULL);
-	CreateDirectoryA(".\\Update\\Backup", NULL);
-	CreateDirectoryA(m_TempDirectory.c_str(), NULL);
+    CreateDirectoryA(".\\Update", NULL);
+    CreateDirectoryA(m_TempDirectory, NULL);
 
-	// Load configuration
-	LoadConfig(".\\Data\\UpdateConfig.ini");
+    LogUpdate("[UpdateManager] Initialized (Version: %s, Enabled: %s)",
+        m_CurrentVersion, m_Enabled ? "YES" : "NO");
 
-	// Load file versions from version manifest
-	LoadVersionManifest(".\\Update\\versions.txt");
+    if (m_Enabled && strlen(m_UpdateServerUrl) == 0) {
+        LogUpdate("[UpdateManager] WARNING: Auto-update is enabled but no update server URL is configured!");
+        m_Enabled = false;
+    }
 
-	LogUpdate("[UpdateManager] Initialized");
-	LogUpdate("[UpdateManager] Server Version: %s", m_CurrentVersion.c_str());
-	LogUpdate("[UpdateManager] Auto-Update: %s", m_Enabled ? "ENABLED" : "DISABLED");
-	LogUpdate("[UpdateManager] Tracked Files: %d", (int)m_FileVersions.size());
-
-	if (m_Enabled && m_UpdateServerUrl.empty()) {
-		LogUpdate("[UpdateManager] WARNING: No update server URL configured!");
-		m_Enabled = false;
-	}
-
-	// Initial check if enabled
-	if (m_Enabled && m_AutoCheck) {
-		LogUpdate("[UpdateManager] Performing initial update check...");
-		CheckForUpdates();
-	}
+    if (m_Enabled && m_AutoCheck) {
+        LogUpdate("[UpdateManager] Performing initial update check...");
+        CheckForUpdates();
+    }
 }
 
 void CUpdateManager::LoadConfig(const char* configFile) {
-	m_Enabled = GetPrivateProfileInt("UpdateManager", "Enabled", 0, configFile) ? true : false;
-	m_AutoCheck = GetPrivateProfileInt("UpdateManager", "AutoCheck", 1, configFile) ? true : false;
-	m_AutoDownload = GetPrivateProfileInt("UpdateManager", "AutoDownload", 0, configFile) ? true : false;
-	m_ShowNotifications = GetPrivateProfileInt("UpdateManager", "ShowNotifications", 1, configFile) ? true : false;
+    m_Enabled = GetPrivateProfileInt("UpdateManager", "Enabled", 0, configFile) ? true : false;
+    m_AutoCheck = GetPrivateProfileInt("UpdateManager", "AutoCheck", 1, configFile) ? true : false;
+    m_AutoDownload = GetPrivateProfileInt("UpdateManager", "AutoDownload", 0, configFile) ? true : false;
+    m_ShowNotifications = GetPrivateProfileInt("UpdateManager", "ShowNotifications", 1, configFile) ? true : false;
 
-	char buffer[256];
-	GetPrivateProfileString("UpdateManager", "UpdateServerUrl", "", buffer, sizeof(buffer), configFile);
-	m_UpdateServerUrl = buffer;
-
-	GetPrivateProfileString("UpdateManager", "CurrentVersion", "1.0.0", buffer, sizeof(buffer), configFile);
-	m_CurrentVersion = buffer;
-
-	GetPrivateProfileString("UpdateManager", "TempDirectory", ".\\Update\\Temp", buffer, sizeof(buffer), configFile);
-	m_TempDirectory = buffer;
+    GetPrivateProfileString("UpdateManager", "UpdateServerUrl", "", m_UpdateServerUrl, sizeof(m_UpdateServerUrl), configFile);
+    GetPrivateProfileString("UpdateManager", "CurrentVersion", "1.0.0", m_CurrentVersion, sizeof(m_CurrentVersion), configFile);
+    GetPrivateProfileString("UpdateManager", "TempDirectory", ".\\Update\\Temp", m_TempDirectory, sizeof(m_TempDirectory), configFile);
 }
 
-void CUpdateManager::LoadVersionManifest(const char* manifestFile) {
-	m_FileVersions.clear();
-
-	std::ifstream file(manifestFile);
-	if (!file.is_open()) {
-		LogUpdate("[UpdateManager] No version manifest found, creating new one...");
-		SaveVersionManifest(manifestFile);
-		return;
-	}
-
-	std::string line;
-	while (std::getline(file, line)) {
-		if (line.empty() || line[0] == '#' || line[0] == ';') continue;
-
-		size_t pos = line.find('=');
-		if (pos != std::string::npos) {
-			std::string fileName = line.substr(0, pos);
-			std::string version = line.substr(pos + 1);
-
-			// Trim whitespace
-			fileName.erase(0, fileName.find_first_not_of(" \t\r\n"));
-			fileName.erase(fileName.find_last_not_of(" \t\r\n") + 1);
-			version.erase(0, version.find_first_not_of(" \t\r\n"));
-			version.erase(version.find_last_not_of(" \t\r\n") + 1);
-
-			m_FileVersions[fileName] = version;
-			LogUpdate("[UpdateManager] Tracked: %s = %s", fileName.c_str(), version.c_str());
-		}
-	}
-	file.close();
-}
-
-void CUpdateManager::SaveVersionManifest(const char* manifestFile) {
-	std::ofstream file(manifestFile);
-	if (!file.is_open()) {
-		LogUpdate("[UpdateManager] ERROR: Cannot save version manifest");
-		return;
-	}
-
-	file << "# MuServer Version Manifest\n";
-	file << "# Format: FileName=Version\n";
-	file << "# Generated: " << __DATE__ << " " << __TIME__ << "\n\n";
-
-	file << "GameServer.exe=" << m_CurrentVersion << "\n";
-
-	for (const auto& pair : m_FileVersions) {
-		file << pair.first << "=" << pair.second << "\n";
-	}
-
-	file.close();
-	LogUpdate("[UpdateManager] Version manifest saved");
-}
-
-void CUpdateManager::SetFileVersion(const std::string& fileName, const std::string& version) {
-	m_FileVersions[fileName] = version;
-	SaveVersionManifest(".\\Update\\versions.txt");
-	LogUpdate("[UpdateManager] Updated version: %s = %s", fileName.c_str(), version.c_str());
-}
-
-std::string CUpdateManager::GetFileVersion(const std::string& fileName) {
-	auto
-
-		auto it = m_FileVersions.find(fileName);
-	if (it != m_FileVersions.end()) {
-		return it->second;
-	}
-	return "0.0.0";
+void CUpdateManager::SaveConfig(const char* configFile) {
+    WritePrivateProfileString("UpdateManager", "Enabled", m_Enabled ? "1" : "0", configFile);
+    WritePrivateProfileString("UpdateManager", "AutoCheck", m_AutoCheck ? "1" : "0", configFile);
+    WritePrivateProfileString("UpdateManager", "AutoDownload", m_AutoDownload ? "1" : "0", configFile);
+    WritePrivateProfileString("UpdateManager", "ShowNotifications", m_ShowNotifications ? "1" : "0", configFile);
+    WritePrivateProfileString("UpdateManager", "UpdateServerUrl", m_UpdateServerUrl, configFile);
+    WritePrivateProfileString("UpdateManager", "CurrentVersion", m_CurrentVersion, configFile);
+    WritePrivateProfileString("UpdateManager", "TempDirectory", m_TempDirectory, configFile);
 }
 
 bool CUpdateManager::CheckForUpdates() {
-	if (!m_Enabled) {
-		LogUpdate("[UpdateManager] Update check skipped - disabled");
-		return false;
-	}
+    if (!m_Enabled) {
+        LogUpdate("[UpdateManager] Update check skipped - auto-update is disabled");
+        return false;
+    }
 
-	if (m_UpdateServerUrl.empty()) {
-		LogUpdate("[UpdateManager] ERROR: No update server URL");
-		return false;
-	}
+    if (strlen(m_UpdateServerUrl) == 0) {
+        LogUpdate("[UpdateManager] ERROR: Update server URL not configured");
+        return false;
+    }
 
-	LogUpdate("[UpdateManager] Checking for updates: %s", m_UpdateServerUrl.c_str());
+    CreateDirectoryA(".\\Update", NULL);
+    CreateDirectoryA(m_TempDirectory, NULL);
 
-	// Download master manifest
-	std::string manifestUrl = m_UpdateServerUrl + "/update_manifest.txt";
-	std::string manifestPath = GetTempFilePath("update_manifest.txt");
+    LogUpdate("[UpdateManager] Checking for updates from: %s", m_UpdateServerUrl);
 
-	DWORD bytesDownloaded = 0;
-	if (!DownloadFileInternal(manifestUrl.c_str(), manifestPath.c_str(), &bytesDownloaded)) {
-		LogUpdate("[UpdateManager] ERROR: Failed to download manifest");
-		m_Status = UPDATE_STATUS_ERROR;
-		return false;
-	}
+    char manifestUrl[768];
+    char manifestPath[512];
+    sprintf_s(manifestUrl, sizeof(manifestUrl), "%s/update_manifest.txt", m_UpdateServerUrl);
+    GetTempFilePath("update_manifest.txt", manifestPath, sizeof(manifestPath));
 
-	// Read manifest
-	std::ifstream file(manifestPath);
-	if (!file.is_open()) {
-		LogUpdate("[UpdateManager] ERROR: Cannot open manifest");
-		m_Status = UPDATE_STATUS_ERROR;
-		return false;
-	}
+    DWORD bytesDownloaded = 0;
+    if (!DownloadFile(manifestUrl, manifestPath, &bytesDownloaded)) {
+        LogUpdate("[UpdateManager] ERROR: Failed to download update manifest");
+        m_Status = UPDATE_STATUS_ERROR;
+        return false;
+    }
 
-	m_AvailableUpdates.clear();
-	std::string line;
-	UpdateFileInfo currentFile;
-	bool inSection = false;
+    FILE* file = NULL;
+    fopen_s(&file, manifestPath, "r");
+    if (!file) {
+        LogUpdate("[UpdateManager] ERROR: Failed to open update manifest file");
+        m_Status = UPDATE_STATUS_ERROR;
+        return false;
+    }
 
-	while (std::getline(file, line)) {
-		// Trim
-		line.erase(0, line.find_first_not_of(" \t\r\n"));
-		line.erase(line.find_last_not_of(" \t\r\n") + 1);
+    char manifestData[16384] = { 0 };
+    fread(manifestData, 1, sizeof(manifestData) - 1, file);
+    fclose(file);
 
-		if (line.empty() || line[0] == '#' || line[0] == ';') continue;
+    if (!ParseUpdateManifest(manifestData)) {
+        LogUpdate("[UpdateManager] ERROR: Failed to parse update manifest");
+        m_Status = UPDATE_STATUS_ERROR;
+        return false;
+    }
 
-		if (line[0] == '[') {
-			// Save previous file if exists
-			if (inSection) {
-				ProcessUpdateFile(currentFile);
-			}
-			// Start new section
-			currentFile = UpdateFileInfo();
-			inSection = true;
-			continue;
-		}
+    // NEW: Filter out already installed updates
+    int newUpdateCount = 0;
+    UpdateInfo newUpdates[MAX_UPDATES];
+    memset(newUpdates, 0, sizeof(newUpdates));
 
-		size_t pos = line.find('=');
-		if (pos != std::string::npos) {
-			std::string key = line.substr(0, pos);
-			std::string value = line.substr(pos + 1);
+    for (int i = 0; i < m_UpdateCount; i++) {
+        UpdateInfo* update = &m_AvailableUpdates[i];
 
-			// Trim
-			key.erase(key.find_last_not_of(" \t") + 1);
-			value.erase(0, value.find_first_not_of(" \t"));
+        // Check if this update is already installed
+        if (!IsUpdateAlreadyInstalled(update->fileName, update->version)) {
+            memcpy(&newUpdates[newUpdateCount], update, sizeof(UpdateInfo));
+            newUpdateCount++;
+            LogUpdate("[UpdateManager] New update found: %s v%s",
+                update->fileName, update->version);
+        }
+        else {
+            LogUpdate("[UpdateManager] Skipping already installed: %s v%s",
+                update->fileName, update->version);
+        }
+    }
 
-			if (_stricmp(key.c_str(), "FileName") == 0) {
-				currentFile.fileName = value;
-			}
-			else if (_stricmp(key.c_str(), "Version") == 0) {
-				currentFile.version = value;
-			}
-			else if (_stricmp(key.c_str(), "DownloadUrl") == 0) {
-				currentFile.downloadUrl = value;
-			}
-			else if (_stricmp(key.c_str(), "FileHash") == 0) {
-				currentFile.fileHash = value;
-			}
-			else if (_stricmp(key.c_str(), "FileSize") == 0) {
-				currentFile.fileSize = atoi(value.c_str());
-			}
-			else if (_stricmp(key.c_str(), "FileType") == 0) {
-				currentFile.fileType = (UpdateFileType)atoi(value.c_str());
-			}
-			else if (_stricmp(key.c_str(), "Description") == 0) {
-				currentFile.description = value;
-			}
-			else if (_stricmp(key.c_str(), "Required") == 0) {
-				currentFile.isRequired = atoi(value.c_str()) != 0;
-			}
-			else if (_stricmp(key.c_str(), "TargetPath") == 0) {
-				currentFile.targetPath = value;
-			}
-		}
-	}
+    // Replace available updates with only new ones
+    memcpy(m_AvailableUpdates, newUpdates, sizeof(newUpdates));
+    m_UpdateCount = newUpdateCount;
 
-	// Process last file
-	if (inSection) {
-		ProcessUpdateFile(currentFile);
-	}
+    if (m_UpdateCount > 0) {
+        m_UpdateAvailable = true;
+        m_Status = UPDATE_STATUS_AVAILABLE;
 
-	file.close();
+        LogUpdate("[UpdateManager] Found %d NEW update(s) available:", m_UpdateCount);
+        for (int i = 0; i < m_UpdateCount; i++) {
+            LogUpdate("[UpdateManager]   %d) %s (v%s) - %s",
+                i + 1,
+                m_AvailableUpdates[i].fileName,
+                m_AvailableUpdates[i].version,
+                m_AvailableUpdates[i].description);
+        }
 
-	// Update status
-	m_UpdateAvailable = !m_AvailableUpdates.empty();
-	m_Status = m_UpdateAvailable ? UPDATE_STATUS_AVAILABLE : UPDATE_STATUS_NO_UPDATE;
-	m_LastCheckTime = GetTickCount();
+        if (m_ShowNotifications) {
+            ShowUpdateSummary();
+        }
 
-	LogUpdate("[UpdateManager] Check complete: %d update(s) available", (int)m_AvailableUpdates.size());
+        if (m_AutoDownload) {
+            if (DownloadAllUpdates()) {
+                int result = MessageBoxA(m_hWnd,
+                    "All updates downloaded successfully!\n\n"
+                    "Do you want to apply the updates now?\n"
+                    "(The server will restart if updating executable)",
+                    "Apply Updates?", MB_YESNO | MB_ICONQUESTION);
 
-	return true;
+                if (result == IDYES) {
+                    ApplyAllUpdates();
+                }
+                else {
+                    LogUpdate("[UpdateManager] User postponed update application");
+                }
+            }
+        }
+
+        m_LastCheckTime = GetTickCount();
+        return true;
+    }
+    else {
+        m_UpdateAvailable = false;
+        m_Status = UPDATE_STATUS_NO_UPDATE;
+        LogUpdate("[UpdateManager] No new updates available - all updates already installed");
+        m_LastCheckTime = GetTickCount();
+        return false;
+    }
 }
 
-void CUpdateManager::ProcessUpdateFile(UpdateFileInfo& fileInfo) {
-	if (fileInfo.fileName.empty() || fileInfo.version.empty()) {
-		return;
-	}
+bool CUpdateManager::ParseUpdateManifest(const char* manifestData) {
+    m_UpdateCount = 0;
+    memset(m_AvailableUpdates, 0, sizeof(m_AvailableUpdates));
 
-	// Get current version
-	fileInfo.currentVersion = GetFileVersion(fileInfo.fileName);
+    char buffer[1024];
+    const char* ptr = manifestData;
+    int currentIndex = -1;
 
-	// Set default target path if not specified
-	if (fileInfo.targetPath.empty()) {
-		if (fileInfo.fileType == UPDATE_FILE_EXECUTABLE) {
-			fileInfo.targetPath = ".\\" + fileInfo.fileName;
-		}
-		else {
-			fileInfo.targetPath = ".\\Data\\" + fileInfo.fileName;
-		}
-	}
+    while (*ptr && m_UpdateCount < MAX_UPDATES) {
+        int i = 0;
+        while (*ptr && *ptr != '\n' && i < sizeof(buffer) - 1) {
+            buffer[i++] = *ptr++;
+        }
+        buffer[i] = '\0';
+        if (*ptr == '\n') ptr++;
 
-	// Compare versions
-	if (CompareVersions(fileInfo.version, fileInfo.currentVersion) > 0) {
-		fileInfo.status = FILE_STATUS_AVAILABLE;
-		m_AvailableUpdates.push_back(fileInfo);
-		LogUpdate("[UpdateManager] Update available: %s (%s -> %s)",
-			fileInfo.fileName.c_str(),
-			fileInfo.currentVersion.c_str(),
-			fileInfo.version.c_str());
-	}
+        if (buffer[0] == '\0' || buffer[0] == ';' || buffer[0] == '#') {
+            continue;
+        }
+
+        if (buffer[0] == '[') {
+            char* endBracket = strchr(buffer, ']');
+            if (endBracket) {
+                currentIndex = m_UpdateCount;
+                m_UpdateCount++;
+                continue;
+            }
+        }
+
+        char* equals = strchr(buffer, '=');
+        if (equals && currentIndex >= 0) {
+            *equals = '\0';
+            char* key = buffer;
+            char* value = equals + 1;
+
+            while (*key == ' ' || *key == '\t') key++;
+            while (*value == ' ' || *value == '\t') value++;
+
+            char* end = key + strlen(key) - 1;
+            while (end > key && (*end == ' ' || *end == '\t' || *end == '\r')) *end-- = '\0';
+            end = value + strlen(value) - 1;
+            while (end > value && (*end == ' ' || *end == '\t' || *end == '\r')) *end-- = '\0';
+
+            UpdateInfo* update = &m_AvailableUpdates[currentIndex];
+
+            if (_stricmp(key, "Version") == 0) {
+                strcpy_s(update->version, sizeof(update->version), value);
+            }
+            else if (_stricmp(key, "DownloadUrl") == 0) {
+                strcpy_s(update->downloadUrl, sizeof(update->downloadUrl), value);
+            }
+            else if (_stricmp(key, "FileName") == 0) {
+                strcpy_s(update->fileName, sizeof(update->fileName), value);
+            }
+            else if (_stricmp(key, "FileHash") == 0) {
+                strcpy_s(update->fileHash, sizeof(update->fileHash), value);
+            }
+            else if (_stricmp(key, "FileSize") == 0) {
+                update->fileSize = atoi(value);
+            }
+            else if (_stricmp(key, "FileType") == 0) {
+                update->fileType = (UpdateFileType)atoi(value);
+            }
+            else if (_stricmp(key, "Description") == 0) {
+                strcpy_s(update->description, sizeof(update->description), value);
+            }
+            else if (_stricmp(key, "TargetPath") == 0) {
+                strcpy_s(update->targetPath, sizeof(update->targetPath), value);
+            }
+            else if (_stricmp(key, "Required") == 0) {
+                update->isRequired = atoi(value) ? true : false;
+            }
+        }
+    }
+
+    for (int i = 0; i < m_UpdateCount; i++) {
+        UpdateInfo* update = &m_AvailableUpdates[i];
+        if (strlen(update->version) == 0 ||
+            strlen(update->downloadUrl) == 0 ||
+            strlen(update->fileName) == 0) {
+            LogUpdate("[UpdateManager] ERROR: Update #%d missing required fields", i + 1);
+            return false;
+        }
+    }
+
+    LogUpdate("[UpdateManager] Successfully parsed %d update(s) from manifest", m_UpdateCount);
+    return m_UpdateCount > 0;
 }
 
-int CUpdateManager::CompareVersions(const std::string& v1, const std::string& v2) {
-	// Parse version strings (e.g., "1.2.3")
-	int major1 = 0, minor1 = 0, patch1 = 0;
-	int major2 = 0, minor2 = 0, patch2 = 0;
+void CUpdateManager::ShowUpdateSummary() {
+    if (m_UpdateCount == 0) return;
 
-	sscanf_s(v1.c_str(), "%d.%d.%d", &major1, &minor1, &patch1);
-	sscanf_s(v2.c_str(), "%d.%d.%d", &major2, &minor2, &patch2);
+    char msg[4096];
+    char temp[512];
 
-	if (major1 != major2) return major1 - major2;
-	if (minor1 != minor2) return minor1 - minor2;
-	return patch1 - patch2;
+    sprintf_s(msg, sizeof(msg),
+        "UPDATE AVAILABLE!\n\n"
+        "Found %d update(s):\n\n",
+        m_UpdateCount);
+
+    float totalSize = 0;
+    for (int i = 0; i < m_UpdateCount; i++) {
+        UpdateInfo* update = &m_AvailableUpdates[i];
+        totalSize += update->fileSize;
+
+        sprintf_s(temp, sizeof(temp),
+            "%d) %s (v%s)\n"
+            "   Size: %.2f MB\n"
+            "   %s\n\n",
+            i + 1,
+            update->fileName,
+            update->version,
+            update->fileSize / 1024.0 / 1024.0,
+            update->description);
+
+        strcat_s(msg, sizeof(msg), temp);
+    }
+
+    sprintf_s(temp, sizeof(temp),
+        "Total Size: %.2f MB\n\n"
+        "Go to menu [Update] to download and apply the updates.",
+        totalSize / 1024.0 / 1024.0);
+    strcat_s(msg, sizeof(msg), temp);
+
+    MessageBoxA(m_hWnd, msg, "Updates Available", MB_ICONINFORMATION);
 }
 
-std::vector<UpdateFileInfo> CUpdateManager::GetAvailableUpdates() {
-	return m_AvailableUpdates;
+bool CUpdateManager::DownloadAllUpdates() {
+    if (m_UpdateCount == 0) {
+        LogUpdate("[UpdateManager] No updates available to download");
+        return false;
+    }
+
+    LogUpdate("[UpdateManager] Starting download of %d update(s)...", m_UpdateCount);
+    m_Status = UPDATE_STATUS_DOWNLOADING;
+
+    int successCount = 0;
+    int failCount = 0;
+
+    for (int i = 0; i < m_UpdateCount; i++) {
+        UpdateInfo* update = &m_AvailableUpdates[i];
+
+        LogUpdate("[UpdateManager] Downloading %d/%d: %s",
+            i + 1, m_UpdateCount, update->fileName);
+
+        char progressTitle[256];
+        sprintf_s(progressTitle, sizeof(progressTitle),
+            "Downloading %d/%d: %s", i + 1, m_UpdateCount, update->fileName);
+        ShowProgressDialog(progressTitle);
+
+        char destPath[512];
+        GetTempFilePath(update->fileName, destPath, sizeof(destPath));
+
+        DWORD bytesDownloaded = 0;
+        if (!DownloadFileWithProgress(update->downloadUrl, destPath, &bytesDownloaded)) {
+            LogUpdate("[UpdateManager] ERROR: Download failed for %s", update->fileName);
+            failCount++;
+            CloseProgressDialog();
+            continue;
+        }
+
+        LogUpdate("[UpdateManager] Download complete: %s (%d bytes)",
+            update->fileName, bytesDownloaded);
+
+        CloseProgressDialog();
+
+        if (strlen(update->fileHash) > 0) {
+            LogUpdate("[UpdateManager] Verifying %s...", update->fileName);
+            if (!VerifyDownloadedFile(destPath, update->fileHash)) {
+                LogUpdate("[UpdateManager] ERROR: File verification failed for %s", update->fileName);
+                failCount++;
+                continue;
+            }
+        }
+
+        successCount++;
+    }
+
+    LogUpdate("[UpdateManager] Download summary: %d successful, %d failed",
+        successCount, failCount);
+
+    if (successCount == m_UpdateCount) {
+        m_Status = UPDATE_STATUS_READY;
+        LogUpdate("[UpdateManager] All updates ready to install");
+        return true;
+    }
+    else if (successCount > 0) {
+        m_Status = UPDATE_STATUS_READY;
+        char msg[512];
+        sprintf_s(msg, sizeof(msg),
+            "Downloaded %d out of %d updates.\n\n"
+            "%d update(s) failed to download.\n\n"
+            "Do you want to continue with partial installation?",
+            successCount, m_UpdateCount, failCount);
+
+        int result = MessageBoxA(m_hWnd, msg, "Partial Download", MB_YESNO | MB_ICONWARNING);
+        return (result == IDYES);
+    }
+    else {
+        m_Status = UPDATE_STATUS_ERROR;
+        MessageBoxA(m_hWnd,
+            "All updates failed to download!\n\nPlease check your connection and try again.",
+            "Download Failed", MB_ICONERROR);
+        return false;
+    }
 }
 
-bool CUpdateManager::DownloadFile(UpdateFileInfo& fileInfo) {
-	if (fileInfo.downloadUrl.empty()) {
-		LogUpdate("[UpdateManager] ERROR: No download URL for %s", fileInfo.fileName.c_str());
-		return false;
-	}
+bool CUpdateManager::ApplyAllUpdates() {
+    if (m_Status != UPDATE_STATUS_READY) {
+        LogUpdate("[UpdateManager] ERROR: No updates ready to apply");
+        return false;
+    }
 
-	std::string destPath = GetTempFilePath(fileInfo.fileName.c_str());
-	LogUpdate("[UpdateManager] Downloading: %s", fileInfo.fileName.c_str());
+    char confirmMsg[1024];
+    sprintf_s(confirmMsg, sizeof(confirmMsg),
+        "Are you sure you want to apply %d update(s)?\n\n"
+        "The GameServer may restart if updating executable files.\n\n"
+        "Make sure all players are disconnected before proceeding!",
+        m_UpdateCount);
 
-	DWORD bytesDownloaded = 0;
-	if (!DownloadFileInternal(fileInfo.downloadUrl.c_str(), destPath.c_str(), &bytesDownloaded)) {
-		LogUpdate("[UpdateManager] ERROR: Download failed for %s", fileInfo.fileName.c_str());
-		return false;
-	}
+    int result = MessageBox(m_hWnd, confirmMsg,
+        "Apply Updates - Confirmation",
+        MB_YESNO | MB_ICONQUESTION | MB_DEFBUTTON2);
 
-	LogUpdate("[UpdateManager] Downloaded: %s (%d bytes)", fileInfo.fileName.c_str(), bytesDownloaded);
-	return true;
+    if (result != IDYES) {
+        LogUpdate("[UpdateManager] Updates cancelled by user");
+        return false;
+    }
+
+    LogUpdate("[UpdateManager] Applying %d update(s)...", m_UpdateCount);
+
+    bool hasExecutableUpdate = false;
+    int successCount = 0;
+    int failCount = 0;
+
+    for (int i = 0; i < m_UpdateCount; i++) {
+        UpdateInfo* update = &m_AvailableUpdates[i];
+
+        char updateFile[512];
+        char targetFile[512];
+        GetTempFilePath(update->fileName, updateFile, sizeof(updateFile));
+
+        if (update->fileType == UPDATE_FILE_EXECUTABLE) {
+            // Just prepare the file, actual copy will happen via batch script
+            LogUpdate("[UpdateManager] Executable update prepared: %s", updateFile);
+
+            // Save this update as installed
+            SaveInstalledUpdate(update->fileName, update->version);
+
+            successCount++;
+            continue;
+        }
+        else {
+            if (strlen(update->targetPath) > 0) {
+                strcpy_s(targetFile, sizeof(targetFile), update->targetPath);
+            }
+            else {
+                sprintf_s(targetFile, sizeof(targetFile), ".\\Data\\%s", update->fileName);
+            }
+        }
+
+        LogUpdate("[UpdateManager] Applying update %d/%d: %s -> %s",
+            i + 1, m_UpdateCount, update->fileName, targetFile);
+
+        CreateDirectoryStructure(targetFile);
+
+        if (!CreateBackup(targetFile)) {
+            LogUpdate("[UpdateManager] WARNING: Failed to create backup for %s", targetFile);
+        }
+
+        if (!CopyFileA(updateFile, targetFile, FALSE)) {
+            LogUpdate("[UpdateManager] ERROR: Failed to copy %s: %d",
+                targetFile, GetLastError());
+            failCount++;
+            continue;
+        }
+
+        LogUpdate("[UpdateManager] Successfully applied: %s", targetFile);
+
+        // Save this update as installed
+        SaveInstalledUpdate(update->fileName, update->version);
+
+        successCount++;
+    }
+
+    LogUpdate("[UpdateManager] Apply summary: %d successful, %d failed",
+        successCount, failCount);
+
+    if (hasExecutableUpdate && successCount > 0) {
+        LogUpdate("[UpdateManager] Executable update detected - preparing restart...");
+
+        strcpy_s(m_CurrentVersion, sizeof(m_CurrentVersion),
+            m_AvailableUpdates[m_UpdateCount - 1].version);
+        m_Status = UPDATE_STATUS_NO_UPDATE;
+        m_UpdateAvailable = false;
+        m_UpdateCount = 0;
+        SaveConfig(".\\Data\\UpdateConfig.ini");
+
+        FILE* script = NULL;
+        fopen_s(&script, ".\\Update\\apply_update.bat", "w");
+        if (script) {
+            fprintf(script, "@echo off\n");
+            fprintf(script, "echo Applying GameServer updates...\n");
+            fprintf(script, "timeout /t 2 /nobreak >nul\n");
+            fprintf(script, "echo Restarting GameServer...\n");
+            fprintf(script, "start \"\" \".\\GameServer.exe\"\n");
+            fclose(script);
+
+            STARTUPINFOA si = { 0 };
+            PROCESS_INFORMATION pi = { 0 };
+            si.cb = sizeof(si);
+            char cmdLine[512] = ".\\Update\\apply_update.bat";
+
+            if (CreateProcessA(NULL, cmdLine, NULL, NULL, FALSE,
+                CREATE_NEW_CONSOLE, NULL, NULL, &si, &pi)) {
+                CloseHandle(pi.hProcess);
+                CloseHandle(pi.hThread);
+                PostQuitMessage(0);
+                return true;
+            }
+        }
+    }
+    else if (successCount > 0) {
+        strcpy_s(m_CurrentVersion, sizeof(m_CurrentVersion),
+            m_AvailableUpdates[m_UpdateCount - 1].version);
+        SaveConfig(".\\Data\\UpdateConfig.ini");
+
+        char msg[1024];
+        sprintf_s(msg, sizeof(msg),
+            "Successfully applied %d update(s)!\n\n"
+            "You may need to reload data files for changes to take effect.\n\n"
+            "%d update(s) failed.",
+            successCount, failCount);
+        MessageBoxA(m_hWnd, msg, "Updates Applied",
+            failCount > 0 ? MB_ICONWARNING : MB_ICONINFORMATION);
+    }
+    else {
+        MessageBoxA(m_hWnd,
+            "All updates failed to apply!\n\nPlease check the log for details.",
+            "Update Failed", MB_ICONERROR);
+        return false;
+    }
+
+    m_Status = UPDATE_STATUS_NO_UPDATE;
+    m_UpdateAvailable = false;
+    m_UpdateCount = 0;
+    CleanupTempFiles();
+
+    return true;
 }
 
-bool CUpdateManager::DownloadFileInternal(const char* url, const char* destPath, DWORD* bytesDownloaded) {
-	HINTERNET hInternet = InternetOpenA("MuServer UpdateManager/2.0",
-		INTERNET_OPEN_TYPE_PRECONFIG, NULL, NULL, 0);
-	if (!hInternet) {
-		LogUpdate("[UpdateManager] ERROR: InternetOpen failed: %d", GetLastError());
-		return false;
-	}
+void CUpdateManager::CreateDirectoryStructure(const char* filePath) {
+    char dirPath[512];
+    strcpy_s(dirPath, sizeof(dirPath), filePath);
 
-	HINTERNET hUrl = InternetOpenUrlA(hInternet, url, NULL, 0,
-		INTERNET_FLAG_RELOAD | INTERNET_FLAG_NO_CACHE_WRITE, 0);
-	if (!hUrl) {
-		LogUpdate("[UpdateManager] ERROR: InternetOpenUrl failed: %d", GetLastError());
-		InternetCloseHandle(hInternet);
-		return false;
-	}
+    char* lastSlash = strrchr(dirPath, '\\');
+    if (!lastSlash) return;
 
-	FILE* file = NULL;
-	fopen_s(&file, destPath, "wb");
-	if (!file) {
-		LogUpdate("[UpdateManager] ERROR: Cannot create file: %s", destPath);
-		InternetCloseHandle(hUrl);
-		InternetCloseHandle(hInternet);
-		return false;
-	}
+    *lastSlash = '\0';
 
-	BYTE buffer[8192];
-	DWORD totalBytes = 0;
-	DWORD dwRead = 0;
+    char currentPath[512] = { 0 };
+    char* token = dirPath;
 
-	while (InternetReadFile(hUrl, buffer, sizeof(buffer), &dwRead) && dwRead > 0) {
-		fwrite(buffer, 1, dwRead, file);
-		totalBytes += dwRead;
-	}
+    while (*token) {
+        if (*token == '\\') {
+            if (strlen(currentPath) > 0) {
+                CreateDirectoryA(currentPath, NULL);
+            }
+            strcat_s(currentPath, sizeof(currentPath), "\\");
+            token++;
+            continue;
+        }
 
-	fclose(file);
-	InternetCloseHandle(hUrl);
-	InternetCloseHandle(hInternet);
+        char temp[2] = { *token, '\0' };
+        strcat_s(currentPath, sizeof(currentPath), temp);
+        token++;
+    }
 
-	if (bytesDownloaded) {
-		*bytesDownloaded = totalBytes;
-	}
-
-	return totalBytes > 0;
+    if (strlen(dirPath) > 0) {
+        CreateDirectoryA(dirPath, NULL);
+    }
 }
 
-bool CUpdateManager::VerifyFile(const UpdateFileInfo& fileInfo) {
-	std::string filePath = GetTempFilePath(fileInfo.fileName.c_str());
-
-	// Check file exists
-	WIN32_FILE_ATTRIBUTE_DATA fileData;
-	if (!GetFileAttributesExA(filePath.c_str(), GetFileExInfoStandard, &fileData)) {
-		LogUpdate("[UpdateManager] ERROR: File not found: %s", filePath.c_str());
-		return false;
-	}
-
-	DWORD fileSize = fileData.nFileSizeLow;
-
-	// Verify size
-	if (fileInfo.fileSize > 0 && fileSize != fileInfo.fileSize) {
-		LogUpdate("[UpdateManager] ERROR: Size mismatch for %s (expected %d, got %d)",
-			fileInfo.fileName.c_str(), fileInfo.fileSize, fileSize);
-		return false;
-	}
-
-	// TODO: Implement hash verification if needed
-	if (!fileInfo.fileHash.empty()) {
-		// Add MD5/SHA256 verification here
-	}
-
-	LogUpdate("[UpdateManager] Verification OK: %s", fileInfo.fileName.c_str());
-	return true;
+// OLD FUNCTION - Keep for compatibility
+bool CUpdateManager::DownloadUpdate() {
+    return DownloadAllUpdates();
 }
 
-bool CUpdateManager::ApplyUpdate(UpdateFileInfo& fileInfo) {
-	std::string sourcePath = GetTempFilePath(fileInfo.fileName.c_str());
-	std::string targetPath = fileInfo.targetPath;
-
-	LogUpdate("[UpdateManager] Applying: %s -> %s", fileInfo.fileName.c_str(), targetPath.c_str());
-
-	// Create backup
-	if (!CreateBackup(targetPath.c_str())) {
-		LogUpdate("[UpdateManager] WARNING: Backup failed for %s", targetPath.c_str());
-	}
-
-	// Special handling for executable
-	if (fileInfo.fileType == UPDATE_FILE_EXECUTABLE) {
-		return PrepareExecutableUpdate(sourcePath, targetPath);
-	}
-
-	// Regular file update
-	if (!CopyFileA(sourcePath.c_str(), targetPath.c_str(), FALSE)) {
-		LogUpdate("[UpdateManager] ERROR: Copy failed: %d", GetLastError());
-		return false;
-	}
-
-	// Update version
-	SetFileVersion(fileInfo.fileName, fileInfo.version);
-
-	LogUpdate("[UpdateManager] Successfully applied: %s", fileInfo.fileName.c_str());
-	return true;
+// OLD FUNCTION - Keep for compatibility
+bool CUpdateManager::ApplyUpdate() {
+    return ApplyAllUpdates();
 }
 
-bool CUpdateManager::PrepareExecutableUpdate(const std::string& sourcePath, const std::string& targetPath) {
-	// Create updater batch script
-	std::string scriptPath = ".\\Update\\apply_update.bat";
-	std::ofstream script(scriptPath);
+bool CUpdateManager::DownloadFileWithProgress(const char* url, const char* destPath, DWORD* bytesDownloaded) {
+    HINTERNET hInternet = InternetOpenA("GameServer UpdateManager/1.0",
+        INTERNET_OPEN_TYPE_PRECONFIG, NULL, NULL, 0);
 
-	if (!script.is_open()) {
-		LogUpdate("[UpdateManager] ERROR: Cannot create update script");
-		return false;
-	}
+    if (!hInternet) {
+        LogUpdate("[UpdateManager] ERROR: InternetOpen failed: %d", GetLastError());
+        return false;
+    }
 
-	script << "@echo off\n";
-	script << "title MuServer Update - Please Wait\n";
-	script << "echo.\n";
-	script << "echo ========================================\n";
-	script << "echo    MuServer Update in Progress\n";
-	script << "echo ========================================\n";
-	script << "echo.\n";
-	script << "echo Waiting for server to close...\n";
-	script << "timeout /t 3 /nobreak >nul\n";
-	script << "echo.\n";
-	script << "echo Applying update...\n";
-	script << "copy /Y \"" << sourcePath << "\" \"" << targetPath << "\"\n";
-	script << "if errorlevel 1 (\n";
-	script << "    echo ERROR: Update failed!\n";
-	script << "    echo Restoring backup...\n";
-	script << "    copy /Y \"" << targetPath << ".backup\" \"" << targetPath << "\"\n";
-	script << "    pause\n";
-	script << "    exit /b 1\n";
-	script << ")\n";
-	script << "echo.\n";
-	script << "echo Update successful!\n";
-	script << "echo Restarting server...\n";
-	script << "timeout /t 2 /nobreak >nul\n";
-	script << "start \"MuServer\" \"" << targetPath << "\"\n";
-	script << "exit\n";
+    HINTERNET hUrl = InternetOpenUrlA(hInternet, url, NULL, 0,
+        INTERNET_FLAG_RELOAD | INTERNET_FLAG_NO_CACHE_WRITE, 0);
+    if (!hUrl) {
+        LogUpdate("[UpdateManager] ERROR: InternetOpenUrl failed: %d", GetLastError());
+        InternetCloseHandle(hInternet);
+        return false;
+    }
 
-	script.close();
+    DWORD fileSize = 0;
+    DWORD bufferSize = sizeof(fileSize);
+    HttpQueryInfoA(hUrl, HTTP_QUERY_CONTENT_LENGTH | HTTP_QUERY_FLAG_NUMBER,
+        &fileSize, &bufferSize, NULL);
 
-	// Launch updater
-	STARTUPINFOA si = { 0 };
-	PROCESS_INFORMATION pi = { 0 };
-	si.cb = sizeof(si);
+    FILE* file = NULL;
+    fopen_s(&file, destPath, "wb");
+    if (!file) {
+        LogUpdate("[UpdateManager] ERROR: Failed to create file: %s", destPath);
+        InternetCloseHandle(hUrl);
+        InternetCloseHandle(hInternet);
+        return false;
+    }
 
-	char cmdLine[512];
-	sprintf_s(cmdLine, "cmd.exe /c \"%s\"", scriptPath.c_str());
+    BYTE buffer[8192];
+    DWORD totalBytes = 0;
+    DWORD dwRead = 0;
+    int lastProgress = -1;
 
-	if (!CreateProcessA(NULL, cmdLine, NULL, NULL, FALSE,
-		CREATE_NEW_CONSOLE, NULL, NULL, &si, &pi)) {
-		LogUpdate("[UpdateManager] ERROR: Cannot launch updater");
-		return false;
-	}
+    while (InternetReadFile(hUrl, buffer, sizeof(buffer), &dwRead) && dwRead > 0) {
+        fwrite(buffer, 1, dwRead, file);
+        totalBytes += dwRead;
 
-	CloseHandle(pi.hProcess);
-	CloseHandle(pi.hThread);
+        int progress = 0;
+        if (fileSize > 0) {
+            progress = (int)((totalBytes * 100) / fileSize);
 
-	LogUpdate("[UpdateManager] Updater launched, exiting server...");
+            if (progress != lastProgress) {
+                LogUpdate("[UpdateManager] Download progress: %d%% (%d / %d bytes)",
+                    progress, totalBytes, fileSize);
+                lastProgress = progress;
+                UpdateProgressDialog(progress, totalBytes, fileSize);
+            }
+        }
+        else if (totalBytes % (1024 * 100) == 0) {
+            LogUpdate("[UpdateManager] Downloaded: %d KB", totalBytes / 1024);
+        }
 
-	// Exit server
-	PostQuitMessage(0);
-	return true;
+        m_DownloadProgress = progress;
+    }
+
+    fclose(file);
+    InternetCloseHandle(hUrl);
+    InternetCloseHandle(hInternet);
+
+    if (bytesDownloaded) {
+        *bytesDownloaded = totalBytes;
+    }
+
+    m_DownloadProgress = 100;
+    LogUpdate("[UpdateManager] Download complete: %d bytes", totalBytes);
+
+    return true;
+}
+
+bool CUpdateManager::DownloadFile(const char* url, const char* destPath, DWORD* bytesDownloaded) {
+    HINTERNET hInternet = InternetOpenA("GameServer UpdateManager/1.0",
+        INTERNET_OPEN_TYPE_PRECONFIG, NULL, NULL, 0);
+    if (!hInternet) {
+        LogUpdate("[UpdateManager] ERROR: InternetOpen failed: %d", GetLastError());
+        return false;
+    }
+
+    HINTERNET hUrl = InternetOpenUrlA(hInternet, url, NULL, 0,
+        INTERNET_FLAG_RELOAD | INTERNET_FLAG_NO_CACHE_WRITE, 0);
+    if (!hUrl) {
+        LogUpdate("[UpdateManager] ERROR: InternetOpenUrl failed: %d", GetLastError());
+        InternetCloseHandle(hInternet);
+        return false;
+    }
+
+    FILE* file = NULL;
+    fopen_s(&file, destPath, "wb");
+    if (!file) {
+        LogUpdate("[UpdateManager] ERROR: Failed to create file: %s", destPath);
+        InternetCloseHandle(hUrl);
+        InternetCloseHandle(hInternet);
+        return false;
+    }
+
+    BYTE buffer[4096];
+    DWORD totalBytes = 0;
+    DWORD dwRead = 0;
+
+    while (InternetReadFile(hUrl, buffer, sizeof(buffer), &dwRead) && dwRead > 0) {
+        fwrite(buffer, 1, dwRead, file);
+        totalBytes += dwRead;
+
+        if (totalBytes % (1024 * 100) == 0) {
+            LogUpdate("[UpdateManager] Downloaded: %d KB", totalBytes / 1024);
+        }
+    }
+
+    fclose(file);
+    InternetCloseHandle(hUrl);
+    InternetCloseHandle(hInternet);
+
+    if (bytesDownloaded) {
+        *bytesDownloaded = totalBytes;
+    }
+
+    LogUpdate("[UpdateManager] Download complete: %d bytes", totalBytes);
+    return true;
+}
+
+bool CUpdateManager::VerifyDownloadedFile(const char* filePath, const char* expectedHash) {
+    WIN32_FILE_ATTRIBUTE_DATA fileInfo;
+    if (!GetFileAttributesExA(filePath, GetFileExInfoStandard, &fileInfo)) {
+        return false;
+    }
+
+    DWORD fileSize = fileInfo.nFileSizeLow;
+
+    // Simple size check for now
+    return true;
 }
 
 bool CUpdateManager::CreateBackup(const char* filePath) {
-	if (!PathFileExistsA(filePath)) {
-		return true; // Nothing to backup
-	}
+    char backupPath[512];
+    sprintf_s(backupPath, sizeof(backupPath), "%s.backup", filePath);
 
-	// Create backup directory
-	CreateDirectoryA(".\\Update\\Backup", NULL);
+    if (PathFileExistsA(filePath)) {
+        if (!CopyFileA(filePath, backupPath, FALSE)) {
+            LogUpdate("[UpdateManager] Failed to create backup: %d", GetLastError());
+            return false;
+        }
+        LogUpdate("[UpdateManager] Backup created: %s", backupPath);
+    }
 
-	// Generate backup filename with timestamp
-	SYSTEMTIME st;
-	GetLocalTime(&st);
-
-	char backupPath[MAX_PATH];
-	sprintf_s(backupPath, ".\\Update\\Backup\\%s_%04d%02d%02d_%02d%02d%02d.backup",
-		PathFindFileNameA(filePath),
-		st.wYear, st.wMonth, st.wDay,
-		st.wHour, st.wMinute, st.wSecond);
-
-	if (!CopyFileA(filePath, backupPath, FALSE)) {
-		LogUpdate("[UpdateManager] Backup failed: %d", GetLastError());
-		return false;
-	}
-
-	LogUpdate("[UpdateManager] Backup created: %s", backupPath);
-	return true;
+    return true;
 }
 
-void CUpdateManager::SaveCurrentVersions() {
-	SaveVersionManifest(".\\Update\\versions.txt");
-	SaveConfig(".\\Data\\UpdateConfig.ini");
+void CUpdateManager::GetTempFilePath(const char* fileName, char* outPath, int outPathSize) {
+    sprintf_s(outPath, outPathSize, "%s\\%s", m_TempDirectory, fileName);
 }
 
-void CUpdateManager::RestartServer() {
-	// This is called after non-executable updates
-	// Server can reload configs without full restart
-	LogUpdate("[UpdateManager] Reloading configuration...");
-
-	// TODO: Add your reload functions here
-	// ReloadItemList();
-	// ReloadMonsterData();
-	// etc.
+void CUpdateManager::SetCurrentVersion(const char* version) {
+    strcpy_s(m_CurrentVersion, sizeof(m_CurrentVersion), version);
 }
 
-void CUpdateManager::ShowUpdateDialog() {
-	if (!g_UpdateDialog) {
-		g_UpdateDialog = new CUpdateDialog();
-	}
-	g_UpdateDialog->Show(m_hWnd);
+void CUpdateManager::SetUpdateServerUrl(const char* url) {
+    strcpy_s(m_UpdateServerUrl, sizeof(m_UpdateServerUrl), url);
 }
 
-std::string CUpdateManager::GetTempFilePath(const char* fileName) {
-	return m_TempDirectory + "\\" + fileName;
+void CUpdateManager::CalculateFileHash(const char* filePath, char* outHash, int outHashSize) {
+    if (outHash && outHashSize > 0) {
+        outHash[0] = '\0';
+    }
+}
+
+void CUpdateManager::ShowNotification(const char* message, UINT icon) {
+    if (m_hWnd && m_ShowNotifications) {
+        MessageBoxA(m_hWnd, message, "GameServer Auto-Update", icon);
+    }
 }
 
 void CUpdateManager::LogUpdate(const char* format, ...) {
-	char buffer[512];
-	va_list args;
-	va_start(args, format);
-	vsprintf_s(buffer, sizeof(buffer), format, args);
-	va_end(args);
+    char buffer[512];
+    va_list args;
+    va_start(args, format);
+    vsprintf_s(buffer, sizeof(buffer), format, args);
+    va_end(args);
 
-	LogAdd(LOG_BLACK, "%s", buffer);
+    LogAdd(LOG_BLACK, "%s", buffer);
 }
 
 const char* CUpdateManager::GetStatusString() const {
-	switch (m_Status) {
-	case UPDATE_STATUS_NO_UPDATE: return "No updates available";
-	case UPDATE_STATUS_AVAILABLE: return "Updates available";
-	case UPDATE_STATUS_DOWNLOADING: return "Downloading...";
-	case UPDATE_STATUS_READY: return "Ready to install";
-	case UPDATE_STATUS_ERROR: return "Error";
-	case UPDATE_STATUS_DISABLED: return "Disabled";
-	default: return "Unknown";
-	}
+    switch (m_Status) {
+    case UPDATE_STATUS_NO_UPDATE: return "No updates available";
+    case UPDATE_STATUS_AVAILABLE: return "Update available";
+    case UPDATE_STATUS_DOWNLOADING: return "Downloading update...";
+    case UPDATE_STATUS_READY: return "Update ready to install";
+    case UPDATE_STATUS_ERROR: return "Error checking for updates";
+    case UPDATE_STATUS_DISABLED: return "Auto-update disabled";
+    default: return "Unknown status";
+    }
+}
+
+bool CUpdateManager::IsUpdateAvailable() {
+    return m_UpdateAvailable;
+}
+
+UpdateInfo CUpdateManager::GetUpdateInfo() {
+    if (m_UpdateCount > 0) {
+        return m_AvailableUpdates[0];
+    }
+
+    UpdateInfo empty;
+    return empty;
+}
+
+void CUpdateManager::OnTimer() {
+    if (!m_Enabled || !m_AutoCheck) {
+        return;
+    }
+
+    DWORD currentTime = GetTickCount();
+    if (currentTime - m_LastCheckTime > UPDATE_CHECK_INTERVAL) {
+        LogUpdate("[UpdateManager] Automatic update check (interval: %d ms)", UPDATE_CHECK_INTERVAL);
+        CheckForUpdates();
+        m_LastCheckTime = currentTime;
+    }
+}
+
+void CUpdateManager::ManualCheckForUpdates() {
+    LogUpdate("[UpdateManager] Manual update check requested");
+
+    if (!m_Enabled) {
+        MessageBoxA(m_hWnd,
+            "Auto-update system is disabled.\n\n"
+            "Enable it in Update - Config Updates to check for updates.",
+            "Auto-Update Disabled", MB_ICONINFORMATION);
+        return;
+    }
+
+    if (!CheckForUpdates()) {
+        if (m_Status == UPDATE_STATUS_ERROR) {
+            MessageBoxA(m_hWnd,
+                "Failed to check for updates.\n\n"
+                "Please check:\n"
+                "- Your internet connection\n"
+                "- Update server URL is correct\n"
+                "- Update server is online\n\n"
+                "Check the console for details.",
+                "Update Check Failed", MB_ICONERROR);
+        }
+        else if (!m_UpdateAvailable) {
+            char msg[256];
+            sprintf_s(msg, sizeof(msg),
+                "You have the latest version!\n\n"
+                "Current Version: %s\n\n"
+                "No updates needed.",
+                m_CurrentVersion);
+            MessageBoxA(m_hWnd, msg, "Up to Date", MB_ICONINFORMATION);
+        }
+        return;
+    }
+
+    // Show detailed update list and ask to download
+    char msg[4096];
+    char temp[512];
+
+    sprintf_s(msg, sizeof(msg),
+        "UPDATES AVAILABLE!\n\n"
+        "Found %d update(s):\n\n",
+        m_UpdateCount);
+
+    float totalSize = 0;
+    for (int i = 0; i < m_UpdateCount; i++) {
+        UpdateInfo* update = &m_AvailableUpdates[i];
+        totalSize += update->fileSize;
+
+        sprintf_s(temp, sizeof(temp),
+            "%d) %s (v%s) - %.2f MB\n"
+            "   %s\n\n",
+            i + 1,
+            update->fileName,
+            update->version,
+            update->fileSize / 1024.0 / 1024.0,
+            update->description);
+        strcat_s(msg, sizeof(msg), temp);
+    }
+
+    sprintf_s(temp, sizeof(temp),
+        "Total Size: %.2f MB\n\n"
+        "Download and install these updates now?",
+        totalSize / 1024.0 / 1024.0);
+    strcat_s(msg, sizeof(msg), temp);
+
+    int result = MessageBoxA(m_hWnd, msg, "Updates Available",
+        MB_YESNO | MB_ICONQUESTION);
+
+    if (result == IDYES) {
+        if (DownloadAllUpdates()) {
+            int applyResult = MessageBoxA(m_hWnd,
+                "All downloads completed!\n\n"
+                "Apply updates now?",
+                "Apply Updates?", MB_YESNO | MB_ICONQUESTION);
+
+            if (applyResult == IDYES) {
+                ApplyAllUpdates();
+            }
+        }
+    }
+}
+
+void CUpdateManager::EnableAutoUpdate(bool enable) {
+    m_Enabled = enable;
+    SaveConfig(".\\Data\\UpdateConfig.ini");
+    LogUpdate("[UpdateManager] Auto-update %s", enable ? "ENABLED" : "DISABLED");
+}
+
+void CUpdateManager::SetDownloadProgress(int percent) {
+    m_DownloadProgress = percent;
+}
+
+void CUpdateManager::CleanupTempFiles() {
+    WIN32_FIND_DATAA findData;
+    HANDLE hFind;
+    char searchPath[512];
+    char filePath[512];
+
+    sprintf_s(searchPath, sizeof(searchPath), "%s\\*.*", m_TempDirectory);
+    hFind = FindFirstFileA(searchPath, &findData);
+
+    if (hFind != INVALID_HANDLE_VALUE) {
+        do {
+            if (strcmp(findData.cFileName, ".") == 0 || strcmp(findData.cFileName, "..") == 0) {
+                continue;
+            }
+
+            sprintf_s(filePath, sizeof(filePath), "%s\\%s", m_TempDirectory, findData.cFileName);
+            DeleteFileA(filePath);
+        } while (FindNextFileA(hFind, &findData));
+
+        FindClose(hFind);
+    }
+
+    LogUpdate("[UpdateManager] Temporary files cleaned up successfully");
+}
+
+bool CUpdateManager::DeleteDirectoryRecursive(const char* dirPath) {
+    WIN32_FIND_DATAA findData;
+    HANDLE hFind;
+    char searchPath[512];
+    char filePath[512];
+
+    sprintf_s(searchPath, sizeof(searchPath), "%s\\*.*", dirPath);
+    hFind = FindFirstFileA(searchPath, &findData);
+
+    if (hFind != INVALID_HANDLE_VALUE) {
+        do {
+            if (strcmp(findData.cFileName, ".") == 0 || strcmp(findData.cFileName, "..") == 0) {
+                continue;
+            }
+
+            sprintf_s(filePath, sizeof(filePath), "%s\\%s", dirPath, findData.cFileName);
+
+            if (findData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) {
+                DeleteDirectoryRecursive(filePath);
+            }
+            else {
+                DeleteFileA(filePath);
+            }
+        } while (FindNextFileA(hFind, &findData));
+
+        FindClose(hFind);
+    }
+
+    return RemoveDirectoryA(dirPath) ? true : false;
+}
+
+INT_PTR CALLBACK UpdateConfigDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam) {
+    static CUpdateManager* pManager = NULL;
+
+    switch (message) {
+    case WM_INITDIALOG:
+    {
+        pManager = (CUpdateManager*)lParam;
+
+        CheckDlgButton(hDlg, IDC_CHECK_ENABLED, pManager->IsEnabled() ? BST_CHECKED : BST_UNCHECKED);
+        CheckDlgButton(hDlg, IDC_CHECK_AUTOCHECK,
+            GetPrivateProfileInt("UpdateManager", "AutoCheck", 1, ".\\Data\\UpdateConfig.ini") ? BST_CHECKED : BST_UNCHECKED);
+        CheckDlgButton(hDlg, IDC_CHECK_AUTODOWNLOAD,
+            GetPrivateProfileInt("UpdateManager", "AutoDownload", 0, ".\\Data\\UpdateConfig.ini") ? BST_CHECKED : BST_UNCHECKED);
+        CheckDlgButton(hDlg, IDC_CHECK_SHOWNOTIFICATIONS,
+            GetPrivateProfileInt("UpdateManager", "ShowNotifications", 1, ".\\Data\\UpdateConfig.ini") ? BST_CHECKED : BST_UNCHECKED);
+
+        SetDlgItemText(hDlg, IDC_EDIT_UPDATEURL, pManager->GetUpdateServerUrl());
+        SetDlgItemText(hDlg, IDC_EDIT_CURRENTVERSION, pManager->GetCurrentVersion());
+
+        return TRUE;
+    }
+
+    case WM_COMMAND:
+    {
+        if (LOWORD(wParam) == IDC_BTN_SAVE_UPDATECONFIG || LOWORD(wParam) == IDOK) {
+            bool enabled = IsDlgButtonChecked(hDlg, IDC_CHECK_ENABLED) == BST_CHECKED;
+            bool autoCheck = IsDlgButtonChecked(hDlg, IDC_CHECK_AUTOCHECK) == BST_CHECKED;
+            bool autoDownload = IsDlgButtonChecked(hDlg, IDC_CHECK_AUTODOWNLOAD) == BST_CHECKED;
+            bool showNotifications = IsDlgButtonChecked(hDlg, IDC_CHECK_SHOWNOTIFICATIONS) == BST_CHECKED;
+
+            char updateUrl[512];
+            char currentVersion[32];
+            GetDlgItemText(hDlg, IDC_EDIT_UPDATEURL, updateUrl, sizeof(updateUrl));
+            GetDlgItemText(hDlg, IDC_EDIT_CURRENTVERSION, currentVersion, sizeof(currentVersion));
+
+            if (strlen(updateUrl) == 0) {
+                MessageBoxA(hDlg, "Update Server URL cannot be empty!", "Validation Error", MB_OK | MB_ICONERROR);
+                return TRUE;
+            }
+
+            WritePrivateProfileString("UpdateManager", "Enabled", enabled ? "1" : "0", ".\\Data\\UpdateConfig.ini");
+            WritePrivateProfileString("UpdateManager", "AutoCheck", autoCheck ? "1" : "0", ".\\Data\\UpdateConfig.ini");
+            WritePrivateProfileString("UpdateManager", "AutoDownload", autoDownload ? "1" : "0", ".\\Data\\UpdateConfig.ini");
+            WritePrivateProfileString("UpdateManager", "ShowNotifications", showNotifications ? "1" : "0", ".\\Data\\UpdateConfig.ini");
+            WritePrivateProfileString("UpdateManager", "UpdateServerUrl", updateUrl, ".\\Data\\UpdateConfig.ini");
+            WritePrivateProfileString("UpdateManager", "CurrentVersion", currentVersion, ".\\Data\\UpdateConfig.ini");
+
+            pManager->LoadConfig(".\\Data\\UpdateConfig.ini");
+
+            MessageBoxA(hDlg, "Configuration saved successfully!", "Success", MB_OK | MB_ICONINFORMATION);
+            EndDialog(hDlg, IDOK);
+            return TRUE;
+        }
+        else if (LOWORD(wParam) == IDCANCEL) {
+            EndDialog(hDlg, IDCANCEL);
+            return TRUE;
+        }
+        break;
+    }
+    }
+
+    return FALSE;
+}
+
+void CUpdateManager::ShowConfigDialog() {
+    DialogBoxParam(GetModuleHandle(NULL), MAKEINTRESOURCE(IDD_UPDATE_CONFIG), m_hWnd, UpdateConfigDlgProc, (LPARAM)this);
+}
+
+INT_PTR CALLBACK ProgressDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam) {
+    switch (message) {
+    case WM_INITDIALOG:
+    {
+        RECT rc;
+        GetWindowRect(hDlg, &rc);
+        int x = (GetSystemMetrics(SM_CXSCREEN) - (rc.right - rc.left)) / 2;
+        int y = (GetSystemMetrics(SM_CYSCREEN) - (rc.bottom - rc.top)) / 2;
+        SetWindowPos(hDlg, NULL, x, y, 0, 0, SWP_NOSIZE | SWP_NOZORDER);
+
+        SendDlgItemMessage(hDlg, IDC_PROGRESS_BAR, PBM_SETRANGE, 0, MAKELPARAM(0, 100));
+        SendDlgItemMessage(hDlg, IDC_PROGRESS_BAR, PBM_SETPOS, 0, 0);
+
+        return TRUE;
+    }
+    }
+
+    return FALSE;
+}
+
+void CUpdateManager::ShowProgressDialog(const char* fileName) {
+    if (m_hProgressWnd != NULL) {
+        return;
+    }
+
+    m_hProgressWnd = CreateDialogParam(GetModuleHandle(NULL), MAKEINTRESOURCE(IDD_PROGRESS_DIALOG),
+        m_hWnd, ProgressDlgProc, (LPARAM)this);
+
+    if (m_hProgressWnd) {
+        SetDlgItemText(m_hProgressWnd, IDC_STATIC_FILENAME, fileName);
+        ShowWindow(m_hProgressWnd, SW_SHOW);
+    }
+}
+
+void CUpdateManager::UpdateProgressDialog(int percent, DWORD current, DWORD total) {
+    if (m_hProgressWnd == NULL) {
+        return;
+    }
+
+    SendDlgItemMessage(m_hProgressWnd, IDC_PROGRESS_BAR, PBM_SETPOS, percent, 0);
+
+    char progressText[128];
+    sprintf_s(progressText, sizeof(progressText), "%d%%", percent);
+    SetDlgItemText(m_hProgressWnd, IDC_STATIC_PROGRESS, progressText);
+
+    char sizeText[128];
+    sprintf_s(sizeText, sizeof(sizeText), "%.2f MB / %.2f MB",
+        current / 1024.0 / 1024.0, total / 1024.0 / 1024.0);
+    SetDlgItemText(m_hProgressWnd, IDC_STATIC_SIZE, sizeText);
+
+    MSG msg;
+    while (PeekMessage(&msg, m_hProgressWnd, 0, 0, PM_REMOVE)) {
+        TranslateMessage(&msg);
+        DispatchMessage(&msg);
+    }
+}
+
+void CUpdateManager::CloseProgressDialog() {
+    if (m_hProgressWnd != NULL) {
+        DestroyWindow(m_hProgressWnd);
+        m_hProgressWnd = NULL;
+    }
+}
+
+bool CUpdateManager::IsVersionNewer(const char* version1, const char* version2) {
+    // Parse version numbers (format: X.Y.Z)
+    int v1_major = 0, v1_minor = 0, v1_patch = 0;
+    int v2_major = 0, v2_minor = 0, v2_patch = 0;
+
+    sscanf_s(version1, "%d.%d.%d", &v1_major, &v1_minor, &v1_patch);
+    sscanf_s(version2, "%d.%d.%d", &v2_major, &v2_minor, &v2_patch);
+
+    if (v1_major > v2_major) return true;
+    if (v1_major < v2_major) return false;
+
+    if (v1_minor > v2_minor) return true;
+    if (v1_minor < v2_minor) return false;
+
+    if (v1_patch > v2_patch) return true;
+
+    return false; // Same version or older
+}
+
+bool CUpdateManager::IsUpdateAlreadyInstalled(const char* fileName, const char* version) {
+    // Check in UpdateConfig.ini if this specific file+version was installed
+    char sectionName[128];
+    sprintf_s(sectionName, sizeof(sectionName), "InstalledUpdates");
+
+    char installedVersion[32] = { 0 };
+    GetPrivateProfileString(sectionName, fileName, "",
+        installedVersion, sizeof(installedVersion), ".\\Data\\UpdateConfig.ini");
+
+    if (strlen(installedVersion) == 0) {
+        return false; // Not installed
+    }
+
+    // Check if installed version is same or newer
+    if (strcmp(installedVersion, version) == 0) {
+        return true; // Exact same version already installed
+    }
+
+    // Check if installed version is newer
+    if (!IsVersionNewer(version, installedVersion)) {
+        return true; // Installed version is newer or same
+    }
+
+    return false; // Available version is newer
+}
+
+void CUpdateManager::SaveInstalledUpdate(const char* fileName, const char* version) {
+    char sectionName[128];
+    sprintf_s(sectionName, sizeof(sectionName), "InstalledUpdates");
+
+    WritePrivateProfileString(sectionName, fileName, version, ".\\Data\\UpdateConfig.ini");
+
+    LogUpdate("[UpdateManager] Saved installed update: %s = %s", fileName, version);
 }

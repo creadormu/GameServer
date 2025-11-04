@@ -578,7 +578,6 @@
     <ClInclude Include="TuChan.h" />
     <ClInclude Include="Union.h" />
     <ClInclude Include="UnionInfo.h" />
-    <ClInclude Include="UpdateDialog.h" />
     <ClInclude Include="UpdateManager.h" />
     <ClInclude Include="User.h" />
     <ClInclude Include="Util.h" />
@@ -866,7 +865,6 @@
     <ClCompile Include="TuChan.cpp" />
     <ClCompile Include="Union.cpp" />
     <ClCompile Include="UnionInfo.cpp" />
-    <ClCompile Include="UpdateDialog.cpp" />
     <ClCompile Include="UpdateManager.cpp" />
     <ClCompile Include="User.cpp" />
     <ClCompile Include="Util.cpp" />

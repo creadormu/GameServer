@@ -85,7 +85,7 @@ bool CPhraseManager::LoadLanguageFromPath(const char* phrasesFolder, const char*
 bool CPhraseManager::LoadPhrasesPath(const char* phrasesFolder)
 {
     char filePath[260];
-    sprintf_s(filePath, sizeof(filePath), "%sBotPhrases.txt", phrasesFolder);
+    sprintf_s(filePath, sizeof(filePath), "%sBo", phrasesFolder);
 
     // Check if file exists
     DWORD attrib = GetFileAttributes(filePath);

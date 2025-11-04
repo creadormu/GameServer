@@ -1008,9 +1008,6 @@
     <ClInclude Include="UpdateManager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="UpdateDialog.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -1839,9 +1836,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="UpdateManager.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="UpdateDialog.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

@@ -52,8 +52,8 @@
 #include "UpdateManager.h"
 #include <shellapi.h>
 #pragma comment(lib, "shell32.lib")
-#include "UpdateManager.h"
-#include "UpdateDialog.h"
+
+
 
 
 TCHAR szTitle[MAX_LOADSTRING];
@@ -129,6 +129,8 @@ int APIENTRY WinMain(HINSTANCE hInstance,HINSTANCE hPrevInstance,LPSTR lpCmdLine
 	// Initialize name manager
 	g_NameManager.Initialize();
 	g_PhraseManager.Initialize();
+		// Initialize update manager
+	gUpdateManager.Init(hWnd);
 
 
 	#if(PROTECT_STATE==1)
@@ -279,21 +281,7 @@ LRESULT CALLBACK WndProc(HWND hWnd,UINT message,WPARAM wParam,LPARAM lParam) // 
 		case WM_CREATE:
 
 		{
-			// Initialize update manager after window is created
-			gUpdateManager.Init(hWnd);
 
-			// Create update dialog instance
-			if (!g_UpdateDialog) {
-				g_UpdateDialog = new CUpdateDialog();
-			}
-
-			// Set up timer for auto-check (every 1 hour)
-			SetTimer(hWnd, UPDATE_TIMER_ID, UPDATE_CHECK_INTERVAL, NULL);
-
-			break;
-		}
-
-		{
             hWndStatusBar = CreateWindowEx(
 
             0,
@@ -354,6 +342,7 @@ LRESULT CALLBACK WndProc(HWND hWnd,UINT message,WPARAM wParam,LPARAM lParam) // 
 		case WM_COMMAND:
 			switch(LOWORD(wParam))
 			{
+
 				case IDM_ONLINEUSERS:
 					DialogBox(hInst,(LPCTSTR)IDD_ONLINEUSER,hWnd,(DLGPROC)UserOnline);
 					break;
@@ -676,101 +665,17 @@ LRESULT CALLBACK WndProc(HWND hWnd,UINT message,WPARAM wParam,LPARAM lParam) // 
 				case IDM_SWAMP_OF_PIECE:
 					gSwampEvent.StartEvent();
 					break;
-
-				case IDM_UPDATE_DIALOG:
-					// Open the modern update dialog (RECOMMENDED)
-					gUpdateManager.ShowUpdateDialog();
+				case IDM_UPDATE_CHECK:
+					gUpdateManager.ManualCheckForUpdates();
+					break;
+				case IDM_UPDATE_CONFIG:
+					gUpdateManager.ShowConfigDialog();
 					break;
 
-				case IDM_UPDATE_CHECK:
-					// Quick check from menu
-				{
-					if (gUpdateManager.CheckForUpdates()) {
-						if (gUpdateManager.IsUpdateAvailable()) {
-							MessageBox(hWnd,
-								"Updates are available!\n\n"
-								"Open Update Manager to download and apply them.",
-								"Updates Available",
-								MB_ICONINFORMATION);
-						}
-						else {
-							MessageBox(hWnd,
-								"Your server is up to date!",
-								"No Updates",
-								MB_ICONINFORMATION);
-						}
-					}
-					else {
-						MessageBox(hWnd,
-							"Failed to check for updates.\n"
-							"Please check your internet connection.",
-							"Update Check Failed",
-							MB_ICONERROR);
-					}
-				}
-				break;
-
-				case IDM_UPDATE_DOWNLOAD:
-					// Quick download (not recommended - use dialog instead)
-				{
-					auto updates = gUpdateManager.GetAvailableUpdates();
-					if (updates.empty()) {
-						MessageBox(hWnd,
-							"No updates available.\n"
-							"Please check for updates first.",
-							"No Updates",
-							MB_ICONINFORMATION);
-					}
-					else {
-						MessageBox(hWnd,
-							"Please use the Update Manager dialog for downloading.\n\n"
-							"Menu: Update → Update Manager",
-							"Use Update Manager",
-							MB_ICONINFORMATION);
-					}
-				}
-				break;
-
-				case IDM_UPDATE_APPLY:
-					// Quick apply (not recommended - use dialog instead)
-				{
-					MessageBox(hWnd,
-						"Please use the Update Manager dialog for applying updates.\n\n"
-						"Menu: Update → Update Manager\n\n"
-						"This ensures proper verification and backup.",
-						"Use Update Manager",
-						MB_ICONINFORMATION);
-				}
-				break;
-
-
-				case IDM_UPDATE_CONFIG:
-					// Open configuration dialog
-				{
-					char msg[512];
-					sprintf_s(msg, sizeof(msg),
-						"Update Configuration:\n\n"
-						"Enabled: %s\n"
-						"Auto-Check: %s\n"
-						"Auto-Download: %s\n"
-						"Server URL: %s\n"
-						"Current Version: %s\n\n"
-						"Edit Data\\UpdateConfig.ini to change settings.",
-						gUpdateManager.IsEnabled() ? "Yes" : "No",
-						gUpdateManager.IsAutoCheckEnabled() ? "Yes" : "No",
-						gUpdateManager.IsAutoDownloadEnabled() ? "Yes" : "No",
-						gUpdateManager.GetUpdateServerUrl().c_str(),
-						gUpdateManager.GetCurrentVersion().c_str());
-
-					MessageBox(hWnd, msg, "Update Configuration", MB_ICONINFORMATION);
-				}
-				break;
-
 				default:
-					return DefWindowProc(hWnd, message, wParam, lParam);
+					return DefWindowProc(hWnd,message,wParam,lParam);
 			}
 			break;
-	
 		case WM_CLOSE:
 			if (MessageBox(0, "Close GameServer?", "GameServer", MB_OKCANCEL) == IDOK)
 			{
@@ -779,15 +684,6 @@ LRESULT CALLBACK WndProc(HWND hWnd,UINT message,WPARAM wParam,LPARAM lParam) // 
 			break;
 		case WM_TIMER:
 			switch(wParam)
-
-			{
-				if (wParam == UPDATE_TIMER_ID) {
-					// Automatic update check
-					gUpdateManager.OnTimer();
-				}
-				break;
-			}
-
 			{
 				case WM_TIMER_1000:
 					GJServerUserInfoSend();
@@ -800,6 +696,7 @@ LRESULT CALLBACK WndProc(HWND hWnd,UINT message,WPARAM wParam,LPARAM lParam) // 
 				case WM_TIMER_10000:
 					JoinServerReconnect(hWnd,WM_JOIN_SERVER_MSG_PROC);
 					DataServerReconnect(hWnd,WM_DATA_SERVER_MSG_PROC);
+					gUpdateManager.OnTimer();
 					break;
 			}
 			break;
@@ -835,16 +732,6 @@ LRESULT CALLBACK WndProc(HWND hWnd,UINT message,WPARAM wParam,LPARAM lParam) // 
 		return 0;
 		break;
 		case WM_DESTROY:
-
-		{
-			// Cleanup
-			KillTimer(hWnd, UPDATE_TIMER_ID);
-
-			if (g_UpdateDialog) {
-				delete g_UpdateDialog;
-				g_UpdateDialog = nullptr;
-			}
-
 			PostQuitMessage(0);
 			break;
 		default:
@@ -855,118 +742,6 @@ LRESULT CALLBACK WndProc(HWND hWnd,UINT message,WPARAM wParam,LPARAM lParam) // 
 }
 
 
-// Alternative: Simplified menu for console app
-void HandleUpdateMenu()
-{
-	printf("\n╔════════════════════════════════════════╗\n");
-	printf("║       MuServer Update Manager          ║\n");
-	printf("╠════════════════════════════════════════╣\n");
-	printf("║  1. Open Update Manager Dialog         ║\n");
-	printf("║  2. Quick Check for Updates            ║\n");
-	printf("║  3. View Current Configuration         ║\n");
-	printf("║  4. Enable/Disable Auto-Update         ║\n");
-	printf("║  0. Back to Main Menu                  ║\n");
-	printf("╚════════════════════════════════════════╝\n");
-	printf("Select option: ");
-
-	int choice;
-	scanf("%d", &choice);
-
-	switch (choice)
-	{
-	case 1:
-		gUpdateManager.ShowUpdateDialog();
-		break;
-
-	case 2:
-		printf("\nChecking for updates...\n");
-		if (gUpdateManager.CheckForUpdates()) {
-			auto updates = gUpdateManager.GetAvailableUpdates();
-			if (updates.empty()) {
-				printf("✓ Server is up to date!\n");
-			}
-			else {
-				printf("! %d update(s) available:\n", (int)updates.size());
-				for (const auto& update : updates) {
-					printf("  - %s (%s -> %s)\n",
-						update.fileName.c_str(),
-						update.currentVersion.c_str(),
-						update.version.c_str());
-				}
-				printf("\nUse Update Manager dialog to download and apply.\n");
-			}
-		}
-		else {
-			printf("✗ Failed to check for updates.\n");
-		}
-		break;
-
-	case 3:
-		printf("\n╔════════════════════════════════════════╗\n");
-		printf("║       Update Configuration             ║\n");
-		printf("╠════════════════════════════════════════╣\n");
-		printf("║ Enabled:       %-23s ║\n",
-			gUpdateManager.IsEnabled() ? "Yes" : "No");
-		printf("║ Auto-Check:    %-23s ║\n",
-			gUpdateManager.IsAutoCheckEnabled() ? "Yes" : "No");
-		printf("║ Auto-Download: %-23s ║\n",
-			gUpdateManager.IsAutoDownloadEnabled() ? "Yes" : "No");
-		printf("║ Version:       %-23s ║\n",
-			gUpdateManager.GetCurrentVersion().c_str());
-		printf("║ Status:        %-23s ║\n",
-			gUpdateManager.GetStatusString());
-		printf("╚════════════════════════════════════════╝\n");
-		break;
-
-	case 4:
-	{
-		bool current = gUpdateManager.IsEnabled();
-		gUpdateManager.SetEnabled(!current);
-		printf("\nAuto-Update %s\n", !current ? "ENABLED" : "DISABLED");
-	}
-	break;
-
-	}
-
-
-
-	// Notification example - call this when updates are found
-	void NotifyUpdatesAvailable()
-	{
-		if (!gUpdateManager.IsUpdateAvailable()) {
-			return;
-		}
-
-		auto updates = gUpdateManager.GetAvailableUpdates();
-
-		char notification[512];
-		sprintf_s(notification, sizeof(notification),
-			"═══════════════════════════════════════\n"
-			"  SERVER UPDATES AVAILABLE\n"
-			"═══════════════════════════════════════\n"
-			"\n"
-			"%d file(s) have updates ready:\n\n",
-			(int)updates.size());
-
-		std::string fileList;
-		for (size_t i = 0; i < updates.size() && i < 5; i++) {
-			char line[128];
-			sprintf_s(line, "  • %s v%s\n",
-				updates[i].fileName.c_str(),
-				updates[i].version.c_str());
-			fileList += line;
-		}
-
-		if (updates.size() > 5) {
-			fileList += "  ... and more\n";
-		}
-
-		fileList += "\nOpen Update Manager to install.\n";
-
-		strcat_s(notification, fileList.c_str());
-
-		LogAdd(LOG_RED, notification);
-	}
 
 
 // ====================================
@@ -1816,7 +1591,7 @@ INT_PTR CALLBACK CreateBotsDialogProc(HWND hDlg, UINT message, WPARAM wParam, LP
 
 				char successMsg[512];
 				sprintf_s(successMsg, sizeof(successMsg),
-					"Connection successful!\n\nServer: %s\nFound %d databases\n\nSelect database from dropdown.",
+					"✅ Connection successful!\n\nServer: %s\nFound %d databases\n\nSelect database from dropdown.",
 					serverName, (int)databases.size());
 				MessageBox(hDlg, successMsg, "SQL Connection Test", MB_OK | MB_ICONINFORMATION);
 			}
