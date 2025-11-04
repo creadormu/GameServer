@@ -624,7 +624,7 @@ BOOL ObjBotTrader::TradeOpen(int index, int nindex)
 
 		if (it == s_FakeOnline.m_TradeData.end()) {
 			gNotice.NewNoticeSend(lpObj->Index, 0, 0, 0, 0, 0, "Este bot no puede hacer trade.");
-			return 0;
+			return 1;  // Return 1 to indicate we handled this trade (by rejecting it)
 		}
 
 		const auto& config = it->second;
@@ -633,7 +633,7 @@ BOOL ObjBotTrader::TradeOpen(int index, int nindex)
 		if (!s_FakeOnline.BotHasRewardItems(lpBot, config.rewardItems)) {
 			gNotice.NewNoticeSend(lpObj->Index, 0, 0, 0, 0, 0, "El bot no tiene los items necesarios en este momento.");
 			LogAdd(LOG_RED, "[FakeBotTrade] Bot %s cannot trade - missing items", lpBot->Name);
-			return 0;
+			return 1;  // Return 1 to indicate we handled this trade (by rejecting it)
 		}
 
 
@@ -655,7 +655,7 @@ BOOL ObjBotTrader::TradeOpen(int index, int nindex)
 		lpObj->TargetNumber = lpBot->Index;
 		lpObj->Transaction = 1;
 
-		//Congelar también el bot para que no camine o ataque mientras está en trade
+		//Congelar tambiÃ©n el bot para que no camine o ataque mientras estÃ¡ en trade
 		lpBot->Interface.state = 1;
 		lpBot->Interface.use = 1;
 		lpBot->Interface.type = 1;
@@ -677,7 +677,7 @@ BOOL ObjBotTrader::TradeOpen(int index, int nindex)
 			lpBot->Interface.type = 0;
 			lpBot->Interface.state = 0;
 			lpBot->TargetNumber = -1;
-			return 0;
+			return 1;  // Return 1 to indicate we handled this trade (by rejecting it due to error)
 		}
 
 		// Now show bot items to player (using proper visibility function)
