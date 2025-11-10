@@ -53,7 +53,7 @@
 #include <shellapi.h>
 #pragma comment(lib, "shell32.lib")
 
-
+extern bool g_OdbcInitialized;
 
 
 TCHAR szTitle[MAX_LOADSTRING];
@@ -1346,11 +1346,12 @@ bool CreateMultipleBotsAdvanced(int botCount, int startFrom, int gateNumber, int
 		// =====================================================
 		// NEW: Call stored procedure instead of writing SQL file
 		// =====================================================
+		const char* language = "en"; // Define the language parameter
 		if (CallBotStoredProcedure(account, charName, selectedClassConfig->classCode,
 			level, mapNumber, finalMapX, finalMapY,
 			selectedClassConfig->str, selectedClassConfig->dex,
 			selectedClassConfig->vit, selectedClassConfig->ene,
-			selectedClassConfig->cmd, invHex, magicHex))
+			selectedClassConfig->cmd, invHex, magicHex, language))
 		{
 			successCount++;
 			if ((i + 1) % 10 == 0)
@@ -1774,6 +1775,263 @@ INT_PTR CALLBACK CreateBotsDialogProc(HWND hDlg, UINT message, WPARAM wParam, LP
 
 			return TRUE;
 		}
+
+		// CLEAN BOT ACCOUNTS Button
+
+
+
+		else if (LOWORD(wParam) == IDC_BTN_CLEANBOTS)
+
+
+		{
+
+
+			// Get database settings
+
+
+			char serverName[128] = { 0 };
+
+
+			char dbName[64] = { 0 };
+
+
+			GetDlgItemTextA(hDlg, IDC_EDIT_SQLSERVER, serverName, sizeof(serverName));
+
+
+			GetDlgItemTextA(hDlg, IDC_COMBO_DATABASES, dbName, sizeof(dbName));
+
+
+
+
+
+			// Trim whitespace from server name
+
+
+			int len = strlen(serverName);
+
+
+			while (len > 0 && (serverName[len - 1] == ' ' || serverName[len - 1] == '\t'))
+
+
+			{
+
+
+				serverName[--len] = '\0';
+
+
+			}
+
+
+
+
+
+			// Use defaults if empty
+
+
+			if (len == 0) strcpy_s(serverName, ".\\SQLEXPRESS");
+
+
+			if (strlen(dbName) == 0) strcpy_s(dbName, "MuOnline");
+
+
+
+
+
+			// Confirm action
+
+
+			int choice = MessageBox(hDlg,
+
+
+				"⚠ WARNING ⚠\n\n"
+
+
+				"This will DELETE all accounts starting with 'Bot' from the database!\n\n"
+
+
+				"This action CANNOT be undone!\n\n"
+
+
+				"Are you sure you want to continue?",
+
+
+				"Confirm Bot Account Cleanup", MB_YESNO | MB_ICONWARNING | MB_DEFBUTTON2);
+
+
+
+
+
+			if (choice != IDYES)
+
+
+			{
+
+
+				return TRUE;
+
+
+			}
+
+
+
+
+
+			// Initialize database connection if not already connected
+
+
+			if (!g_OdbcInitialized)
+
+
+			{
+
+
+				LogAdd(LOG_BLUE, "[CleanBots] Initializing database connection...");
+
+
+				if (!InitializeBotODBC(serverName, dbName, "", ""))
+
+
+				{
+
+
+					MessageBox(hDlg,
+
+
+						"❌ Failed to connect to database!\n\n"
+
+
+						"Check:\n"
+
+
+						"• SQL Server is running\n"
+
+
+						"• Server name is correct\n"
+
+
+						"• Database name is correct\n"
+
+
+						"• Windows Authentication is enabled",
+
+
+						"Database Error", MB_OK | MB_ICONERROR);
+
+
+					return TRUE;
+
+
+				}
+
+
+			}
+
+
+
+
+
+			// Disable dialog during cleanup
+
+
+			EnableWindow(hDlg, FALSE);
+
+
+			SetCursor(LoadCursor(NULL, IDC_WAIT));
+
+
+
+
+
+			// Call cleanup function
+
+
+			bool success = CleanBotAccounts();
+
+
+
+
+
+			SetCursor(LoadCursor(NULL, IDC_ARROW));
+
+
+			EnableWindow(hDlg, TRUE);
+
+
+
+
+
+			if (success)
+
+
+			{
+
+
+				MessageBox(hDlg,
+
+
+					"✅ Bot accounts cleaned successfully!\n\n"
+
+
+					"All accounts starting with 'Bot' have been removed from:\n"
+
+
+					"• MEMB_INFO\n"
+
+
+					"• CHARACTER\n"
+
+
+					"• MEMB_STAT\n"
+
+
+					"• warehouse\n"
+
+
+					"• ExtWareHouse\n"
+
+
+					"• And other related tables\n\n"
+
+
+					"Check console logs for details.",
+
+
+					"Cleanup Successful", MB_OK | MB_ICONINFORMATION);
+
+
+			}
+
+
+			else
+
+
+			{
+
+
+				MessageBox(hDlg,
+
+
+					"❌ Failed to clean bot accounts!\n\n"
+
+
+					"Some queries may have failed.\n"
+
+
+					"Check console logs for details.",
+
+
+					"Cleanup Failed", MB_OK | MB_ICONERROR);
+
+
+			}
+
+
+			return TRUE;
+
+
+			}
+
+
 		// UPDATE ACCOUNTS.XML Button
 		else if (LOWORD(wParam) == IDC_BTN_UPDATEXML)
 		{

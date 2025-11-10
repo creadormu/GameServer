@@ -180,12 +180,139 @@ bool TestSQLConnection(const char* serverName, std::vector<std::string>& databas
 }
 
 // =====================================================
+// 2. Batch Creation with Transaction Safety
+// =====================================================
+struct BotCreationData {
+    char account[11];
+    char charName[11];
+    int classCode;
+    int level;
+    int mapNumber;
+    int mapX;
+    int mapY;
+    int str, dex, vit, ene, cmd;
+    std::string invHex;
+    std::string magicHex;
+    int mainSkill;
+    int secondarySkill;
+    int buff1, buff2, buff3;
+    int gateNumber;
+    int phamViTrain;
+    int moveRange;
+    int timeReturn;
+    int tuNhatItem;
+    int tuDongReset;
+    int partyMode;
+    int pvpMode;
+    int postKhiDie;
+};
+
+
+bool CreateBotsBatch(const std::vector<BotCreationData>& bots, int* successCount, int* failCount)
+{
+    if (!g_OdbcInitialized)
+    {
+        LogAdd(LOG_RED, (char*)"[BatchCreate] ODBC not initialized!");
+        return false;
+    }
+
+    *successCount = 0;
+    *failCount = 0;
+
+    SQLHSTMT hStmt = NULL;
+    SQLRETURN ret = SQLAllocHandle(SQL_HANDLE_STMT, g_hOdbcConn, &hStmt);
+
+    if (ret != SQL_SUCCESS && ret != SQL_SUCCESS_WITH_INFO)
+    {
+        LogAdd(LOG_RED, (char*)"[BatchCreate] Failed to allocate statement");
+        return false;
+    }
+
+    // Start transaction
+    LogAdd(LOG_BLUE, (char*)"[BatchCreate] Starting transaction for %d bots...", (int)bots.size());
+
+    // Process each bot within transaction
+    for (size_t i = 0; i < bots.size(); i++)
+    {
+        const BotCreationData& bot = bots[i];
+
+        char query[8192];
+        sprintf_s(query, sizeof(query),
+            "EXEC WZ_CreateBotDirect '%s', '%s', %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, '%s', '%s'",
+            bot.account, bot.charName, bot.classCode, bot.level, bot.mapNumber,
+            bot.mapX, bot.mapY, bot.str, bot.dex, bot.vit, bot.ene, bot.cmd,
+            bot.invHex.c_str(), bot.magicHex.c_str());
+
+        ret = SQLExecDirect(hStmt, (SQLCHAR*)query, SQL_NTS);
+
+        if (ret == SQL_SUCCESS || ret == SQL_SUCCESS_WITH_INFO)
+        {
+            (*successCount)++;
+
+            // Progress indicator every 10 bots
+            if ((*successCount) % 10 == 0)
+            {
+                LogAdd(LOG_BLUE, (char*)"[BatchCreate] Progress: %d/%d", *successCount, (int)bots.size());
+            }
+        }
+        else
+        {
+            SQLCHAR sqlState[6], errorMsg[SQL_MAX_MESSAGE_LENGTH];
+            SQLINTEGER nativeError;
+            SQLSMALLINT msgLen;
+
+            if (SQLGetDiagRec(SQL_HANDLE_STMT, hStmt, 1, sqlState, &nativeError,
+                errorMsg, sizeof(errorMsg), &msgLen) == SQL_SUCCESS)
+            {
+                LogAdd(LOG_RED, (char*)"[BatchCreate] Bot %s failed: %s", bot.account, errorMsg);
+            }
+
+            (*failCount)++;
+
+            // If too many failures, rollback entire transaction
+            if (*failCount > 5)
+            {
+                LogAdd(LOG_RED, (char*)"[BatchCreate] Too many failures, rolling back transaction!");
+                SQLEndTran(SQL_HANDLE_DBC, g_hOdbcConn, SQL_ROLLBACK);
+                SQLFreeHandle(SQL_HANDLE_STMT, hStmt);
+                return false;
+            }
+        }
+
+        // Clear for next iteration
+        SQLFreeStmt(hStmt, SQL_CLOSE);
+    }
+
+    // Commit transaction
+    ret = SQLEndTran(SQL_HANDLE_DBC, g_hOdbcConn, SQL_COMMIT);
+
+    if (ret == SQL_SUCCESS || ret == SQL_SUCCESS_WITH_INFO)
+    {
+        LogAdd(LOG_GREEN, (char*)"[BatchCreate] Transaction committed: %d bots created", *successCount);
+    }
+    else
+    {
+        SQLCHAR errorMsg[SQL_MAX_MESSAGE_LENGTH];
+        SQLGetDiagRec(SQL_HANDLE_DBC, g_hOdbcConn, 1, NULL, NULL, errorMsg, sizeof(errorMsg), NULL);
+        LogAdd(LOG_RED, (char*)"[BatchCreate] Commit failed: %s", errorMsg);
+
+        SQLEndTran(SQL_HANDLE_DBC, g_hOdbcConn, SQL_ROLLBACK);
+        SQLFreeHandle(SQL_HANDLE_STMT, hStmt);
+        return false;
+    }
+
+    SQLFreeHandle(SQL_HANDLE_STMT, hStmt);
+    return (*successCount > 0);
+}
+
+
+// =====================================================
 // 3. Call Stored Procedure for Single Bot
 // =====================================================
 bool CallBotStoredProcedure(const char* accountID, const char* charName,
     int classCode, int level, int mapNumber,
     int mapX, int mapY, int str, int dex, int vit,
-    int ene, int cmd, const char* invHex, const char* magicHex)
+    int ene, int cmd, const char* invHex, const char* magicHex, const char* language)
 {
     // Auto-initialize if needed
     if (!g_OdbcInitialized)
@@ -211,9 +338,9 @@ bool CallBotStoredProcedure(const char* accountID, const char* charName,
     // Build stored procedure call
     char query[8192];
     sprintf_s(query, sizeof(query),
-        "EXEC WZ_CreateBotDirect '%s', '%s', %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, '%s', '%s'",
+        "EXEC WZ_CreateBotDirect '%s', '%s', %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, '%s', '%s', '%s'",
         accountID, charName, classCode, level, mapNumber, mapX, mapY,
-        str, dex, vit, ene, cmd, invHex, magicHex);
+        str, dex, vit, ene, cmd, invHex, magicHex, language);
 
     // Execute
     ret = SQLExecDirect(hStmt, (SQLCHAR*)query, SQL_NTS);
@@ -287,17 +414,18 @@ bool CreateBotsViaBatch(int startFrom, int botCount, int minLevel, int maxLevel,
 // =====================================================
 // 5. MAIN FUNCTION - Create Multiple Bots (Stored Procedure Version)
 // =====================================================
-bool CreateMultipleBotsAdvanced_StoredProc(int botCount, int startFrom, int gateNumber, int mapNumber, int mapX, int mapY,
-    int minLevel, int maxLevel, int selectedClass, int phamViTrain, int moveRange, int timeReturn,
-    int tuNhatItem, int tuDongReset, int partyMode, int pvpMode, int postKhiDie, int enabledConfigs)
+bool CreateMultipleBotsAdvanced_StoredProc(int botCount, int startFrom, int gateNumber,
+    int mapNumber, int mapX, int mapY, int minLevel, int maxLevel, int selectedClass,
+    int phamViTrain, int moveRange, int timeReturn, int tuNhatItem, int tuDongReset,
+    int partyMode, int pvpMode, int postKhiDie, int enabledConfigs)
 {
-    LogAdd(LOG_BLACK, (char*)"[CreateBots] ===== START (Stored Procedure Version) =====");
-    LogAdd(LOG_BLACK, (char*)"[CreateBots] Count=%d, StartFrom=%d, EnabledConfigs=%d", botCount, startFrom, enabledConfigs);
+    LogAdd(LOG_BLACK, (char*)"[CreateBots] ===== START (Safe Transaction Version) =====");
+    LogAdd(LOG_BLACK, (char*)"[CreateBots] Count=%d, StartFrom=%d", botCount, startFrom);
 
     // SAFETY CHECKS
     if (botCount > 1000 || botCount < 1)
     {
-        LogAdd(LOG_RED, (char*)"[CreateBots] ERROR: Invalid bot count");
+        LogAdd(LOG_RED, (char*)"[CreateBots] ERROR: Invalid bot count (1-1000)");
         return false;
     }
 
@@ -307,13 +435,13 @@ bool CreateMultipleBotsAdvanced_StoredProc(int botCount, int startFrom, int gate
         return false;
     }
 
-    // Auto-initialize ODBC if not already done
+    // Auto-initialize ODBC
     if (!g_OdbcInitialized)
     {
         LogAdd(LOG_BLUE, (char*)"[CreateBots] Initializing ODBC connection...");
         if (!InitializeBotODBC(".\\SQLEXPRESS", "MuOnline", "", ""))
         {
-            LogAdd(LOG_RED, (char*)"[CreateBots] FAILED to initialize ODBC! Cannot proceed.");
+            LogAdd(LOG_RED, (char*)"[CreateBots] FAILED to initialize ODBC!");
             return false;
         }
     }
@@ -334,7 +462,7 @@ bool CreateMultipleBotsAdvanced_StoredProc(int botCount, int startFrom, int gate
         {0,  "DW",  9,   12,  16,  -1,  -1, 15, 2000, 2000, 2000, 5000, 0,    false},
         {16, "DK",  44,  41,  48,  -1,  -1, 30, 5000, 4500, 5500, 4000, 0,    false},
         {32, "ELF", 24,  52,  26,  27,  28, 20, 2500, 4500, 2500, 3000, 0,    true},
-        {48, "MG",  8,  55,   -1,  -1,  -1, 10, 4000, 3000, 4000, 4000, 0,    false},
+        {48, "MG",  8,   55,  -1,  -1,  -1, 10, 4000, 3000, 4000, 4000, 0,    false},
         {64, "DL",  65,  61,  64,  -1,  -1, 10, 4500, 3500, 4500, 2500, 5000, false},
         {80, "SUM", 214, 215, 217, 218, -1, 10, 2000, 2000, 2000, 5000, 0,    true},
         {96, "RF",  264, 263, 266, 268, -1, 5,  4500, 4500, 4500, 2000, 0,    false}
@@ -351,37 +479,17 @@ bool CreateMultipleBotsAdvanced_StoredProc(int botCount, int startFrom, int gate
         cumulativePercentages[i] = total;
     }
 
-    LogAdd(LOG_BLACK, (char*)"[CreateBots] Opening XML file...");
-
-    // Open XML file
-    FILE* xmlFile = NULL;
-    errno_t err = fopen_s(&xmlFile, "IA\\Generated\\IA_Accounts.xml", "w");
-    if (err != 0 || !xmlFile)
-    {
-        LogAdd(LOG_RED, (char*)"[CreateBots] FAILED to open XML file! Error: %d", err);
-        return false;
-    }
-    LogAdd(LOG_GREEN, (char*)"[CreateBots] XML file opened successfully");
-
-    // Write XML header
-    fputs("<?xml version=\"1.0\" encoding=\"utf-8\"?>\n\n", xmlFile);
-    fputs("<MSGThongBao IndexMesMin=\"3020\" IndexMesMax=\"3030\"/>\n\n", xmlFile);
-    fputs("<Config DelayRange=\"40000\" />\n\n", xmlFile);
-    fputs("<FakeOnlineData>\n", xmlFile);
-
-    LogAdd(LOG_GREEN, (char*)"[CreateBots] Starting bot generation...");
-
-    // Process bots
-    int successCount = 0;
-    int failCount = 0;
+    // STEP 1: Prepare all bot data BEFORE database operations
+    LogAdd(LOG_BLUE, (char*)"[CreateBots] Preparing bot data...");
+    std::vector<BotCreationData> botsToCreate;
+    botsToCreate.reserve(botCount);
 
     for (int i = 0; i < botCount; i++)
     {
+        BotCreationData bot;
         int botNumber = startFrom + i;
-        char account[11];
-        char charName[11];
 
-        sprintf_s(account, sizeof(account), "Bot%04d", botNumber);
+        sprintf_s(bot.account, sizeof(bot.account), "Bot%04d", botNumber);
 
         // Select class
         ClassConfig* selectedClassConfig = NULL;
@@ -420,27 +528,98 @@ bool CreateMultipleBotsAdvanced_StoredProc(int botCount, int startFrom, int gate
         {
             LogAdd(LOG_RED, (char*)"[CreateBots] Class %s NOT configured in Config %d!",
                 selectedClassConfig->className, configIndex);
-            fclose(xmlFile);
             return false;
         }
 
         // Generate name
         if (selectedClassConfig->useFemaleNames)
         {
-            sprintf_s(charName, sizeof(charName), "%s%d",
+            sprintf_s(bot.charName, sizeof(bot.charName), "%s%d",
                 g_NameManager.GetRandomFemaleName(), GetLargeRand() % 90 + 10);
         }
         else
         {
-            sprintf_s(charName, sizeof(charName), "%s%d",
+            sprintf_s(bot.charName, sizeof(bot.charName), "%s%d",
                 g_NameManager.GetRandomMaleName(), GetLargeRand() % 90 + 10);
         }
 
-        int level = minLevel + (GetLargeRand() % (maxLevel - minLevel + 1));
-        int finalMapX = mapX + ((i % 20) - 10);
-        int finalMapY = mapY + (((i / 20) % 20) - 10);
+        bot.classCode = selectedClassConfig->classCode;
+        bot.level = minLevel + (GetLargeRand() % (maxLevel - minLevel + 1));
+        bot.mapNumber = mapNumber;
+        bot.mapX = mapX + ((i % 20) - 10);
+        bot.mapY = mapY + (((i / 20) % 20) - 10);
+        bot.str = selectedClassConfig->str;
+        bot.dex = selectedClassConfig->dex;
+        bot.vit = selectedClassConfig->vit;
+        bot.ene = selectedClassConfig->ene;
+        bot.cmd = selectedClassConfig->cmd;
 
-        // Write to XML
+        // Get hex data
+        const char* invHex = g_ClassConfigManager.GetInventoryHex(selectedClassConfig->classCode, configIndex);
+        const char* magicHex = g_ClassConfigManager.GetMagicListHex(selectedClassConfig->classCode, configIndex);
+
+        if (!invHex || !magicHex)
+        {
+            LogAdd(LOG_RED, (char*)"[CreateBots] Failed to get hex data for bot %d", i + 1);
+            return false;
+        }
+
+        bot.invHex = invHex;
+        bot.magicHex = magicHex;
+
+        // Store AI configuration
+        bot.mainSkill = selectedClassConfig->mainSkill;
+        bot.secondarySkill = selectedClassConfig->secondarySkill;
+        bot.buff1 = selectedClassConfig->buff1;
+        bot.buff2 = selectedClassConfig->buff2;
+        bot.buff3 = selectedClassConfig->buff3;
+        bot.gateNumber = gateNumber;
+        bot.phamViTrain = phamViTrain;
+        bot.moveRange = moveRange;
+        bot.timeReturn = timeReturn;
+        bot.tuNhatItem = tuNhatItem;
+        bot.tuDongReset = tuDongReset;
+        bot.partyMode = partyMode;
+        bot.pvpMode = pvpMode;
+        bot.postKhiDie = postKhiDie;
+
+        botsToCreate.push_back(bot);
+    }
+
+    LogAdd(LOG_GREEN, (char*)"[CreateBots] Prepared %d bots for creation", (int)botsToCreate.size());
+
+    // STEP 2: Create bots in database with transaction
+    int successCount = 0;
+    int failCount = 0;
+
+    if (!CreateBotsBatch(botsToCreate, &successCount, &failCount))
+    {
+        LogAdd(LOG_RED, (char*)"[CreateBots] Database creation failed!");
+        return false;
+    }
+
+    // STEP 3: Only write XML after database commit succeeds
+    LogAdd(LOG_BLUE, (char*)"[CreateBots] Writing XML configuration...");
+
+    FILE* xmlFile = NULL;
+    errno_t err = fopen_s(&xmlFile, "IA\\Generated\\IA_Accounts.xml", "w");
+    if (err != 0 || !xmlFile)
+    {
+        LogAdd(LOG_RED, (char*)"[CreateBots] FAILED to open XML file! Error: %d", err);
+        return false;
+    }
+
+    // Write XML header
+    fputs("<?xml version=\"1.0\" encoding=\"utf-8\"?>\n\n", xmlFile);
+    fputs("<MSGThongBao IndexMesMin=\"3020\" IndexMesMax=\"3030\"/>\n\n", xmlFile);
+    fputs("<Config DelayRange=\"40000\" />\n\n", xmlFile);
+    fputs("<FakeOnlineData>\n", xmlFile);
+
+    // Write bot configurations
+    for (size_t i = 0; i < botsToCreate.size(); i++)
+    {
+        const BotCreationData& bot = botsToCreate[i];
+
         fprintf(xmlFile,
             "  <Info Account=\"%s\" Password=\"123456\" Name=\"%s\" "
             "SkillID=\"%d\" SecondarySkillID=\"%d\" "
@@ -449,53 +628,283 @@ bool CreateMultipleBotsAdvanced_StoredProc(int botCount, int startFrom, int gate
             "PhamViTrain=\"%d\" MoveRange=\"%d\" TimeReturn=\"%d\" "
             "TuNhatItem=\"%d\" TuDongReset=\"%d\" "
             "PartyMode=\"%d\" PVPMode=\"%d\" PostKhiDie=\"%d\" />\n",
-            account, charName,
-            selectedClassConfig->mainSkill, selectedClassConfig->secondarySkill,
-            selectedClassConfig->buff1, selectedClassConfig->buff2, selectedClassConfig->buff3,
-            gateNumber, mapNumber, finalMapX, finalMapY,
-            phamViTrain, moveRange, timeReturn,
-            tuNhatItem, tuDongReset,
-            partyMode, pvpMode, postKhiDie
+            bot.account, bot.charName,
+            bot.mainSkill, bot.secondarySkill,
+            bot.buff1, bot.buff2, bot.buff3,
+            bot.gateNumber, bot.mapNumber, bot.mapX, bot.mapY,
+            bot.phamViTrain, bot.moveRange, bot.timeReturn,
+            bot.tuNhatItem, bot.tuDongReset,
+            bot.partyMode, bot.pvpMode, bot.postKhiDie
         );
-
-        // Get hex data
-        const char* invHex = g_ClassConfigManager.GetInventoryHex(selectedClassConfig->classCode, configIndex);
-        const char* magicHex = g_ClassConfigManager.GetMagicListHex(selectedClassConfig->classCode, configIndex);
-
-        if (!invHex || !magicHex)
-        {
-            LogAdd(LOG_RED, (char*)"[CreateBots] Bot %d: Failed to get hex data", i + 1);
-            failCount++;
-            continue;
-        }
-
-        // Call stored procedure to create bot in database
-        if (CallBotStoredProcedure(account, charName, selectedClassConfig->classCode,
-            level, mapNumber, finalMapX, finalMapY,
-            selectedClassConfig->str, selectedClassConfig->dex,
-            selectedClassConfig->vit, selectedClassConfig->ene,
-            selectedClassConfig->cmd, invHex, magicHex))
-        {
-            successCount++;
-            if ((i + 1) % 10 == 0)
-            {
-                LogAdd(LOG_BLUE, (char*)"[CreateBots] Progress: %d/%d", i + 1, botCount);
-            }
-        }
-        else
-        {
-            failCount++;
-            LogAdd(LOG_RED, (char*)"[CreateBots] Bot %d (%s) creation failed", i + 1, account);
-        }
     }
 
-    // Write XML footer
     fputs("</FakeOnlineData>\n", xmlFile);
     fclose(xmlFile);
 
     LogAdd(LOG_GREEN, (char*)"[CreateBots] ===== COMPLETED =====");
     LogAdd(LOG_GREEN, (char*)"[CreateBots] Success: %d, Failed: %d", successCount, failCount);
-    LogAdd(LOG_GREEN, (char*)"[CreateBots] XML file: IA\\Generated\\IA_Accounts.xml");
+    LogAdd(LOG_GREEN, (char*)"[CreateBots] XML: IA\\Generated\\IA_Accounts.xml");
 
     return (successCount > 0);
+
+
+    }
+
+
+
+
+
+
+    // =====================================================
+
+
+    // 6. Clean Bot Accounts Function
+
+
+    // =====================================================
+
+
+    bool CleanBotAccounts()
+
+
+    {
+
+
+        if (!g_OdbcInitialized || g_hOdbcConn == SQL_NULL_HDBC)
+
+
+        {
+
+
+            LogAdd(LOG_RED, (char*)"[CleanBots] Database not connected!");
+
+
+            return false;
+
+
+        }
+
+
+
+
+
+        SQLHSTMT hStmt = SQL_NULL_HSTMT;
+
+
+        SQLRETURN ret;
+
+
+
+
+
+        LogAdd(LOG_BLACK, (char*)"[CleanBots] ===== START CLEANING BOT ACCOUNTS =====");
+
+
+
+
+
+        // Allocate statement handle
+
+
+        ret = SQLAllocHandle(SQL_HANDLE_STMT, g_hOdbcConn, &hStmt);
+
+
+        if (ret != SQL_SUCCESS && ret != SQL_SUCCESS_WITH_INFO)
+
+
+        {
+
+
+            LogAdd(LOG_RED, (char*)"[CleanBots] Failed to allocate statement handle");
+
+
+            return false;
+
+
+        }
+
+
+
+
+
+        // Array of SQL queries to clean bot accounts
+
+
+        const char* queries[] = {
+
+
+            "DELETE FROM MEMB_INFO WHERE memb___id LIKE 'Bot%'",
+
+
+            "DELETE FROM CHARACTER WHERE AccountID LIKE 'Bot%'",
+
+
+            "DELETE FROM MEMB_STAT WHERE memb___id LIKE 'Bot%'",
+
+
+            "DELETE FROM warehouse WHERE AccountID LIKE 'Bot%'",
+
+
+            "DELETE FROM ExtWareHouse WHERE AccountID LIKE 'Bot%'",
+
+
+            "DELETE FROM GuildMember WHERE Name IN (SELECT Name FROM CHARACTER WHERE AccountID LIKE 'Bot%')",
+
+
+            "DELETE FROM AccountCharacter WHERE Id LIKE 'Bot%'",
+
+
+            "DELETE FROM GameServerInfo WHERE AccountID LIKE 'Bot%'",
+
+
+            "DELETE FROM MuCastle_MONEY_STATISTICS WHERE AccountID LIKE 'Bot%'",
+
+
+            "DELETE FROM T_FriendList WHERE GUID IN (SELECT GUID FROM T_FriendMain WHERE Name IN (SELECT Name FROM CHARACTER WHERE AccountID LIKE 'Bot%'))",
+
+
+            "DELETE FROM T_FriendMail WHERE GUID IN (SELECT GUID FROM T_FriendMain WHERE Name IN (SELECT Name FROM CHARACTER WHERE AccountID LIKE 'Bot%'))",
+
+
+            "DELETE FROM T_FriendMain WHERE Name IN (SELECT Name FROM CHARACTER WHERE AccountID LIKE 'Bot%')",
+
+
+            "DELETE FROM T_PetItem_Info WHERE AccountID LIKE 'Bot%'",
+
+
+            "DELETE FROM T_WaitFriend WHERE FriendName IN (SELECT Name FROM CHARACTER WHERE AccountID LIKE 'Bot%')",
+
+
+            "UPDATE MasterSkillTree SET MasterSkill = 0 WHERE Name IN (SELECT Name FROM CHARACTER WHERE AccountID LIKE 'Bot%')",
+
+
+            NULL
+
+
+        };
+
+
+
+
+
+        int successCount = 0;
+
+
+        int failCount = 0;
+
+
+
+
+
+        // Execute each query
+
+
+        for (int i = 0; queries[i] != NULL; i++)
+
+
+        {
+
+
+            LogAdd(LOG_BLUE, (char*)"[CleanBots] Executing query %d...", i + 1);
+
+
+
+
+
+            ret = SQLExecDirect(hStmt, (SQLCHAR*)queries[i], SQL_NTS);
+
+
+
+
+
+            if (ret == SQL_SUCCESS || ret == SQL_SUCCESS_WITH_INFO)
+
+
+            {
+
+
+                SQLLEN rowCount = 0;
+
+
+                SQLRowCount(hStmt, &rowCount);
+
+
+                LogAdd(LOG_GREEN, (char*)"[CleanBots] Query %d succeeded: %d rows affected", i + 1, (int)rowCount);
+
+
+                successCount++;
+
+
+            }
+
+
+            else
+
+
+            {
+
+
+                SQLCHAR sqlState[6], errorMsg[SQL_MAX_MESSAGE_LENGTH];
+
+
+                SQLINTEGER nativeError;
+
+
+                SQLSMALLINT msgLen;
+
+
+                SQLGetDiagRec(SQL_HANDLE_STMT, hStmt, 1, sqlState, &nativeError,
+
+
+                    errorMsg, sizeof(errorMsg), &msgLen);
+
+                LogAdd(LOG_RED, (char*)"[CleanBots] Query %d failed: %s", i + 1, errorMsg);
+
+
+                failCount++;
+
+
+            }
+
+
+            // Close cursor for next query
+
+            SQLCloseCursor(hStmt);
+
+
+        }
+
+        // Free statement handle
+
+
+        SQLFreeHandle(SQL_HANDLE_STMT, hStmt);
+
+        LogAdd(LOG_GREEN, (char*)"[CleanBots] ===== COMPLETED =====");
+
+
+        LogAdd(LOG_GREEN, (char*)"[CleanBots] Success: %d queries, Failed: %d queries", successCount, failCount);
+
+        return (failCount == 0);
+
+}
+// =====================================================
+// Cleanup function
+// =====================================================
+void CleanupBotODBC()
+{
+    if (g_hOdbcConn != SQL_NULL_HDBC)
+    {
+        SQLDisconnect(g_hOdbcConn);
+        SQLFreeHandle(SQL_HANDLE_DBC, g_hOdbcConn);
+        g_hOdbcConn = SQL_NULL_HDBC;
+    }
+
+    if (g_hOdbcEnv != SQL_NULL_HENV)
+    {
+        SQLFreeHandle(SQL_HANDLE_ENV, g_hOdbcEnv);
+        g_hOdbcEnv = SQL_NULL_HENV;
+    }
+
+    g_OdbcInitialized = false;
+    LogAdd(LOG_BLUE, (char*)"[BotODBC] Cleanup completed");
 }

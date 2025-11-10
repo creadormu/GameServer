@@ -1248,6 +1248,7 @@ bool CCommandManager::CommandSetLevel(LPOBJ lpObj,char* arg) // OK
 bool CCommandManager::CommandSetPKLevel(LPOBJ lpObj,char* arg, int Npc) // ok - liam
 {
 	char name[11] = {0};
+	
 
 	this->GetString(arg,name,sizeof(name),0);
 
