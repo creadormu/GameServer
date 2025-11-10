@@ -499,3 +499,90 @@ bool CreateMultipleBotsAdvanced_StoredProc(int botCount, int startFrom, int gate
 
     return (successCount > 0);
 }
+
+// =====================================================
+// 6. Clean Bot Accounts Function
+// =====================================================
+bool CleanBotAccounts()
+{
+    if (!g_OdbcInitialized || g_hOdbcConn == SQL_NULL_HDBC)
+    {
+        LogAdd(LOG_RED, (char*)"[CleanBots] Database not connected!");
+        return false;
+    }
+
+    SQLHSTMT hStmt = SQL_NULL_HSTMT;
+    SQLRETURN ret;
+
+    LogAdd(LOG_BLACK, (char*)"[CleanBots] ===== START CLEANING BOT ACCOUNTS =====");
+
+    // Allocate statement handle
+    ret = SQLAllocHandle(SQL_HANDLE_STMT, g_hOdbcConn, &hStmt);
+    if (ret != SQL_SUCCESS && ret != SQL_SUCCESS_WITH_INFO)
+    {
+        LogAdd(LOG_RED, (char*)"[CleanBots] Failed to allocate statement handle");
+        return false;
+    }
+
+    // Array of SQL queries to clean bot accounts
+    const char* queries[] = {
+        "DELETE FROM MEMB_INFO WHERE memb___id LIKE 'Bot%'",
+        "DELETE FROM CHARACTER WHERE AccountID LIKE 'Bot%'",
+        "DELETE FROM MEMB_STAT WHERE memb___id LIKE 'Bot%'",
+        "DELETE FROM warehouse WHERE AccountID LIKE 'Bot%'",
+        "DELETE FROM ExtWareHouse WHERE AccountID LIKE 'Bot%'",
+        "DELETE FROM GuildMember WHERE Name IN (SELECT Name FROM CHARACTER WHERE AccountID LIKE 'Bot%')",
+        "DELETE FROM AccountCharacter WHERE Id LIKE 'Bot%'",
+        "DELETE FROM GameServerInfo WHERE AccountID LIKE 'Bot%'",
+        "DELETE FROM MuCastle_MONEY_STATISTICS WHERE AccountID LIKE 'Bot%'",
+        "DELETE FROM T_FriendList WHERE GUID IN (SELECT GUID FROM T_FriendMain WHERE Name IN (SELECT Name FROM CHARACTER WHERE AccountID LIKE 'Bot%'))",
+        "DELETE FROM T_FriendMail WHERE GUID IN (SELECT GUID FROM T_FriendMain WHERE Name IN (SELECT Name FROM CHARACTER WHERE AccountID LIKE 'Bot%'))",
+        "DELETE FROM T_FriendMain WHERE Name IN (SELECT Name FROM CHARACTER WHERE AccountID LIKE 'Bot%')",
+        "DELETE FROM T_PetItem_Info WHERE AccountID LIKE 'Bot%'",
+        "DELETE FROM T_WaitFriend WHERE FriendName IN (SELECT Name FROM CHARACTER WHERE AccountID LIKE 'Bot%')",
+        "UPDATE MasterSkillTree SET MasterSkill = 0 WHERE Name IN (SELECT Name FROM CHARACTER WHERE AccountID LIKE 'Bot%')",
+        NULL
+    };
+
+    int successCount = 0;
+    int failCount = 0;
+
+    // Execute each query
+    for (int i = 0; queries[i] != NULL; i++)
+    {
+        LogAdd(LOG_BLUE, (char*)"[CleanBots] Executing query %d...", i + 1);
+
+        ret = SQLExecDirect(hStmt, (SQLCHAR*)queries[i], SQL_NTS);
+
+        if (ret == SQL_SUCCESS || ret == SQL_SUCCESS_WITH_INFO)
+        {
+            SQLLEN rowCount = 0;
+            SQLRowCount(hStmt, &rowCount);
+            LogAdd(LOG_GREEN, (char*)"[CleanBots] Query %d succeeded: %d rows affected", i + 1, (int)rowCount);
+            successCount++;
+        }
+        else
+        {
+            SQLCHAR sqlState[6], errorMsg[SQL_MAX_MESSAGE_LENGTH];
+            SQLINTEGER nativeError;
+            SQLSMALLINT msgLen;
+
+            SQLGetDiagRec(SQL_HANDLE_STMT, hStmt, 1, sqlState, &nativeError,
+                errorMsg, sizeof(errorMsg), &msgLen);
+
+            LogAdd(LOG_RED, (char*)"[CleanBots] Query %d failed: %s", i + 1, errorMsg);
+            failCount++;
+        }
+
+        // Close cursor for next query
+        SQLCloseCursor(hStmt);
+    }
+
+    // Free statement handle
+    SQLFreeHandle(SQL_HANDLE_STMT, hStmt);
+
+    LogAdd(LOG_GREEN, (char*)"[CleanBots] ===== COMPLETED =====");
+    LogAdd(LOG_GREEN, (char*)"[CleanBots] Success: %d queries, Failed: %d queries", successCount, failCount);
+
+    return (failCount == 0);
+}

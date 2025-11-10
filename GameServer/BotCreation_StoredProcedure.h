@@ -37,4 +37,7 @@ bool CreateMultipleBotsAdvanced_StoredProc(int botCount, int startFrom, int gate
     int tuNhatItem, int tuDongReset, int partyMode,
     int pvpMode, int postKhiDie, int enabledConfigs);
 
+// Clean bot accounts from database (accounts starting with "Bot")
+bool CleanBotAccounts();
+
 #endif // BOT_CREATION_STORED_PROCEDURE_H
