@@ -31,6 +31,10 @@ struct OFFEXP_DATA
 	int MoveRange;
 	int MainAttackSkillID;
 	int SecondaryAttackSkillID;
+	
+	// City wandering attributes
+	int BotStayCity;      // 0=disabled, 1=enabled - bot will wander in safe zones
+	int TimeForCity;      // Time in minutes to spend in city before returning to hunting
 
 };
 
@@ -78,7 +82,15 @@ public:
 	void OnAttackAlreadyConnected(LPOBJ lpObj);
 	int NhatItem(int aIndex);
 	void QuayLaiToaDoGoc(int aIndex);
-	void PostChatMSG(LPOBJ lpObj); 
+	void PostChatMSG(LPOBJ lpObj);
+	
+	// City wandering functions
+	void InitializeCityMode(LPOBJ lpObj);
+	void UpdateBotMode(LPOBJ lpObj, OFFEXP_DATA* pBotData);
+	void HandleCityWandering(LPOBJ lpObj, OFFEXP_DATA* pBotData);
+	void SwitchToHuntingMode(LPOBJ lpObj, OFFEXP_DATA* pBotData);
+	void SwitchToCityMode(LPOBJ lpObj, OFFEXP_DATA* pBotData);
+	bool IsBotInCityMode(LPOBJ lpObj); 
 	int	IndexMsgMin; 
 	int	IndexMsgMax; 
 	void SuDungMauMana(int aIndex);

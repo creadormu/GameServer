@@ -1167,6 +1167,13 @@ struct OBJECTSTRUCT
 	int	 IsFakeMoveRange;
 	DWORD	 IsFakeTimeLag;
 	DWORD FakeBotPartyInviteCooldownTick; // Nuevo nombre único
+	
+	// City wandering state tracking
+	bool IsFakeInCityMode;         // true=city mode, false=hunting mode
+	DWORD IsFakeCityModeStartTime; // When current mode started (in milliseconds)
+	int IsFakeCitySpawnX;          // City spawn X coordinate
+	int IsFakeCitySpawnY;          // City spawn Y coordinate
+	int IsFakeCitySpawnMap;        // City spawn map number
 #endif
 
 #endif

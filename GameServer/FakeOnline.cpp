@@ -51,6 +51,7 @@
 #include "Warehouse.h"
 #include "ResetTable.h"
 #include "PhraseManager.h"
+#include "SafeZoneManager.h"
 
 // Function to trim leading and trailing whitespace from a string
 std::string trim(const std::string& str) {
@@ -297,6 +298,9 @@ void CFakeOnline::LoadFakeData(char* path)
             info.TuNhatItem = rInfoData.attribute("TuNhatItem").as_int(0); info.TuDongReset = rInfoData.attribute("TuDongReset").as_int(0);
             info.PartyMode = rInfoData.attribute("PartyMode").as_int(0); info.PostKhiDie = rInfoData.attribute("PostKhiDie").as_int(0);
 			info.Map = rInfoData.attribute("Map").as_int(0);
+			// City wandering attributes
+			info.BotStayCity = rInfoData.attribute("BotStayCity").as_int(0);
+			info.TimeForCity = rInfoData.attribute("TimeForCity").as_int(40);
 			//info.MinLevel = rInfoReset.attribute("MinLevel").as_int();
 			if (strlen(info.Account) > 0) { this->m_Data.insert(std::pair<std::string, OFFEXP_DATA>(info.Account, info));}
         }
@@ -751,7 +755,9 @@ void CFakeOnline::RestoreFakeOnline()
 
 			gObjViewportListCreate(lpObj->Index);
 			gObjViewportListProtocolCreate(lpObj);
-
+			
+			// Initialize city wandering mode if enabled
+			InitializeCityMode(lpObj);
 
 			LogAdd(LOG_RED, "[FakeOnline]  [TK: %s NV: %s][Cls:%d] Online at Map:%d X:%d Y:%d Gate:%d", it->second.Account, it->second.Name, lpObj->Class, lpObj->Map, lpObj->X, lpObj->Y, lpObj->GateNumber);
 		}
@@ -1223,6 +1229,8 @@ void CFakeOnline::Attack(int aIndex)
 	if (lpObj->IsFakeOnline == 0 || !lpObj->IsFakeRegen) { return; }
 	if (lpObj->State == OBJECT_DELCMD || lpObj->DieRegen != 0 || lpObj->Teleport != 0 || lpObj->RegenOk > 0) { return; }
 	if (gServerInfo.InSafeZone(aIndex) == true) { return; }
+	// Don't attack in city mode
+	if (lpObj->IsFakeInCityMode) { return; }
 
     OFFEXP_DATA* pBotData = this->GetOffExpInfo(lpObj);
     if (pBotData != nullptr && pBotData->TuNhatItem == 1) {
@@ -1522,6 +1530,20 @@ void CFakeOnline::QuayLaiToaDoGoc(int aIndex) {
 	OFFEXP_DATA *info = this->GetOffExpInfo(lpObj); 
 	if (info != 0 && lpObj->Socket == INVALID_SOCKET) {
 		if (lpObj->State == OBJECT_DELCMD || lpObj->DieRegen != 0 || lpObj->Teleport != 0) { return; }
+		
+		// Check if bot has city wandering enabled
+		if (info->BotStayCity == 1)
+		{
+			// Update bot mode (city/hunting) and handle wandering
+			UpdateBotMode(lpObj, info);
+			
+			// If in city mode, skip normal hunting movement logic
+			if (lpObj->IsFakeInCityMode)
+			{
+				return;
+			}
+		}
+		
 		int PhamViDiTrain = (int)sqrt(pow(((float)lpObj->X - (float)info->MapX), 2) + pow(((float)lpObj->Y - (float)info->MapY), 2));
 
 			if ((GetTickCount() >= static_cast<DWORD>(lpObj->IsFakeTimeLag) + 30000) &&
@@ -1611,6 +1633,168 @@ void CFakeOnline::QuayLaiToaDoGoc(int aIndex) {
 	}
 }
 
+// ======================================
+// City Wandering Functions
+// ======================================
+
+// Check if bot is currently in city mode
+bool CFakeOnline::IsBotInCityMode(LPOBJ lpObj)
+{
+	if (!lpObj || lpObj->IsFakeOnline == 0) return false;
+	return lpObj->IsFakeInCityMode;
+}
+
+// Initialize city mode for a bot
+void CFakeOnline::InitializeCityMode(LPOBJ lpObj)
+{
+	if (!lpObj || lpObj->IsFakeOnline == 0) return;
+	
+	OFFEXP_DATA* pBotData = this->GetOffExpInfo(lpObj);
+	if (!pBotData || pBotData->BotStayCity == 0) return;
+	
+	// Initialize city mode state
+	lpObj->IsFakeInCityMode = false;
+	lpObj->IsFakeCityModeStartTime = GetTickCount();
+	lpObj->IsFakeCitySpawnX = 0;
+	lpObj->IsFakeCitySpawnY = 0;
+	lpObj->IsFakeCitySpawnMap = -1;
+	
+	// Start in hunting mode first
+	LogAdd(LOG_BLUE, "[CityWander][%s] City wandering initialized - starting in hunting mode", lpObj->Name);
+}
+
+// Switch bot to city mode
+void CFakeOnline::SwitchToCityMode(LPOBJ lpObj, OFFEXP_DATA* pBotData)
+{
+	if (!lpObj || !pBotData) return;
+	
+	// Find a suitable safe zone to teleport to
+	int citySpawnX = 0;
+	int citySpawnY = 0;
+	int cityMap = lpObj->Map;
+	
+	// Try to get a random safe zone location on current map
+	if (GetRandomSafeZoneCoords(cityMap, &citySpawnX, &citySpawnY))
+	{
+		// Teleport bot to safe zone
+		gObjTeleport(lpObj->Index, cityMap, citySpawnX, citySpawnY);
+		
+		lpObj->IsFakeInCityMode = true;
+		lpObj->IsFakeCityModeStartTime = GetTickCount();
+		lpObj->IsFakeCitySpawnX = citySpawnX;
+		lpObj->IsFakeCitySpawnY = citySpawnY;
+		lpObj->IsFakeCitySpawnMap = cityMap;
+		
+		LogAdd(LOG_BLUE, "[CityWander][%s] Switched to CITY mode at map %d (%d,%d) for %d minutes", 
+			lpObj->Name, cityMap, citySpawnX, citySpawnY, pBotData->TimeForCity);
+	}
+	else
+	{
+		// No safe zone found on current map, try Lorencia (map 0)
+		cityMap = 0;
+		if (GetRandomSafeZoneCoords(cityMap, &citySpawnX, &citySpawnY))
+		{
+			gObjTeleport(lpObj->Index, cityMap, citySpawnX, citySpawnY);
+			
+			lpObj->IsFakeInCityMode = true;
+			lpObj->IsFakeCityModeStartTime = GetTickCount();
+			lpObj->IsFakeCitySpawnX = citySpawnX;
+			lpObj->IsFakeCitySpawnY = citySpawnY;
+			lpObj->IsFakeCitySpawnMap = cityMap;
+			
+			LogAdd(LOG_BLUE, "[CityWander][%s] Switched to CITY mode at Lorencia (%d,%d) for %d minutes", 
+				lpObj->Name, citySpawnX, citySpawnY, pBotData->TimeForCity);
+		}
+		else
+		{
+			LogAdd(LOG_RED, "[CityWander][%s] ERROR: Could not find safe zone for city mode!", lpObj->Name);
+		}
+	}
+}
+
+// Switch bot back to hunting mode
+void CFakeOnline::SwitchToHuntingMode(LPOBJ lpObj, OFFEXP_DATA* pBotData)
+{
+	if (!lpObj || !pBotData) return;
+	
+	lpObj->IsFakeInCityMode = false;
+	lpObj->IsFakeCityModeStartTime = GetTickCount();
+	
+	// Teleport bot back to hunting gate
+	gObjMoveGate(lpObj->Index, pBotData->GateNumber);
+	
+	LogAdd(LOG_BLUE, "[CityWander][%s] Switched to HUNTING mode at gate %d for %d minutes", 
+		lpObj->Name, pBotData->GateNumber, pBotData->TimeReturn);
+}
+
+// Handle city wandering movement
+void CFakeOnline::HandleCityWandering(LPOBJ lpObj, OFFEXP_DATA* pBotData)
+{
+	if (!lpObj || !pBotData) return;
+	
+	// Check if bot is still in safe zone
+	if (!IsInSafeZoneArea(lpObj->Map, lpObj->X, lpObj->Y))
+	{
+		// Bot left safe zone somehow, move back to city spawn
+		if (lpObj->IsFakeCitySpawnX > 0 && lpObj->IsFakeCitySpawnY > 0)
+		{
+			FakeAnimationMove(lpObj->Index, lpObj->IsFakeCitySpawnX, lpObj->IsFakeCitySpawnY, false);
+			LogAdd(LOG_BLUE, "[CityWander][%s] Returning to city center (%d,%d)", 
+				lpObj->Name, lpObj->IsFakeCitySpawnX, lpObj->IsFakeCitySpawnY);
+		}
+		return;
+	}
+	
+	// Wander around in the safe zone
+	if (GetTickCount() >= lpObj->m_OfflineMoveDelay + 3000) // Move every 3 seconds
+	{
+		int wanderRadius = (pBotData->MoveRange > 0) ? pBotData->MoveRange : 30;
+		
+		// Use SafeZoneManager's wandering function
+		if (MoveBotToRandomNearbyPoint(lpObj->Index, wanderRadius))
+		{
+			lpObj->m_OfflineMoveDelay = GetTickCount();
+			LogAdd(LOG_BLUE, "[CityWander][%s] Wandering in city to (%d,%d)", 
+				lpObj->Name, lpObj->TX, lpObj->TY);
+		}
+	}
+}
+
+// Update bot mode based on time
+void CFakeOnline::UpdateBotMode(LPOBJ lpObj, OFFEXP_DATA* pBotData)
+{
+	if (!lpObj || !pBotData || pBotData->BotStayCity == 0) return;
+	
+	DWORD currentTime = GetTickCount();
+	DWORD timeSinceSwitch = currentTime - lpObj->IsFakeCityModeStartTime;
+	
+	if (lpObj->IsFakeInCityMode)
+	{
+		// In city mode - check if it's time to go hunting
+		DWORD cityTimeLimit = pBotData->TimeForCity * 60 * 1000; // Convert minutes to milliseconds
+		
+		if (timeSinceSwitch >= cityTimeLimit)
+		{
+			SwitchToHuntingMode(lpObj, pBotData);
+		}
+		else
+		{
+			// Continue wandering in city
+			HandleCityWandering(lpObj, pBotData);
+		}
+	}
+	else
+	{
+		// In hunting mode - check if it's time to go to city
+		DWORD huntingTimeLimit = pBotData->TimeReturn * 60 * 1000; // Convert minutes to milliseconds
+		
+		if (timeSinceSwitch >= huntingTimeLimit)
+		{
+			SwitchToCityMode(lpObj, pBotData);
+		}
+	}
+}
+
 void CFakeOnline::SuDungMauMana(int aIndex)
 {
 	if (!gObjIsConnectedGP(aIndex)) { return; }
@@ -1650,7 +1834,9 @@ void CFakeOnline::TuDongBuffSkill(int aIndex)
 	LPOBJ lpObj = &gObj[aIndex];
 	LPOBJ lpTarget;
 
+	// Don't use buffs in safe zone or city mode
 	if (gServerInfo.InSafeZone(aIndex) == true) { return; }
+	if (lpObj->IsFakeOnline && lpObj->IsFakeInCityMode) { return; }
 
 	if (lpObj->BuffOn != 0) { 
 		CSkill* RenderBuff;
@@ -1850,6 +2036,10 @@ void CFakeOnline::TuDongDanhSkill(int aIndex)
 {
 	if (!gObjIsConnectedGP(aIndex)) { return; }
 	LPOBJ lpObj = &gObj[aIndex];
+	
+	// Don't use combat skills in safe zone or city mode
+	if (gServerInfo.InSafeZone(aIndex) == true) { return; }
+	if (lpObj->IsFakeOnline && lpObj->IsFakeInCityMode) { return; }
 	
     EnterCriticalSection(&this->m_BotDataMutex); 
 
