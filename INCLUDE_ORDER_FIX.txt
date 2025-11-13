@@ -1,0 +1,75 @@
+================================================================================
+  CRITICAL FIX - INCLUDE ORDER PROBLEM!
+================================================================================
+
+PROBLEM FOUND:
+==============
+The Unicode headers were included BEFORE the SQL headers in stdafx.h!
+
+This is the WRONG order:
+------------------------
+#include "UnicodeSupport.h"   // ← Uses SQLWCHAR (not defined yet!)
+#include "UnicodeODBC.h"       // ← Uses SQLWCHAR (not defined yet!)
+#include "UnicodeFileIO.h"
+#include <sql.h>               // ← SQLWCHAR defined here!
+#include <sqlext.h>
+
+This is the CORRECT order:
+--------------------------
+#include <sql.h>               // ← Define SQLWCHAR first!
+#include <sqlext.h>
+#include "pugixml.hpp"
+#include "UnicodeSupport.h"   // ← Now SQLWCHAR is available!
+#include "UnicodeODBC.h"       // ← Now SQLWCHAR is available!
+#include "UnicodeFileIO.h"
+
+WHY THIS MATTERS:
+=================
+The Unicode headers use the SQLWCHAR type in their function declarations.
+If SQLWCHAR is not defined yet (from sql.h), the compiler gives errors!
+
+FIXED NOW:
+==========
+I've corrected the order in your stdafx.h.
+
+The correct section should look like this (around line 145-155):
+
+#include <dbghelp.h>
+#include <Psapi.h>
+#include <sql.h>               // ← SQL headers FIRST
+#include <sqlext.h>
+#include "pugixml.hpp"
+#include "UnicodeSupport.h"   // ← Unicode headers AFTER
+#include "UnicodeODBC.h"
+#include "UnicodeFileIO.h"
+
+#pragma comment(lib,"ws2_32.lib")
+#pragma comment(lib,"Rpcrt4.lib")
+#pragma comment(lib,"dbghelp.lib")
+#pragma comment(lib,"odbc32.lib")
+#pragma comment(lib,"odbccp32.lib")
+#pragma comment(lib,"Psapi.lib")
+
+NOW TRY AGAIN:
+==============
+
+1. Visual Studio → Build → Clean Solution
+2. Build → Rebuild Solution (Ctrl+Shift+B)
+3. Should compile successfully! ✅
+
+RULE OF THUMB:
+==============
+Always include system/library headers BEFORE your custom headers:
+
+✅ CORRECT ORDER:
+1. Windows headers (<windows.h>, <winsock2.h>, etc.)
+2. Standard C++ headers (<string>, <vector>, etc.)
+3. External library headers (<sql.h>, <sqlext.h>, etc.)
+4. Third-party headers ("pugixml.hpp")
+5. Your custom headers ("UnicodeSupport.h", etc.)
+
+❌ WRONG ORDER:
+- Putting your custom headers before the libraries they depend on
+
+THIS SHOULD FIX ALL SQLWCHAR ERRORS!
+================================================================================

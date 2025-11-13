@@ -147,6 +147,9 @@ extern int Conectar;
 #include <sql.h>
 #include <sqlext.h>
 #include "pugixml.hpp"
+#include "UnicodeSupport.h"
+#include "UnicodeODBC.h"
+#include "UnicodeFileIO.h"
 
 #pragma comment(lib,"ws2_32.lib")
 #pragma comment(lib,"Rpcrt4.lib")
