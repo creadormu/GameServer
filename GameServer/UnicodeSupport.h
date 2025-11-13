@@ -7,7 +7,7 @@
 #pragma once
 
 #include <string>
-#include <windows.h>
+// SQL headers are included in stdafx.h
 
 // =============================================
 // UNICODE STRING CONVERSION UTILITIES

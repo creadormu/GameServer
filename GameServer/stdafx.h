@@ -144,12 +144,16 @@ extern int Conectar;
 #include <atltime.h>
 #include <dbghelp.h>
 #include <Psapi.h>
+#include <sql.h>
+#include <sqlext.h>
 #include "pugixml.hpp"
 
 #pragma comment(lib,"ws2_32.lib")
 #pragma comment(lib,"Rpcrt4.lib")
 #pragma comment(lib,"dbghelp.lib")
 #pragma comment(lib,"Psapi.lib")
+#pragma comment(lib,"odbc32.lib")
+#pragma comment(lib,"odbccp32.lib")
 
 #if(GAMESERVER_UPDATE>=701)
 #if(NDEBUG==0)

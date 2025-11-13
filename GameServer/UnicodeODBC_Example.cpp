@@ -6,8 +6,10 @@
 #include "stdafx.h"
 #include "UnicodeSupport.h"
 #include "UnicodeODBC.h"
-#include <sql.h>
-#include <sqlext.h>
+
+// SQL headers are included in stdafx.h
+// These are EXAMPLE functions - you need to declare g_hOdbcConn in your actual code
+extern SQLHDBC g_hOdbcConn; // Your global database connection handle
 
 // =============================================
 // EXAMPLE 1: Character Creation with Unicode

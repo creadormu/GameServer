@@ -6,10 +6,9 @@
 
 #pragma once
 
-#include <sql.h>
-#include <sqlext.h>
 #include <string>
 #include "UnicodeSupport.h"
+// SQL headers are included in stdafx.h
 
 // =============================================
 // UNICODE ODBC CONNECTION CLASS

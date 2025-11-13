@@ -2,6 +2,10 @@
 // ChatUnicode_Example.cpp
 // Example implementation of Unicode-aware chat system
 // Shows how to integrate Unicode support into existing chat code
+//
+// NOTE: This is EXAMPLE CODE for reference only!
+// Do NOT add this file to your project compilation yet.
+// Use these examples as a guide when updating your actual chat code.
 // =============================================
 
 #include "stdafx.h"
@@ -9,6 +13,15 @@
 #include "Protocol.h"
 #include "UnicodeSupport.h"
 #include "Message.h"
+
+// Forward declarations for example purposes
+void GCSendChatMessage(LPOBJ lpObj, const char* message);
+void GCSendServerMessage(int aIndex, const char* message);
+void GCSendWhisper(LPOBJ lpSender, LPOBJ lpTarget, const char* message);
+void GCNoticeSend(int aIndex, int type, const char* message);
+
+// External variables that should exist in your actual code
+extern SQLHDBC g_hOdbcConn;
 
 // =============================================
 // EXAMPLE 1: Enhanced Chat Receive Handler

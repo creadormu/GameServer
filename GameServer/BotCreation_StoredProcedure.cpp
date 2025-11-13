@@ -8,14 +8,11 @@
 #include "User.h"
 #include "ClassConfig.h"
 #include "NameManager.h"
-#include <sql.h>
-#include <sqlext.h>
 #include <vector>
 #include <string>
 #include <map>
 
-#pragma comment(lib, "odbc32.lib")
-#pragma comment(lib, "odbccp32.lib")
+// SQL headers and libs now in stdafx.h
 
 // =============================================
 // GLOBAL ODBC HANDLES
