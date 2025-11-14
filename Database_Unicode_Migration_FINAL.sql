@@ -637,18 +637,28 @@ WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF,
       ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
 PRINT '  Recreated PK_GuildMember'
 
--- CustomNpcQuest and CustomQuest primary keys
-ALTER TABLE [dbo].[CustomNpcQuest] 
-ADD CONSTRAINT [PK_CustomNpcQuest] PRIMARY KEY CLUSTERED ([Name] ASC, [QuestIndex] ASC)
-WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, 
-      ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
-PRINT '  Recreated PK_CustomNpcQuest'
+-- CustomNpcQuest and CustomQuest primary keys (with error handling)
+BEGIN TRY
+    ALTER TABLE [dbo].[CustomNpcQuest] 
+    ADD CONSTRAINT [PK_CustomNpcQuest] PRIMARY KEY CLUSTERED ([Name] ASC, [QuestIndex] ASC)
+    WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, 
+          ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+    PRINT '  Recreated PK_CustomNpcQuest'
+END TRY
+BEGIN CATCH
+    PRINT '  Could not recreate PK_CustomNpcQuest: ' + ERROR_MESSAGE()
+END CATCH
 
-ALTER TABLE [dbo].[CustomQuest] 
-ADD CONSTRAINT [PK_CustomQuest] PRIMARY KEY CLUSTERED ([Name] ASC, [QuestIndex] ASC)
-WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, 
-      ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
-PRINT '  Recreated PK_CustomQuest'
+BEGIN TRY
+    ALTER TABLE [dbo].[CustomQuest] 
+    ADD CONSTRAINT [PK_CustomQuest] PRIMARY KEY CLUSTERED ([Name] ASC, [QuestIndex] ASC)
+    WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, 
+          ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+    PRINT '  Recreated PK_CustomQuest'
+END TRY
+BEGIN CATCH
+    PRINT '  Could not recreate PK_CustomQuest: ' + ERROR_MESSAGE()
+END CATCH
 
 -- Other game table primary keys (recreate with proper key structure)
 -- Note: Add these back with their original key definitions from your schema
@@ -656,9 +666,14 @@ PRINT '  Recreated PK_CustomQuest'
 
 IF OBJECT_ID('CustomAttack', 'U') IS NOT NULL
 BEGIN
-    ALTER TABLE [dbo].[CustomAttack] 
-    ADD CONSTRAINT [PK_CustomAttack] PRIMARY KEY CLUSTERED ([Name] ASC, [SkillIndex] ASC)
-    PRINT '  Recreated PK_CustomAttack'
+    BEGIN TRY
+        ALTER TABLE [dbo].[CustomAttack] 
+        ADD CONSTRAINT [PK_CustomAttack] PRIMARY KEY CLUSTERED ([Name] ASC, [SkillIndex] ASC)
+        PRINT '  Recreated PK_CustomAttack'
+    END TRY
+    BEGIN CATCH
+        PRINT '  Could not recreate PK_CustomAttack: ' + ERROR_MESSAGE()
+    END CATCH
 END
 
 IF OBJECT_ID('CustomGift', 'U') IS NOT NULL
@@ -691,9 +706,14 @@ END
 
 IF OBJECT_ID('QuestSystem', 'U') IS NOT NULL
 BEGIN
-    ALTER TABLE [dbo].[QuestSystem] 
-    ADD CONSTRAINT [PK_QuestSystem] PRIMARY KEY CLUSTERED ([AccountID] ASC, [Name] ASC, [QuestIndex] ASC)
-    PRINT '  Recreated PK_QuestSystem'
+    BEGIN TRY
+        ALTER TABLE [dbo].[QuestSystem] 
+        ADD CONSTRAINT [PK_QuestSystem] PRIMARY KEY CLUSTERED ([AccountID] ASC, [Name] ASC, [QuestIndex] ASC)
+        PRINT '  Recreated PK_QuestSystem'
+    END TRY
+    BEGIN CATCH
+        PRINT '  Could not recreate PK_QuestSystem: ' + ERROR_MESSAGE()
+    END CATCH
 END
 
 -- Recreate CashShopData PK with its original name (PK_TempCashShop)
@@ -772,9 +792,14 @@ END
 
 IF OBJECT_ID('MuunInventory', 'U') IS NOT NULL
 BEGIN
-    ALTER TABLE [dbo].[MuunInventory] 
-    ADD CONSTRAINT [PK_MuunInventory] PRIMARY KEY CLUSTERED ([Name] ASC, [MuunIndex] ASC)
-    PRINT '  Recreated PK_MuunInventory'
+    BEGIN TRY
+        ALTER TABLE [dbo].[MuunInventory] 
+        ADD CONSTRAINT [PK_MuunInventory] PRIMARY KEY CLUSTERED ([Name] ASC, [MuunIndex] ASC)
+        PRINT '  Recreated PK_MuunInventory'
+    END TRY
+    BEGIN CATCH
+        PRINT '  Could not recreate PK_MuunInventory: ' + ERROR_MESSAGE()
+    END CATCH
 END
 
 IF OBJECT_ID('OptionData', 'U') IS NOT NULL
@@ -786,16 +811,26 @@ END
 
 IF OBJECT_ID('QuestKillCount', 'U') IS NOT NULL
 BEGIN
-    ALTER TABLE [dbo].[QuestKillCount] 
-    ADD CONSTRAINT [PK_QuestKillCount] PRIMARY KEY CLUSTERED ([Name] ASC, [QuestIndex] ASC)
-    PRINT '  Recreated PK_QuestKillCount'
+    BEGIN TRY
+        ALTER TABLE [dbo].[QuestKillCount] 
+        ADD CONSTRAINT [PK_QuestKillCount] PRIMARY KEY CLUSTERED ([Name] ASC, [QuestIndex] ASC)
+        PRINT '  Recreated PK_QuestKillCount'
+    END TRY
+    BEGIN CATCH
+        PRINT '  Could not recreate PK_QuestKillCount: ' + ERROR_MESSAGE()
+    END CATCH
 END
 
 IF OBJECT_ID('QuestWorld', 'U') IS NOT NULL
 BEGIN
-    ALTER TABLE [dbo].[QuestWorld] 
-    ADD CONSTRAINT [PK_QuestWorld] PRIMARY KEY CLUSTERED ([Name] ASC)
-    PRINT '  Recreated PK_QuestWorld'
+    BEGIN TRY
+        ALTER TABLE [dbo].[QuestWorld] 
+        ADD CONSTRAINT [PK_QuestWorld] PRIMARY KEY CLUSTERED ([Name] ASC)
+        PRINT '  Recreated PK_QuestWorld'
+    END TRY
+    BEGIN CATCH
+        PRINT '  Could not recreate PK_QuestWorld: ' + ERROR_MESSAGE()
+    END CATCH
 END
 
 IF OBJECT_ID('warehouse', 'U') IS NOT NULL
