@@ -157,17 +157,8 @@ BEGIN
     PRINT '  Dropped PK_CashShopInventory'
 END
 
--- TempCashShop - try both index and constraint approaches
-BEGIN TRY
-    IF EXISTS (SELECT * FROM sys.key_constraints WHERE name = 'PK_TempCashShop')
-    BEGIN
-        ALTER TABLE [dbo].[TempCashShop] DROP CONSTRAINT [PK_TempCashShop]
-        PRINT '  Dropped PK_TempCashShop'
-    END
-END TRY
-BEGIN CATCH
-    PRINT '  PK_TempCashShop not found or already dropped'
-END CATCH
+-- Note: PK_TempCashShop is actually on CashShopData table (named incorrectly)
+-- It will be dropped with PK_CashShopData above, so no need to drop it separately
 
 IF EXISTS (SELECT * FROM sys.indexes WHERE name = 'PK_MuCastle_DATA' AND object_id = OBJECT_ID('MuCastle_DATA'))
 BEGIN
@@ -561,7 +552,13 @@ ALTER TABLE [dbo].[CashShopInventory] ALTER COLUMN [AccountID] NVARCHAR(10) NULL
 ALTER TABLE [dbo].[CashShopInventory] ALTER COLUMN [GiftName] NVARCHAR(10) NULL
 ALTER TABLE [dbo].[CashShopInventory] ALTER COLUMN [GiftText] NVARCHAR(200) NULL
 ALTER TABLE [dbo].[CashLog] ALTER COLUMN [UserID] NVARCHAR(16) NULL
-ALTER TABLE [dbo].[TempCashShop] ALTER COLUMN [AccountID] NVARCHAR(10) NOT NULL
+
+-- TempCashShop table doesn't exist in this database, skip it
+IF EXISTS (SELECT * FROM sys.tables WHERE name = 'TempCashShop')
+BEGIN
+    ALTER TABLE [dbo].[TempCashShop] ALTER COLUMN [AccountID] NVARCHAR(10) NOT NULL
+    PRINT '  TempCashShop converted'
+END
 
 PRINT '  Cash shop tables converted'
 PRINT ''
@@ -686,12 +683,8 @@ BEGIN
     PRINT '  Recreated PK_CashShopInventory'
 END
 
-IF OBJECT_ID('TempCashShop', 'U') IS NOT NULL
-BEGIN
-    ALTER TABLE [dbo].[TempCashShop] 
-    ADD CONSTRAINT [PK_TempCashShop] PRIMARY KEY CLUSTERED ([AccountID] ASC)
-    PRINT '  Recreated PK_TempCashShop'
-END
+-- TempCashShop table doesn't exist, skip recreating its PK
+-- Note: PK_TempCashShop was actually on CashShopData (naming issue in original schema)
 
 IF OBJECT_ID('MuCastle_DATA', 'U') IS NOT NULL
 BEGIN
