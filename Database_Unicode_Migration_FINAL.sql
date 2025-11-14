@@ -347,17 +347,17 @@ IF EXISTS (SELECT * FROM sys.indexes WHERE name = 'PK_AccountCharacter4')
 IF EXISTS (SELECT * FROM sys.indexes WHERE name = 'PK_AccountCharacter5')
     ALTER TABLE [dbo].[AccountCharacter5] DROP CONSTRAINT [PK_AccountCharacter5]
 
--- Drop non-PK indexes that block column alterations
-IF EXISTS (SELECT * FROM sys.indexes WHERE name = 'IX_ATTACK_GUILD_SUBKEY' AND object_id = OBJECT_ID('MuCastle_REG_SIEGE'))
+-- Drop UNIQUE KEY constraints (not indexes!) that block column alterations
+IF EXISTS (SELECT * FROM sys.key_constraints WHERE name = 'IX_ATTACK_GUILD_SUBKEY' AND object_id = OBJECT_ID('MuCastle_REG_SIEGE'))
 BEGIN
-    DROP INDEX [IX_ATTACK_GUILD_SUBKEY] ON [dbo].[MuCastle_REG_SIEGE]
-    PRINT '  Dropped IX_ATTACK_GUILD_SUBKEY index'
+    ALTER TABLE [dbo].[MuCastle_REG_SIEGE] DROP CONSTRAINT [IX_ATTACK_GUILD_SUBKEY]
+    PRINT '  Dropped IX_ATTACK_GUILD_SUBKEY unique constraint'
 END
 
-IF EXISTS (SELECT * FROM sys.indexes WHERE name = 'IX_GUILD_NAME_SUBKEY' AND object_id = OBJECT_ID('MuCastle_SIEGE_GUILDLIST'))
+IF EXISTS (SELECT * FROM sys.key_constraints WHERE name = 'IX_GUILD_NAME_SUBKEY' AND object_id = OBJECT_ID('MuCastle_SIEGE_GUILDLIST'))
 BEGIN
-    DROP INDEX [IX_GUILD_NAME_SUBKEY] ON [dbo].[MuCastle_SIEGE_GUILDLIST]
-    PRINT '  Dropped IX_GUILD_NAME_SUBKEY index'
+    ALTER TABLE [dbo].[MuCastle_SIEGE_GUILDLIST] DROP CONSTRAINT [IX_GUILD_NAME_SUBKEY]
+    PRINT '  Dropped IX_GUILD_NAME_SUBKEY unique constraint'
 END
 
 PRINT ''
@@ -905,19 +905,19 @@ ADD CONSTRAINT [PK_AccountCharacter4] PRIMARY KEY NONCLUSTERED ([Id] ASC)
 ALTER TABLE [dbo].[AccountCharacter5] 
 ADD CONSTRAINT [PK_AccountCharacter5] PRIMARY KEY NONCLUSTERED ([Id] ASC)
 
--- Recreate non-PK indexes
+-- Recreate UNIQUE KEY constraints (not just indexes!)
 IF OBJECT_ID('MuCastle_REG_SIEGE', 'U') IS NOT NULL
 BEGIN
-    CREATE NONCLUSTERED INDEX [IX_ATTACK_GUILD_SUBKEY] 
-    ON [dbo].[MuCastle_REG_SIEGE] ([REG_SIEGE_GUILD] ASC)
-    PRINT '  Recreated IX_ATTACK_GUILD_SUBKEY index'
+    ALTER TABLE [dbo].[MuCastle_REG_SIEGE]
+    ADD CONSTRAINT [IX_ATTACK_GUILD_SUBKEY] UNIQUE NONCLUSTERED ([REG_SIEGE_GUILD] ASC)
+    PRINT '  Recreated IX_ATTACK_GUILD_SUBKEY unique constraint'
 END
 
 IF OBJECT_ID('MuCastle_SIEGE_GUILDLIST', 'U') IS NOT NULL
 BEGIN
-    CREATE NONCLUSTERED INDEX [IX_GUILD_NAME_SUBKEY] 
-    ON [dbo].[MuCastle_SIEGE_GUILDLIST] ([GUILD_NAME] ASC)
-    PRINT '  Recreated IX_GUILD_NAME_SUBKEY index'
+    ALTER TABLE [dbo].[MuCastle_SIEGE_GUILDLIST]
+    ADD CONSTRAINT [IX_GUILD_NAME_SUBKEY] UNIQUE NONCLUSTERED ([GUILD_NAME] ASC)
+    PRINT '  Recreated IX_GUILD_NAME_SUBKEY unique constraint'
 END
 
 PRINT ''
