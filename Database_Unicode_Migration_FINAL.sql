@@ -157,6 +157,12 @@ BEGIN
     PRINT '  Dropped PK_CashShopInventory'
 END
 
+IF EXISTS (SELECT * FROM sys.indexes WHERE name = 'PK_TempCashShop' AND object_id = OBJECT_ID('TempCashShop'))
+BEGIN
+    ALTER TABLE [dbo].[TempCashShop] DROP CONSTRAINT [PK_TempCashShop]
+    PRINT '  Dropped PK_TempCashShop'
+END
+
 IF EXISTS (SELECT * FROM sys.indexes WHERE name = 'PK_MuCastle_DATA' AND object_id = OBJECT_ID('MuCastle_DATA'))
 BEGIN
     ALTER TABLE [dbo].[MuCastle_DATA] DROP CONSTRAINT [PK_MuCastle_DATA]
@@ -536,6 +542,7 @@ ALTER TABLE [dbo].[CashShopInventory] ALTER COLUMN [AccountID] NVARCHAR(10) NULL
 ALTER TABLE [dbo].[CashShopInventory] ALTER COLUMN [GiftName] NVARCHAR(10) NULL
 ALTER TABLE [dbo].[CashShopInventory] ALTER COLUMN [GiftText] NVARCHAR(200) NULL
 ALTER TABLE [dbo].[CashLog] ALTER COLUMN [UserID] NVARCHAR(16) NULL
+ALTER TABLE [dbo].[TempCashShop] ALTER COLUMN [AccountID] NVARCHAR(10) NOT NULL
 
 PRINT '  Cash shop tables converted'
 PRINT ''
@@ -658,6 +665,13 @@ BEGIN
     ALTER TABLE [dbo].[CashShopInventory] 
     ADD CONSTRAINT [PK_CashShopInventory] PRIMARY KEY CLUSTERED ([InventoryID] ASC)
     PRINT '  Recreated PK_CashShopInventory'
+END
+
+IF OBJECT_ID('TempCashShop', 'U') IS NOT NULL
+BEGIN
+    ALTER TABLE [dbo].[TempCashShop] 
+    ADD CONSTRAINT [PK_TempCashShop] PRIMARY KEY CLUSTERED ([AccountID] ASC)
+    PRINT '  Recreated PK_TempCashShop'
 END
 
 IF OBJECT_ID('MuCastle_DATA', 'U') IS NOT NULL
