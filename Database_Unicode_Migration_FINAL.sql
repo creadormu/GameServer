@@ -650,32 +650,53 @@ PRINT '  Skipped PK_CustomQuest (data already converted)'
 IF OBJECT_ID('CustomAttack', 'U') IS NOT NULL
     PRINT '  Skipped PK_CustomAttack (data already converted)'
 
+-- Wrap all remaining PKs in TRY/CATCH for safety
 IF OBJECT_ID('CustomGift', 'U') IS NOT NULL
 BEGIN
-    ALTER TABLE [dbo].[CustomGift] 
-    ADD CONSTRAINT [PK_CustomGift] PRIMARY KEY CLUSTERED ([AccountID] ASC, [Name] ASC)
-    PRINT '  Recreated PK_CustomGift'
+    BEGIN TRY
+        ALTER TABLE [dbo].[CustomGift] 
+        ADD CONSTRAINT [PK_CustomGift] PRIMARY KEY CLUSTERED ([AccountID] ASC, [Name] ASC)
+        PRINT '  Recreated PK_CustomGift'
+    END TRY
+    BEGIN CATCH
+        PRINT '  Skipped PK_CustomGift (schema mismatch): ' + ERROR_MESSAGE()
+    END CATCH
 END
 
 IF OBJECT_ID('ExtWarehouse', 'U') IS NOT NULL
 BEGIN
-    ALTER TABLE [dbo].[ExtWarehouse] 
-    ADD CONSTRAINT [PK_ExtWarehouse] PRIMARY KEY CLUSTERED ([AccountID] ASC)
-    PRINT '  Recreated PK_ExtWarehouse'
+    BEGIN TRY
+        ALTER TABLE [dbo].[ExtWarehouse] 
+        ADD CONSTRAINT [PK_ExtWarehouse] PRIMARY KEY CLUSTERED ([AccountID] ASC)
+        PRINT '  Recreated PK_ExtWarehouse'
+    END TRY
+    BEGIN CATCH
+        PRINT '  Skipped PK_ExtWarehouse (schema mismatch): ' + ERROR_MESSAGE()
+    END CATCH
 END
 
 IF OBJECT_ID('LuckyCoin', 'U') IS NOT NULL
 BEGIN
-    ALTER TABLE [dbo].[LuckyCoin] 
-    ADD CONSTRAINT [PK_LuckyCoin] PRIMARY KEY CLUSTERED ([AccountID] ASC)
-    PRINT '  Recreated PK_LuckyCoin'
+    BEGIN TRY
+        ALTER TABLE [dbo].[LuckyCoin] 
+        ADD CONSTRAINT [PK_LuckyCoin] PRIMARY KEY CLUSTERED ([AccountID] ASC)
+        PRINT '  Recreated PK_LuckyCoin'
+    END TRY
+    BEGIN CATCH
+        PRINT '  Skipped PK_LuckyCoin (schema mismatch): ' + ERROR_MESSAGE()
+    END CATCH
 END
 
 IF OBJECT_ID('Marry', 'U') IS NOT NULL
 BEGIN
-    ALTER TABLE [dbo].[Marry] 
-    ADD CONSTRAINT [PK_Marry] PRIMARY KEY CLUSTERED ([Character] ASC)
-    PRINT '  Recreated PK_Marry'
+    BEGIN TRY
+        ALTER TABLE [dbo].[Marry] 
+        ADD CONSTRAINT [PK_Marry] PRIMARY KEY CLUSTERED ([Character] ASC)
+        PRINT '  Recreated PK_Marry'
+    END TRY
+    BEGIN CATCH
+        PRINT '  Skipped PK_Marry (schema mismatch): ' + ERROR_MESSAGE()
+    END CATCH
 END
 
 -- QuestSystem PK - SKIPPED (data already converted)
@@ -685,16 +706,26 @@ IF OBJECT_ID('QuestSystem', 'U') IS NOT NULL
 -- Recreate CashShopData PK with its original name (PK_TempCashShop)
 IF OBJECT_ID('CashShopData', 'U') IS NOT NULL
 BEGIN
-    ALTER TABLE [dbo].[CashShopData] 
-    ADD CONSTRAINT [PK_TempCashShop] PRIMARY KEY CLUSTERED ([AccountID] ASC)
-    PRINT '  Recreated PK_TempCashShop on CashShopData'
+    BEGIN TRY
+        ALTER TABLE [dbo].[CashShopData] 
+        ADD CONSTRAINT [PK_TempCashShop] PRIMARY KEY CLUSTERED ([AccountID] ASC)
+        PRINT '  Recreated PK_TempCashShop on CashShopData'
+    END TRY
+    BEGIN CATCH
+        PRINT '  Skipped PK_TempCashShop (schema mismatch): ' + ERROR_MESSAGE()
+    END CATCH
 END
 
 IF OBJECT_ID('CashShopInventory', 'U') IS NOT NULL
 BEGIN
-    ALTER TABLE [dbo].[CashShopInventory] 
-    ADD CONSTRAINT [PK_CashShopInventory] PRIMARY KEY CLUSTERED ([InventoryID] ASC)
-    PRINT '  Recreated PK_CashShopInventory'
+    BEGIN TRY
+        ALTER TABLE [dbo].[CashShopInventory] 
+        ADD CONSTRAINT [PK_CashShopInventory] PRIMARY KEY CLUSTERED ([InventoryID] ASC)
+        PRINT '  Recreated PK_CashShopInventory'
+    END TRY
+    BEGIN CATCH
+        PRINT '  Skipped PK_CashShopInventory (schema mismatch): ' + ERROR_MESSAGE()
+    END CATCH
 END
 
 -- TempCashShop table doesn't exist, skip recreating its PK
@@ -702,58 +733,98 @@ END
 
 IF OBJECT_ID('MuCastle_DATA', 'U') IS NOT NULL
 BEGIN
-    ALTER TABLE [dbo].[MuCastle_DATA] 
-    ADD CONSTRAINT [PK_MuCastle_DATA] PRIMARY KEY CLUSTERED ([MAP_SVR_GROUP] ASC)
-    PRINT '  Recreated PK_MuCastle_DATA'
+    BEGIN TRY
+        ALTER TABLE [dbo].[MuCastle_DATA] 
+        ADD CONSTRAINT [PK_MuCastle_DATA] PRIMARY KEY CLUSTERED ([MAP_SVR_GROUP] ASC)
+        PRINT '  Recreated PK_MuCastle_DATA'
+    END TRY
+    BEGIN CATCH
+        PRINT '  Skipped PK_MuCastle_DATA: ' + ERROR_MESSAGE()
+    END CATCH
 END
 
 IF OBJECT_ID('MuCastle_REG_SIEGE', 'U') IS NOT NULL
 BEGIN
-    ALTER TABLE [dbo].[MuCastle_REG_SIEGE] 
-    ADD CONSTRAINT [PK_MuCastle_REG_SIEGE] PRIMARY KEY CLUSTERED ([MAP_SVR_GROUP] ASC, [REG_SIEGE_GUILD] ASC)
-    PRINT '  Recreated PK_MuCastle_REG_SIEGE'
+    BEGIN TRY
+        ALTER TABLE [dbo].[MuCastle_REG_SIEGE] 
+        ADD CONSTRAINT [PK_MuCastle_REG_SIEGE] PRIMARY KEY CLUSTERED ([MAP_SVR_GROUP] ASC, [REG_SIEGE_GUILD] ASC)
+        PRINT '  Recreated PK_MuCastle_REG_SIEGE'
+    END TRY
+    BEGIN CATCH
+        PRINT '  Skipped PK_MuCastle_REG_SIEGE: ' + ERROR_MESSAGE()
+    END CATCH
 END
 
 IF OBJECT_ID('MuCastle_SIEGE_GUILDLIST', 'U') IS NOT NULL
 BEGIN
-    ALTER TABLE [dbo].[MuCastle_SIEGE_GUILDLIST] 
-    ADD CONSTRAINT [PK_MuCastle_SIEGE_GUILDLIST] PRIMARY KEY CLUSTERED ([MAP_SVR_GROUP] ASC, [GUILD_NAME] ASC)
-    PRINT '  Recreated PK_MuCastle_SIEGE_GUILDLIST'
+    BEGIN TRY
+        ALTER TABLE [dbo].[MuCastle_SIEGE_GUILDLIST] 
+        ADD CONSTRAINT [PK_MuCastle_SIEGE_GUILDLIST] PRIMARY KEY CLUSTERED ([MAP_SVR_GROUP] ASC, [GUILD_NAME] ASC)
+        PRINT '  Recreated PK_MuCastle_SIEGE_GUILDLIST'
+    END TRY
+    BEGIN CATCH
+        PRINT '  Skipped PK_MuCastle_SIEGE_GUILDLIST: ' + ERROR_MESSAGE()
+    END CATCH
 END
 
 IF OBJECT_ID('MEMB_STAT', 'U') IS NOT NULL
 BEGIN
-    ALTER TABLE [dbo].[MEMB_STAT] 
-    ADD CONSTRAINT [PK_MEMB_STAT] PRIMARY KEY CLUSTERED ([memb___id] ASC, [ServerName] ASC)
-    PRINT '  Recreated PK_MEMB_STAT'
+    BEGIN TRY
+        ALTER TABLE [dbo].[MEMB_STAT] 
+        ADD CONSTRAINT [PK_MEMB_STAT] PRIMARY KEY CLUSTERED ([memb___id] ASC, [ServerName] ASC)
+        PRINT '  Recreated PK_MEMB_STAT'
+    END TRY
+    BEGIN CATCH
+        PRINT '  Skipped PK_MEMB_STAT: ' + ERROR_MESSAGE()
+    END CATCH
 END
 
 IF OBJECT_ID('EventLeoTheHelper', 'U') IS NOT NULL
 BEGIN
-    ALTER TABLE [dbo].[EventLeoTheHelper] 
-    ADD CONSTRAINT [PK_EventLeoTheHelper] PRIMARY KEY CLUSTERED ([Name] ASC)
-    PRINT '  Recreated PK_EventLeoTheHelper'
+    BEGIN TRY
+        ALTER TABLE [dbo].[EventLeoTheHelper] 
+        ADD CONSTRAINT [PK_EventLeoTheHelper] PRIMARY KEY CLUSTERED ([Name] ASC)
+        PRINT '  Recreated PK_EventLeoTheHelper'
+    END TRY
+    BEGIN CATCH
+        PRINT '  Skipped PK_EventLeoTheHelper: ' + ERROR_MESSAGE()
+    END CATCH
 END
 
 IF OBJECT_ID('EventSantaClaus', 'U') IS NOT NULL
 BEGIN
-    ALTER TABLE [dbo].[EventSantaClaus] 
-    ADD CONSTRAINT [PK_EventSantaClaus] PRIMARY KEY CLUSTERED ([Name] ASC)
-    PRINT '  Recreated PK_EventSantaClaus'
+    BEGIN TRY
+        ALTER TABLE [dbo].[EventSantaClaus] 
+        ADD CONSTRAINT [PK_EventSantaClaus] PRIMARY KEY CLUSTERED ([Name] ASC)
+        PRINT '  Recreated PK_EventSantaClaus'
+    END TRY
+    BEGIN CATCH
+        PRINT '  Skipped PK_EventSantaClaus: ' + ERROR_MESSAGE()
+    END CATCH
 END
 
 IF OBJECT_ID('HelperData', 'U') IS NOT NULL
 BEGIN
-    ALTER TABLE [dbo].[HelperData] 
-    ADD CONSTRAINT [PK_HelperData] PRIMARY KEY CLUSTERED ([Name] ASC)
-    PRINT '  Recreated PK_HelperData'
+    BEGIN TRY
+        ALTER TABLE [dbo].[HelperData] 
+        ADD CONSTRAINT [PK_HelperData] PRIMARY KEY CLUSTERED ([Name] ASC)
+        PRINT '  Recreated PK_HelperData'
+    END TRY
+    BEGIN CATCH
+        PRINT '  Skipped PK_HelperData: ' + ERROR_MESSAGE()
+    END CATCH
 END
 
 IF OBJECT_ID('MasterSkillTree', 'U') IS NOT NULL
 BEGIN
-    ALTER TABLE [dbo].[MasterSkillTree] 
-    ADD CONSTRAINT [PK_MasterSkillTree] PRIMARY KEY CLUSTERED ([Name] ASC)
-    PRINT '  Recreated PK_MasterSkillTree'
+    BEGIN TRY
+        ALTER TABLE [dbo].[MasterSkillTree] 
+        ADD CONSTRAINT [PK_MasterSkillTree] PRIMARY KEY CLUSTERED ([Name] ASC)
+        PRINT '  Recreated PK_MasterSkillTree'
+    END TRY
+    BEGIN CATCH
+        PRINT '  Skipped PK_MasterSkillTree: ' + ERROR_MESSAGE()
+    END CATCH
 END
 
 -- MuunInventory PK - SKIPPED (data already converted)
@@ -762,9 +833,14 @@ IF OBJECT_ID('MuunInventory', 'U') IS NOT NULL
 
 IF OBJECT_ID('OptionData', 'U') IS NOT NULL
 BEGIN
-    ALTER TABLE [dbo].[OptionData] 
-    ADD CONSTRAINT [PK_OptionData] PRIMARY KEY CLUSTERED ([Name] ASC)
-    PRINT '  Recreated PK_OptionData'
+    BEGIN TRY
+        ALTER TABLE [dbo].[OptionData] 
+        ADD CONSTRAINT [PK_OptionData] PRIMARY KEY CLUSTERED ([Name] ASC)
+        PRINT '  Recreated PK_OptionData'
+    END TRY
+    BEGIN CATCH
+        PRINT '  Skipped PK_OptionData: ' + ERROR_MESSAGE()
+    END CATCH
 END
 
 -- Quest table PKs - SKIPPED (data already converted)
@@ -776,138 +852,247 @@ IF OBJECT_ID('QuestWorld', 'U') IS NOT NULL
 
 IF OBJECT_ID('warehouse', 'U') IS NOT NULL
 BEGIN
-    ALTER TABLE [dbo].[warehouse] 
-    ADD CONSTRAINT [PK_warehouse] PRIMARY KEY CLUSTERED ([AccountID] ASC)
-    PRINT '  Recreated PK_warehouse'
+    BEGIN TRY
+        ALTER TABLE [dbo].[warehouse] 
+        ADD CONSTRAINT [PK_warehouse] PRIMARY KEY CLUSTERED ([AccountID] ASC)
+        PRINT '  Recreated PK_warehouse'
+    END TRY
+    BEGIN CATCH
+        PRINT '  Skipped PK_warehouse: ' + ERROR_MESSAGE()
+    END CATCH
 END
 
 IF OBJECT_ID('WarehouseGuild', 'U') IS NOT NULL
 BEGIN
-    ALTER TABLE [dbo].[WarehouseGuild] 
-    ADD CONSTRAINT [PK_WarehouseGuild] PRIMARY KEY CLUSTERED ([Guild] ASC)
-    PRINT '  Recreated PK_WarehouseGuild'
+    BEGIN TRY
+        ALTER TABLE [dbo].[WarehouseGuild] 
+        ADD CONSTRAINT [PK_WarehouseGuild] PRIMARY KEY CLUSTERED ([Guild] ASC)
+        PRINT '  Recreated PK_WarehouseGuild'
+    END TRY
+    BEGIN CATCH
+        PRINT '  Skipped PK_WarehouseGuild: ' + ERROR_MESSAGE()
+    END CATCH
 END
 
--- Ranking table primary keys
+-- Ranking table primary keys (all protected with TRY/CATCH)
 IF OBJECT_ID('RankingBloodCastle', 'U') IS NOT NULL
 BEGIN
-    ALTER TABLE [dbo].[RankingBloodCastle] 
-    ADD CONSTRAINT [PK_RankingBloodCastle] PRIMARY KEY CLUSTERED ([Name] ASC)
-    PRINT '  Recreated PK_RankingBloodCastle'
+    BEGIN TRY
+        ALTER TABLE [dbo].[RankingBloodCastle] 
+        ADD CONSTRAINT [PK_RankingBloodCastle] PRIMARY KEY CLUSTERED ([Name] ASC)
+        PRINT '  Recreated PK_RankingBloodCastle'
+    END TRY
+    BEGIN CATCH
+        PRINT '  Skipped PK_RankingBloodCastle: ' + ERROR_MESSAGE()
+    END CATCH
 END
 
 IF OBJECT_ID('RankingChaosCastle', 'U') IS NOT NULL
 BEGIN
-    ALTER TABLE [dbo].[RankingChaosCastle] 
-    ADD CONSTRAINT [PK_RankingChaosCastle] PRIMARY KEY CLUSTERED ([Name] ASC)
-    PRINT '  Recreated PK_RankingChaosCastle'
+    BEGIN TRY
+        ALTER TABLE [dbo].[RankingChaosCastle] 
+        ADD CONSTRAINT [PK_RankingChaosCastle] PRIMARY KEY CLUSTERED ([Name] ASC)
+        PRINT '  Recreated PK_RankingChaosCastle'
+    END TRY
+    BEGIN CATCH
+        PRINT '  Skipped PK_RankingChaosCastle: ' + ERROR_MESSAGE()
+    END CATCH
 END
 
 IF OBJECT_ID('RankingDevilSquare', 'U') IS NOT NULL
 BEGIN
-    ALTER TABLE [dbo].[RankingDevilSquare] 
-    ADD CONSTRAINT [PK_RankingDevilSquare] PRIMARY KEY CLUSTERED ([Name] ASC)
-    PRINT '  Recreated PK_RankingDevilSquare'
+    BEGIN TRY
+        ALTER TABLE [dbo].[RankingDevilSquare] 
+        ADD CONSTRAINT [PK_RankingDevilSquare] PRIMARY KEY CLUSTERED ([Name] ASC)
+        PRINT '  Recreated PK_RankingDevilSquare'
+    END TRY
+    BEGIN CATCH
+        PRINT '  Skipped PK_RankingDevilSquare: ' + ERROR_MESSAGE()
+    END CATCH
 END
 
 IF OBJECT_ID('RankingDuel', 'U') IS NOT NULL
 BEGIN
-    ALTER TABLE [dbo].[RankingDuel] 
-    ADD CONSTRAINT [PK_RankingDuel] PRIMARY KEY CLUSTERED ([Name] ASC)
-    PRINT '  Recreated PK_RankingDuel'
+    BEGIN TRY
+        ALTER TABLE [dbo].[RankingDuel] 
+        ADD CONSTRAINT [PK_RankingDuel] PRIMARY KEY CLUSTERED ([Name] ASC)
+        PRINT '  Recreated PK_RankingDuel'
+    END TRY
+    BEGIN CATCH
+        PRINT '  Skipped PK_RankingDuel: ' + ERROR_MESSAGE()
+    END CATCH
 END
 
 IF OBJECT_ID('RankingIllusionTemple', 'U') IS NOT NULL
 BEGIN
-    ALTER TABLE [dbo].[RankingIllusionTemple] 
-    ADD CONSTRAINT [PK_RankingIllusionTemple] PRIMARY KEY CLUSTERED ([Name] ASC)
-    PRINT '  Recreated PK_RankingIllusionTemple'
+    BEGIN TRY
+        ALTER TABLE [dbo].[RankingIllusionTemple] 
+        ADD CONSTRAINT [PK_RankingIllusionTemple] PRIMARY KEY CLUSTERED ([Name] ASC)
+        PRINT '  Recreated PK_RankingIllusionTemple'
+    END TRY
+    BEGIN CATCH
+        PRINT '  Skipped PK_RankingIllusionTemple: ' + ERROR_MESSAGE()
+    END CATCH
 END
 
 IF OBJECT_ID('RankingKingGuild', 'U') IS NOT NULL
 BEGIN
-    ALTER TABLE [dbo].[RankingKingGuild] 
-    ADD CONSTRAINT [PK_RankingKingGuild] PRIMARY KEY CLUSTERED ([Name] ASC)
-    PRINT '  Recreated PK_RankingKingGuild'
+    BEGIN TRY
+        ALTER TABLE [dbo].[RankingKingGuild] 
+        ADD CONSTRAINT [PK_RankingKingGuild] PRIMARY KEY CLUSTERED ([Name] ASC)
+        PRINT '  Recreated PK_RankingKingGuild'
+    END TRY
+    BEGIN CATCH
+        PRINT '  Skipped PK_RankingKingGuild: ' + ERROR_MESSAGE()
+    END CATCH
 END
 
 IF OBJECT_ID('RankingKingPlayer', 'U') IS NOT NULL
 BEGIN
-    ALTER TABLE [dbo].[RankingKingPlayer] 
-    ADD CONSTRAINT [PK_RankingKingPlayer] PRIMARY KEY CLUSTERED ([Name] ASC)
-    PRINT '  Recreated PK_RankingKingPlayer'
+    BEGIN TRY
+        ALTER TABLE [dbo].[RankingKingPlayer] 
+        ADD CONSTRAINT [PK_RankingKingPlayer] PRIMARY KEY CLUSTERED ([Name] ASC)
+        PRINT '  Recreated PK_RankingKingPlayer'
+    END TRY
+    BEGIN CATCH
+        PRINT '  Skipped PK_RankingKingPlayer: ' + ERROR_MESSAGE()
+    END CATCH
 END
 
 IF OBJECT_ID('RankingTvT', 'U') IS NOT NULL
 BEGIN
-    ALTER TABLE [dbo].[RankingTvT] 
-    ADD CONSTRAINT [PK_RankingTvT] PRIMARY KEY CLUSTERED ([Name] ASC)
-    PRINT '  Recreated PK_RankingTvT'
+    BEGIN TRY
+        ALTER TABLE [dbo].[RankingTvT] 
+        ADD CONSTRAINT [PK_RankingTvT] PRIMARY KEY CLUSTERED ([Name] ASC)
+        PRINT '  Recreated PK_RankingTvT'
+    END TRY
+    BEGIN CATCH
+        PRINT '  Skipped PK_RankingTvT: ' + ERROR_MESSAGE()
+    END CATCH
 END
 
--- Gens table primary keys
+-- Gens table primary keys (all protected with TRY/CATCH)
 IF OBJECT_ID('Gens_Duprian', 'U') IS NOT NULL
 BEGIN
-    ALTER TABLE [dbo].[Gens_Duprian] 
-    ADD CONSTRAINT [PK_Gens_Duprian] PRIMARY KEY CLUSTERED ([Name] ASC)
-    PRINT '  Recreated PK_Gens_Duprian'
+    BEGIN TRY
+        ALTER TABLE [dbo].[Gens_Duprian] 
+        ADD CONSTRAINT [PK_Gens_Duprian] PRIMARY KEY CLUSTERED ([Name] ASC)
+        PRINT '  Recreated PK_Gens_Duprian'
+    END TRY
+    BEGIN CATCH
+        PRINT '  Skipped PK_Gens_Duprian: ' + ERROR_MESSAGE()
+    END CATCH
 END
 
 IF OBJECT_ID('Gens_Rank', 'U') IS NOT NULL
 BEGIN
-    ALTER TABLE [dbo].[Gens_Rank] 
-    ADD CONSTRAINT [PK_Gens_Rank] PRIMARY KEY CLUSTERED ([Name] ASC)
-    PRINT '  Recreated PK_Gens_Rank'
+    BEGIN TRY
+        ALTER TABLE [dbo].[Gens_Rank] 
+        ADD CONSTRAINT [PK_Gens_Rank] PRIMARY KEY CLUSTERED ([Name] ASC)
+        PRINT '  Recreated PK_Gens_Rank'
+    END TRY
+    BEGIN CATCH
+        PRINT '  Skipped PK_Gens_Rank: ' + ERROR_MESSAGE()
+    END CATCH
 END
 
 IF OBJECT_ID('Gens_Reward', 'U') IS NOT NULL
 BEGIN
-    ALTER TABLE [dbo].[Gens_Reward] 
-    ADD CONSTRAINT [PK_Gens_Reward] PRIMARY KEY CLUSTERED ([Name] ASC)
-    PRINT '  Recreated PK_Gens_Reward'
+    BEGIN TRY
+        ALTER TABLE [dbo].[Gens_Reward] 
+        ADD CONSTRAINT [PK_Gens_Reward] PRIMARY KEY CLUSTERED ([Name] ASC)
+        PRINT '  Recreated PK_Gens_Reward'
+    END TRY
+    BEGIN CATCH
+        PRINT '  Skipped PK_Gens_Reward: ' + ERROR_MESSAGE()
+    END CATCH
 END
 
 IF OBJECT_ID('Gens_Varnert', 'U') IS NOT NULL
 BEGIN
-    ALTER TABLE [dbo].[Gens_Varnert] 
-    ADD CONSTRAINT [PK_Gens_Varnert] PRIMARY KEY CLUSTERED ([Name] ASC)
-    PRINT '  Recreated PK_Gens_Varnert'
+    BEGIN TRY
+        ALTER TABLE [dbo].[Gens_Varnert] 
+        ADD CONSTRAINT [PK_Gens_Varnert] PRIMARY KEY CLUSTERED ([Name] ASC)
+        PRINT '  Recreated PK_Gens_Varnert'
+    END TRY
+    BEGIN CATCH
+        PRINT '  Skipped PK_Gens_Varnert: ' + ERROR_MESSAGE()
+    END CATCH
 END
 
--- Friend/social table primary keys
+-- Friend/social table primary keys (all protected with TRY/CATCH)
 IF OBJECT_ID('T_CGuid', 'U') IS NOT NULL
 BEGIN
-    ALTER TABLE [dbo].[T_CGuid] 
-    ADD CONSTRAINT [PK_T_CGuid] PRIMARY KEY CLUSTERED ([Name] ASC)
-    PRINT '  Recreated PK_T_CGuid'
+    BEGIN TRY
+        ALTER TABLE [dbo].[T_CGuid] 
+        ADD CONSTRAINT [PK_T_CGuid] PRIMARY KEY CLUSTERED ([Name] ASC)
+        PRINT '  Recreated PK_T_CGuid'
+    END TRY
+    BEGIN CATCH
+        PRINT '  Skipped PK_T_CGuid: ' + ERROR_MESSAGE()
+    END CATCH
 END
 
 IF OBJECT_ID('T_FriendMain', 'U') IS NOT NULL
 BEGIN
-    ALTER TABLE [dbo].[T_FriendMain] 
-    ADD CONSTRAINT [PK_T_FriendMain] PRIMARY KEY CLUSTERED ([Name] ASC)
-    PRINT '  Recreated PK_T_FriendMain'
+    BEGIN TRY
+        ALTER TABLE [dbo].[T_FriendMain] 
+        ADD CONSTRAINT [PK_T_FriendMain] PRIMARY KEY CLUSTERED ([Name] ASC)
+        PRINT '  Recreated PK_T_FriendMain'
+    END TRY
+    BEGIN CATCH
+        PRINT '  Skipped PK_T_FriendMain: ' + ERROR_MESSAGE()
+    END CATCH
 END
 
 IF OBJECT_ID('T_WaitFriend', 'U') IS NOT NULL
 BEGIN
-    ALTER TABLE [dbo].[T_WaitFriend] 
-    ADD CONSTRAINT [PK_T_WaitFriend] PRIMARY KEY CLUSTERED ([Name] ASC, [FriendName] ASC)
-    PRINT '  Recreated PK_T_WaitFriend'
+    BEGIN TRY
+        ALTER TABLE [dbo].[T_WaitFriend] 
+        ADD CONSTRAINT [PK_T_WaitFriend] PRIMARY KEY CLUSTERED ([Name] ASC, [FriendName] ASC)
+        PRINT '  Recreated PK_T_WaitFriend'
+    END TRY
+    BEGIN CATCH
+        PRINT '  Skipped PK_T_WaitFriend: ' + ERROR_MESSAGE()
+    END CATCH
 END
 
--- AccountCharacter tables
-ALTER TABLE [dbo].[AccountCharacter2] 
-ADD CONSTRAINT [PK_AccountCharacter2] PRIMARY KEY NONCLUSTERED ([Id] ASC)
+-- AccountCharacter tables (protected with TRY/CATCH)
+BEGIN TRY
+    ALTER TABLE [dbo].[AccountCharacter2] 
+    ADD CONSTRAINT [PK_AccountCharacter2] PRIMARY KEY NONCLUSTERED ([Id] ASC)
+    PRINT '  Recreated PK_AccountCharacter2'
+END TRY
+BEGIN CATCH
+    PRINT '  Skipped PK_AccountCharacter2: ' + ERROR_MESSAGE()
+END CATCH
 
-ALTER TABLE [dbo].[AccountCharacter3] 
-ADD CONSTRAINT [PK_AccountCharacter3] PRIMARY KEY NONCLUSTERED ([Id] ASC)
+BEGIN TRY
+    ALTER TABLE [dbo].[AccountCharacter3] 
+    ADD CONSTRAINT [PK_AccountCharacter3] PRIMARY KEY NONCLUSTERED ([Id] ASC)
+    PRINT '  Recreated PK_AccountCharacter3'
+END TRY
+BEGIN CATCH
+    PRINT '  Skipped PK_AccountCharacter3: ' + ERROR_MESSAGE()
+END CATCH
 
-ALTER TABLE [dbo].[AccountCharacter4] 
-ADD CONSTRAINT [PK_AccountCharacter4] PRIMARY KEY NONCLUSTERED ([Id] ASC)
+BEGIN TRY
+    ALTER TABLE [dbo].[AccountCharacter4] 
+    ADD CONSTRAINT [PK_AccountCharacter4] PRIMARY KEY NONCLUSTERED ([Id] ASC)
+    PRINT '  Recreated PK_AccountCharacter4'
+END TRY
+BEGIN CATCH
+    PRINT '  Skipped PK_AccountCharacter4: ' + ERROR_MESSAGE()
+END CATCH
 
-ALTER TABLE [dbo].[AccountCharacter5] 
-ADD CONSTRAINT [PK_AccountCharacter5] PRIMARY KEY NONCLUSTERED ([Id] ASC)
+BEGIN TRY
+    ALTER TABLE [dbo].[AccountCharacter5] 
+    ADD CONSTRAINT [PK_AccountCharacter5] PRIMARY KEY NONCLUSTERED ([Id] ASC)
+    PRINT '  Recreated PK_AccountCharacter5'
+END TRY
+BEGIN CATCH
+    PRINT '  Skipped PK_AccountCharacter5: ' + ERROR_MESSAGE()
+END CATCH
 
 -- Recreate UNIQUE KEY constraints (not just indexes!)
 IF OBJECT_ID('MuCastle_REG_SIEGE', 'U') IS NOT NULL
