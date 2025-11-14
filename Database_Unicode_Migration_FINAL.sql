@@ -95,6 +95,20 @@ BEGIN
     PRINT '  Dropped PK_GuildMember'
 END
 
+-- CustomNpcQuest and CustomQuest primary keys
+IF EXISTS (SELECT * FROM sys.indexes WHERE name = 'PK_CustomNpcQuest' AND object_id = OBJECT_ID('CustomNpcQuest'))
+BEGIN
+    ALTER TABLE [dbo].[CustomNpcQuest] DROP CONSTRAINT [PK_CustomNpcQuest]
+    PRINT '  Dropped PK_CustomNpcQuest'
+END
+
+IF EXISTS (SELECT * FROM sys.indexes WHERE name = 'PK_CustomQuest' AND object_id = OBJECT_ID('CustomQuest'))
+BEGIN
+    ALTER TABLE [dbo].[CustomQuest] DROP CONSTRAINT [PK_CustomQuest]
+    PRINT '  Dropped PK_CustomQuest'
+END
+
+-- AccountCharacter tables
 IF EXISTS (SELECT * FROM sys.indexes WHERE name = 'PK_AccountCharacter2')
     ALTER TABLE [dbo].[AccountCharacter2] DROP CONSTRAINT [PK_AccountCharacter2]
 IF EXISTS (SELECT * FROM sys.indexes WHERE name = 'PK_AccountCharacter3')
@@ -347,6 +361,20 @@ WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF,
       ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
 PRINT '  Recreated PK_GuildMember'
 
+-- CustomNpcQuest and CustomQuest primary keys
+ALTER TABLE [dbo].[CustomNpcQuest] 
+ADD CONSTRAINT [PK_CustomNpcQuest] PRIMARY KEY CLUSTERED ([Name] ASC, [QuestIndex] ASC)
+WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, 
+      ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+PRINT '  Recreated PK_CustomNpcQuest'
+
+ALTER TABLE [dbo].[CustomQuest] 
+ADD CONSTRAINT [PK_CustomQuest] PRIMARY KEY CLUSTERED ([Name] ASC, [QuestIndex] ASC)
+WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, 
+      ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+PRINT '  Recreated PK_CustomQuest'
+
+-- AccountCharacter tables
 ALTER TABLE [dbo].[AccountCharacter2] 
 ADD CONSTRAINT [PK_AccountCharacter2] PRIMARY KEY NONCLUSTERED ([Id] ASC)
 
