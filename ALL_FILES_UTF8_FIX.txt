@@ -1,0 +1,186 @@
+================================================================================
+  ALL TEXT FILES MUST BE UTF-8 ENCODED!
+================================================================================
+
+FIXED FUNCTIONS:
+================
+
+✅ LoadBotPhrasesFromFile() - Now uses ReadUTF8File()
+✅ LoadBotKeywordResponses() - Now uses ReadUTF8File()
+
+BOTH NOW READ UTF-8 CORRECTLY! 🎉
+
+FILES THAT MUST BE UTF-8:
+==========================
+
+1. ✅ IA\Phrases\Portuguese\BotPhrases.txt
+   - Contains: "De onde você é?", "Horário nobre", etc.
+   - MUST BE: UTF-8 or UTF-8 with BOM
+
+2. ✅ IA\Answers\BotAnswers.txt (or similar answering file)
+   - Contains: Keyword triggers and responses
+   - MUST BE: UTF-8 or UTF-8 with BOM
+
+3. ✅ ANY OTHER TEXT FILES your bots or server read
+
+HOW TO CONVERT FILES TO UTF-8:
+===============================
+
+OPTION 1: Using Notepad++
+--------------------------
+1. Open the file: BotPhrases.txt
+2. Menu → Encoding → Check if it says "UTF-8" or "ANSI"
+3. If ANSI: Menu → Encoding → Convert to UTF-8 (NOT "Encode in UTF-8"!)
+4. Save the file (Ctrl+S)
+5. Bottom-right should now show "UTF-8" ✅
+
+OPTION 2: Using VS Code
+------------------------
+1. Open the file: BotPhrases.txt
+2. Bottom-right corner shows current encoding
+3. Click on encoding (e.g., "ANSI", "Windows 1252")
+4. Select "Save with Encoding"
+5. Choose "UTF-8" (or "UTF-8 with BOM")
+6. Save the file
+
+OPTION 3: Using PowerShell (Automatic)
+---------------------------------------
+Get-Content "BotPhrases.txt" | Set-Content -Encoding UTF8 "BotPhrases.txt"
+
+RECOMMENDED: UTF-8 with BOM
+============================
+
+BOM = Byte Order Mark (0xEF 0xBB 0xBF at start of file)
+
+Benefits:
+✅ Programs KNOW it's UTF-8
+✅ No encoding detection needed
+✅ Works everywhere (Windows, Linux, Mac)
+✅ Our ReadUTF8File() detects and skips BOM automatically
+
+In Notepad++:
+- Menu → Encoding → "UTF-8-BOM" ← Use this! ⭐
+
+VERIFY FILE ENCODING:
+=====================
+
+After converting, verify with hexdump:
+- UTF-8 with BOM starts with: EF BB BF
+- UTF-8 without BOM: Just text directly
+
+Or just check in Notepad++ bottom-right corner:
+- Should show "UTF-8" or "UTF-8-BOM" ✅
+
+TESTING:
+========
+
+After converting files to UTF-8:
+
+1. Recompile GameServer ✅
+2. Start GameServer
+3. Check console logs:
+   [BotPhrases] Loaded 50 lines from: .\IA\Phrases\Portuguese\BotPhrases.txt ✅
+   [BotKeywords] Loaded 20 lines from: .\IA\Answers\BotAnswers.txt ✅
+   [BotKeywords] Loaded keywords: 5 categories ✅
+
+4. In game, wait for bot to speak
+5. Bot says: "Horário nobre" ✅ PERFECT!
+
+BEFORE vs AFTER:
+================
+
+BEFORE (ANSI files):
+  File contains: "Horário nobre"
+  Bot says: "Hor�rio nobre" ❌ SYMBOLS!
+
+AFTER (UTF-8 files):
+  File contains: "Horário nobre"
+  Bot says: "Horário nobre" ✅ PERFECT!
+
+WHY THIS HAPPENS:
+=================
+
+Portuguese uses extended ASCII characters:
+- á = 0xE1 in ANSI (Latin-1)
+- á = 0xC3 0xA1 in UTF-8 (multi-byte!)
+
+When std::ifstream reads UTF-8 file as ANSI:
+- Reads 0xC3 0xA1 as TWO characters → Shows as "�"
+- Wrong interpretation!
+
+When ReadUTF8File reads UTF-8 file as UTF-8:
+- Reads 0xC3 0xA1 as ONE character "á"
+- Correct interpretation! ✅
+
+C++ LESSON:
+===========
+
+Bad way (ANSI):
+```cpp
+std::ifstream file("phrases.txt");
+std::string line;
+std::getline(file, line);
+// "Horário" → "Hor�rio" ❌
+```
+
+Good way (UTF-8):
+```cpp
+std::vector<std::string> lines;
+ReadUTF8File("phrases.txt", lines);
+// "Horário" → "Horário" ✅
+```
+
+ALWAYS use ReadUTF8File() for text files with special characters!
+
+OTHER TEXT FILES TO CHECK:
+===========================
+
+If your GameServer loads other text files:
+- NPC dialogue files → Must be UTF-8
+- Quest description files → Must be UTF-8
+- Item name files → Must be UTF-8
+- Server message files → Must be UTF-8
+- Configuration .txt files → Must be UTF-8
+
+ALL must use ReadUTF8File() or ReadINIValueUTF8()!
+
+COMPLETE SOLUTION:
+==================
+
+1. ✅ Code fixed: LoadBotPhrasesFromFile() uses ReadUTF8File()
+2. ✅ Code fixed: LoadBotKeywordResponses() uses ReadUTF8File()
+3. ⏭️ Convert files: BotPhrases.txt → UTF-8
+4. ⏭️ Convert files: BotAnswers.txt → UTF-8
+5. ⏭️ Recompile GameServer
+6. ✅ Test: "Horário nobre" displays correctly!
+
+AFTER THIS:
+===========
+
+Bot phrases work:
+✅ "Olá!"
+✅ "De onde você é?"
+✅ "Horário nobre"
+✅ "Ação no jogo"
+✅ "Dragões atacando"
+
+Keyword responses work:
+✅ Player: "Olá"
+✅ Bot: "Olá amigo! Como você está?"
+
+ALL PERFECT! 🇧🇷✨
+
+FINAL CHECKLIST:
+================
+
+□ Recompile GameServer (should compile without errors now!)
+□ Convert BotPhrases.txt to UTF-8
+□ Convert BotAnswers.txt to UTF-8  
+□ Convert ANY other .txt files to UTF-8
+□ Start GameServer
+□ Test bot phrases
+□ Celebrate! 🎉
+
+================================================================================
+  Recompile now! Then convert ALL .txt files to UTF-8!
+================================================================================
