@@ -317,16 +317,20 @@ void LoadBotPhrasesFromFile(const char* filename)
 	g_BotPhrasesNight.clear();
 	g_BotPhrasesTrade.clear(); // ADD THIS LINE
 
-	std::ifstream file(filename);
-	if (!file.is_open()) { return; }
+	// Read file as UTF-8 to support Unicode characters
+	std::vector<std::string> lines;
+	if (!ReadUTF8File(filename, lines)) {
+		LogAdd(LOG_RED, "[BotPhrases] Failed to load: %s", filename);
+		return;
+	}
+	LogAdd(LOG_GREEN, "[BotPhrases] Loaded %d lines from: %s", lines.size(), filename);
 
-	std::string line;
 	int mode = 0;
 	const int MODE_NONE = 0, MODE_GENERAL = 1, MODE_NEAR = 2, MODE_IN_PARTY = 3, MODE_PVP = 4, MODE_MAP_SPECIFIC = 5, MODE_CLASS_SPECIFIC = 6;
 	int currentMapIndexForPhrases = -1, currentDBClassForPhrases = -1;
 
 	try {
-		while (std::getline(file, line)) {
+		for (auto& line : lines) {
 			if (line.empty() || line[0] == ';') continue;
 
 			if (line[0] == '#') {
@@ -479,8 +483,10 @@ void LoadBotPhrasesFromFile(const char* filename)
 	}
 	catch (...) {}
 
-	if (file.is_open())
-		file.close();
+	// File is already closed by ReadUTF8File
+	LogAdd(LOG_GREEN, "[BotPhrases] Loaded phrases: General=%d, Near=%d, Party=%d, PVP=%d", 
+		g_BotPhrasesGeneral.size(), g_BotPhrasesNear.size(), 
+		g_BotPhrasesInParty.size(), g_BotPhrasesPVP.size());
 }
 
 

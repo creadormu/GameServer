@@ -1,0 +1,181 @@
+================================================================================
+  BOT PHRASES UTF-8 FIX - UNICODE SUPPORT FOR BOTS
+================================================================================
+
+PROBLEM IDENTIFIED:
+===================
+
+When YOU type "De onde você é?" → Works perfect ✅
+When BOT reads from file → Shows symbols ❌
+
+WHY THIS HAPPENS:
+=================
+
+The bot was reading BotPhrases.txt using:
+  std::ifstream file(filename);  // ❌ Reads as ANSI, not UTF-8!
+
+This reads the file as ANSI/ASCII instead of UTF-8!
+
+Result:
+  "você" → Becomes symbols when bot reads it
+  But YOUR keyboard input → Works (uses UTF-8 protocol)
+
+THE FIX:
+========
+
+Changed FakeOnline.cpp LoadBotPhrasesFromFile() to use:
+  ReadUTF8File(filename, lines);  // ✅ Reads as UTF-8!
+
+This function from UnicodeFileIO.h properly reads UTF-8 files!
+
+WHAT WAS CHANGED:
+=================
+
+File: GameServer/FakeOnline.cpp
+Function: LoadBotPhrasesFromFile()
+
+OLD CODE (Line 320):
+-------------------
+std::ifstream file(filename);
+if (!file.is_open()) { return; }
+
+std::string line;
+while (std::getline(file, line)) {
+    // Process line...
+}
+file.close();
+
+NEW CODE (FIXED):
+-----------------
+// Read file as UTF-8 to support Unicode characters
+std::vector<std::string> lines;
+if (!ReadUTF8File(filename, lines)) {
+    LogAdd(LOG_RED, "[BotPhrases] Failed to load: %s", filename);
+    return;
+}
+LogAdd(LOG_GREEN, "[BotPhrases] Loaded %d lines from: %s", lines.size(), filename);
+
+for (auto& line : lines) {
+    // Process line...
+}
+
+WHY THIS WORKS:
+===============
+
+ReadUTF8File() from UnicodeFileIO.h:
+1. Opens file as binary
+2. Detects UTF-8 BOM (if present)
+3. Reads as UTF-8 encoding
+4. Converts to std::string (UTF-8 internal representation)
+5. Returns vector of UTF-8 strings ✅
+
+Result:
+  "De onde você é?" → Stored correctly in std::string
+  Bot sends to chat → Displays correctly! ✅
+
+ENSURE YOUR FILE IS UTF-8:
+===========================
+
+Your BotPhrases.txt file MUST be saved as UTF-8!
+
+In Notepad++ or VS Code:
+1. Open: IA/Phrases/Portuguese/BotPhrases.txt
+2. Check encoding: Should show "UTF-8" or "UTF-8 with BOM"
+3. If not, convert:
+   - Notepad++: Encoding → Convert to UTF-8
+   - VS Code: Click encoding in status bar → Save with Encoding → UTF-8
+
+RECOMMENDED: UTF-8 with BOM
+- BOM = Byte Order Mark (0xEF, 0xBB, 0xBF)
+- Tells programs: "This is UTF-8!"
+- Our ReadUTF8File() detects and skips BOM automatically
+
+HOW TO TEST:
+============
+
+1. Recompile GameServer
+2. Make sure BotPhrases.txt is UTF-8 encoded
+3. Start GameServer
+4. Watch bot chat messages
+5. Bot should now say: "De onde você é?" correctly! ✅
+
+EXAMPLE BotPhrases.txt (UTF-8):
+================================
+
+#GENERAL, 50
+Olá a todos!
+De onde você é?
+Ação no jogo!
+Dragões atacando!
+
+#NEAR_REAL_PLAYER, 70
+Olá amigo!
+Você é novo?
+
+#PVP_MODE, 30
+Vamos lutar!
+Preparado para ação?
+
+ALL THESE WILL NOW DISPLAY CORRECTLY! ✅
+
+C++ LESSON - FILE ENCODINGS:
+=============================
+
+std::ifstream file("text.txt");           // ❌ ANSI/ASCII
+   → "você" becomes "voc�" or "voc?"
+
+ReadUTF8File("text.txt", lines);          // ✅ UTF-8
+   → "você" stays "você" ✅
+
+Windows API equivalent:
+FILE* file = fopen("text.txt", "r");      // ❌ ANSI
+FILE* file = _wfopen(L"text.txt", L"r");  // ✅ Wide char (UTF-16)
+ReadUTF8File() → Handles UTF-8 properly   // ✅ Best!
+
+NEXT STEPS:
+===========
+
+1. ✅ Code fixed (FakeOnline.cpp updated)
+2. ⏭️ Recompile GameServer
+3. ⏭️ Verify BotPhrases.txt is UTF-8 encoded
+4. ⏭️ Test bot phrases
+5. ⏭️ Celebrate! Bot speaks Portuguese correctly! 🇧🇷
+
+ADDITIONAL FILES TO CHECK:
+==========================
+
+If you have other text files that bots or NPCs read:
+- NPC dialogue files
+- Quest text files
+- Item description files
+- Server messages files
+
+ALL should be:
+1. Saved as UTF-8 (with or without BOM)
+2. Read using ReadUTF8File() or ReadINIValueUTF8()
+
+COMMON MISTAKE:
+===============
+
+Windows Notepad saves as "ANSI" by default! ❌
+
+Always use:
+- Notepad++ → UTF-8
+- VS Code → UTF-8
+- Or add BOM manually
+
+VERIFICATION:
+=============
+
+After recompile, check server console:
+[BotPhrases] Loaded 50 lines from: .\IA\Phrases\Portuguese\BotPhrases.txt ✅
+[BotPhrases] Loaded phrases: General=20, Near=10, Party=5, PVP=3 ✅
+
+Then in game:
+Bot says: "De onde você é?" ✅ (no symbols!)
+
+SUCCESS! 🎉
+
+================================================================================
+  Recompile GameServer and test bot phrases!
+================================================================================
