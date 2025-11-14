@@ -330,7 +330,9 @@ void LoadBotPhrasesFromFile(const char* filename)
 	int currentMapIndexForPhrases = -1, currentDBClassForPhrases = -1;
 
 	try {
-		for (auto& line : lines) {
+		// Use old-style loop for compatibility with older C++ compilers
+		for (size_t i = 0; i < lines.size(); i++) {
+			std::string line = lines[i];
 			if (line.empty() || line[0] == ';') continue;
 
 			if (line[0] == '#') {
