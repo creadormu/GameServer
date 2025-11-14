@@ -157,11 +157,17 @@ BEGIN
     PRINT '  Dropped PK_CashShopInventory'
 END
 
-IF EXISTS (SELECT * FROM sys.indexes WHERE name = 'PK_TempCashShop' AND object_id = OBJECT_ID('TempCashShop'))
-BEGIN
-    ALTER TABLE [dbo].[TempCashShop] DROP CONSTRAINT [PK_TempCashShop]
-    PRINT '  Dropped PK_TempCashShop'
-END
+-- TempCashShop - try both index and constraint approaches
+BEGIN TRY
+    IF EXISTS (SELECT * FROM sys.key_constraints WHERE name = 'PK_TempCashShop')
+    BEGIN
+        ALTER TABLE [dbo].[TempCashShop] DROP CONSTRAINT [PK_TempCashShop]
+        PRINT '  Dropped PK_TempCashShop'
+    END
+END TRY
+BEGIN CATCH
+    PRINT '  PK_TempCashShop not found or already dropped'
+END CATCH
 
 IF EXISTS (SELECT * FROM sys.indexes WHERE name = 'PK_MuCastle_DATA' AND object_id = OBJECT_ID('MuCastle_DATA'))
 BEGIN
