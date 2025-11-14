@@ -145,7 +145,13 @@ BEGIN
     PRINT '  Dropped PK_QuestSystem'
 END
 
-IF EXISTS (SELECT * FROM sys.indexes WHERE name = 'PK_CashShopData' AND object_id = OBJECT_ID('CashShopData'))
+-- CashShopData has a PK but it's named PK_TempCashShop (weird naming!)
+IF EXISTS (SELECT * FROM sys.indexes WHERE name = 'PK_TempCashShop' AND object_id = OBJECT_ID('CashShopData'))
+BEGIN
+    ALTER TABLE [dbo].[CashShopData] DROP CONSTRAINT [PK_TempCashShop]
+    PRINT '  Dropped PK_TempCashShop from CashShopData'
+END
+ELSE IF EXISTS (SELECT * FROM sys.indexes WHERE name = 'PK_CashShopData' AND object_id = OBJECT_ID('CashShopData'))
 BEGIN
     ALTER TABLE [dbo].[CashShopData] DROP CONSTRAINT [PK_CashShopData]
     PRINT '  Dropped PK_CashShopData'
@@ -156,9 +162,6 @@ BEGIN
     ALTER TABLE [dbo].[CashShopInventory] DROP CONSTRAINT [PK_CashShopInventory]
     PRINT '  Dropped PK_CashShopInventory'
 END
-
--- Note: PK_TempCashShop is actually on CashShopData table (named incorrectly)
--- It will be dropped with PK_CashShopData above, so no need to drop it separately
 
 IF EXISTS (SELECT * FROM sys.indexes WHERE name = 'PK_MuCastle_DATA' AND object_id = OBJECT_ID('MuCastle_DATA'))
 BEGIN
@@ -669,11 +672,12 @@ BEGIN
     PRINT '  Recreated PK_QuestSystem'
 END
 
+-- Recreate CashShopData PK with its original name (PK_TempCashShop)
 IF OBJECT_ID('CashShopData', 'U') IS NOT NULL
 BEGIN
     ALTER TABLE [dbo].[CashShopData] 
-    ADD CONSTRAINT [PK_CashShopData] PRIMARY KEY CLUSTERED ([AccountID] ASC)
-    PRINT '  Recreated PK_CashShopData'
+    ADD CONSTRAINT [PK_TempCashShop] PRIMARY KEY CLUSTERED ([AccountID] ASC)
+    PRINT '  Recreated PK_TempCashShop on CashShopData'
 END
 
 IF OBJECT_ID('CashShopInventory', 'U') IS NOT NULL
