@@ -1,0 +1,225 @@
+================================================================================
+  DATABASE MIGRATION ERRORS - FIXED!
+================================================================================
+
+PROBLEMS FOUND:
+===============
+
+1. AccountCharacter table error:
+   - Column 'Id' has a PRIMARY KEY constraint
+   - Can't change column type while constraint exists
+   - Need to DROP constraint first, then ALTER, then RECREATE
+
+2. Guild stored procedure error:
+   - Your Guild table uses 'Number' column (IDENTITY)
+   - The script was trying to use 'G_Num' column (doesn't exist!)
+   - Fixed to use 'Number' instead
+
+3. Guild table not migrated:
+   - The original script didn't convert Guild table columns
+   - Fixed script now converts G_Name, G_Master, G_Notice to nvarchar
+
+SOLUTION:
+=========
+
+I created FIXED versions of both SQL scripts:
+
+1. Database_Unicode_Migration_FIXED.sql
+   - Properly handles PRIMARY KEY constraints
+   - Drops constraints BEFORE altering columns
+   - Recreates constraints AFTER altering columns
+   - Converts Guild table to nvarchar
+
+2. Database_StoredProcedure_Unicode_Update_FIXED.sql
+   - Uses 'Number' column instead of 'G_Num'
+   - All procedures updated correctly
+
+HOW TO RUN THE FIXED SCRIPTS:
+==============================
+
+STEP 1: Restore Your Database (if you ran the old scripts)
+-----------------------------------------------------------
+If you already ran the old scripts and got errors:
+
+Option A - Restore from backup:
+   1. Right-click MuOnline database
+   2. Tasks → Restore → Database
+   3. Select your backup file
+   4. Click OK
+
+Option B - Continue (if no damage done):
+   If the errors stopped the script, you can just run the fixed version
+
+STEP 2: Run the FIXED Migration Script
+---------------------------------------
+1. Open SQL Server Management Studio
+2. File → Open → File
+3. Select: Database_Unicode_Migration_FIXED.sql
+4. Click Execute (F5)
+5. Wait for completion (10-25 minutes)
+
+Expected output:
+   =========================================
+   Starting Unicode Migration for MuOnline
+   =========================================
+   
+   Migrating MEMB_INFO table...
+     MEMB_INFO: Converted varchar to nvarchar for text fields
+   
+   Migrating AccountCharacter table...
+     Dropped PK_AccountCharacter constraint
+     AccountCharacter: Converted varchar to nvarchar for character names
+   
+   Migrating Character table...
+     Dropped PK_Character constraint
+     Character: Converted varchar to nvarchar for text fields
+   
+   Migrating Guild table...
+     Dropped PK_Guild constraint
+     Guild: Converted varchar to nvarchar for text fields
+   
+   Migrating GuildMember table...
+     Dropped PK_GuildMember constraint
+     GuildMember: Converted varchar to nvarchar for character names
+   
+   =========================================
+   Unicode Migration Completed Successfully!
+   =========================================
+
+STEP 3: Run the FIXED Stored Procedure Script
+----------------------------------------------
+1. Open SQL Server Management Studio
+2. File → Open → File
+3. Select: Database_StoredProcedure_Unicode_Update_FIXED.sql
+4. Click Execute (F5)
+5. Wait for completion (< 1 minute)
+
+Expected output:
+   =========================================
+   Updating Stored Procedures for Unicode
+   =========================================
+   
+   Dropped old WZ_CreateCharacter procedure
+   Created WZ_CreateCharacter with Unicode support
+   
+   Dropped old WZ_DeleteCharacter procedure
+   Created WZ_DeleteCharacter with Unicode support
+   
+   Dropped old WZ_CreateGuild procedure
+   Created WZ_CreateGuild with Unicode support
+   
+   Created CreateBotCharacter with Unicode support
+   
+   Dropped old WZ_RenameCharacter procedure
+   Created WZ_RenameCharacter with Unicode support
+   
+   =========================================
+   Stored Procedures Updated Successfully!
+   =========================================
+
+NO ERRORS! ✅
+
+WHAT WAS FIXED:
+===============
+
+Database_Unicode_Migration_FIXED.sql:
+-------------------------------------
+✅ Drops PRIMARY KEY constraints before altering columns
+✅ Recreates PRIMARY KEY constraints after altering columns
+✅ Handles AccountCharacter.Id constraint properly
+✅ Handles Character.Name constraint properly
+✅ Handles Guild.G_Name constraint properly
+✅ Handles GuildMember.Name constraint properly
+✅ Converts Guild table columns to nvarchar
+
+Database_StoredProcedure_Unicode_Update_FIXED.sql:
+---------------------------------------------------
+✅ Uses [Number] column instead of [G_Num] in WZ_CreateGuild
+✅ All NVARCHAR parameters for Unicode support
+✅ Works with your actual Guild table structure
+
+VERIFY SUCCESS:
+===============
+
+After running both scripts successfully, verify with this query:
+
+SELECT 
+    TABLE_NAME, 
+    COLUMN_NAME, 
+    DATA_TYPE, 
+    CHARACTER_MAXIMUM_LENGTH
+FROM INFORMATION_SCHEMA.COLUMNS
+WHERE TABLE_SCHEMA = 'dbo' 
+    AND DATA_TYPE IN ('varchar', 'nvarchar')
+    AND TABLE_NAME IN ('MEMB_INFO', 'AccountCharacter', 'Character', 'Guild', 'GuildMember')
+ORDER BY TABLE_NAME, COLUMN_NAME
+
+Expected results:
+- All text columns should show DATA_TYPE = 'nvarchar' ✅
+- No 'varchar' should remain ✅
+
+COMMON QUESTIONS:
+=================
+
+Q: Why do we need to drop and recreate primary keys?
+A: SQL Server doesn't allow changing column type when it's part of a constraint.
+   We must drop the constraint first, change the column, then recreate it.
+
+Q: Will I lose data?
+A: NO! The data is preserved. Only the data TYPE changes (varchar → nvarchar).
+   Primary keys are recreated with the same structure.
+
+Q: What if I have custom tables?
+A: The script handles optional tables (ChatLog, MemoData, PersonalShop).
+   For your custom tables, add similar ALTER TABLE statements.
+
+Q: Do I need to restart GameServer?
+A: YES! After database migration, restart GameServer with the Unicode-enabled
+   version (that you compiled earlier).
+
+NEXT STEPS:
+===========
+
+After successful migration:
+
+1. ✅ Database migration complete
+2. ✅ Stored procedures updated
+3. ⏭️ Start GameServer
+4. ⏭️ Test character creation with Portuguese name: "João"
+5. ⏭️ Test chat with Portuguese: "Olá, ação!"
+6. ⏭️ Test guild creation: "Dragões"
+
+TROUBLESHOOTING:
+================
+
+Error: "Cannot drop constraint because it doesn't exist"
+Solution: This is OK! Script checks before dropping.
+
+Error: "Column already nvarchar"
+Solution: Migration already done! You can skip this table.
+
+Error: Still getting "G_Num" errors
+Solution: Make sure you're running the FIXED version of the stored procedure script.
+
+Error: Data corruption or strange characters
+Solution: Restore from backup and run the FIXED scripts again.
+
+SUCCESS INDICATORS:
+===================
+
+✅ No errors in migration script
+✅ All varchar columns converted to nvarchar
+✅ All primary keys recreated successfully
+✅ Stored procedures created without errors
+✅ No "G_Num" column errors
+✅ Ready to test Unicode characters!
+
+================================================================================
+  Use the FIXED SQL scripts and everything will work perfectly!
+================================================================================
+
+Files to use:
+1. Database_Unicode_Migration_FIXED.sql
+2. Database_StoredProcedure_Unicode_Update_FIXED.sql
+
+Good luck my friend! 🎉

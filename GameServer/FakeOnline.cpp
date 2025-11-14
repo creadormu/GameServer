@@ -103,7 +103,7 @@ std::string CFakeOnline::GetItemName(int itemType) {
 		// Add more items as needed
 	}
 
-	auto it = itemNames.find(itemType);
+	std::map<int, std::string>::iterator it = itemNames.find(itemType);
 	if (it != itemNames.end()) {
 		return it->second;
 	}
@@ -121,12 +121,12 @@ std::string CFakeOnline::ReplaceTradePlaceholders(const std::string& phrase, con
 	std::string acc = trim(botAccount);
 	std::transform(acc.begin(), acc.end(), acc.begin(), ::toupper);
 
-	auto it = m_TradeData.find(acc);
+	std::map<std::string, FAKEBOT_TRADE_ITEM>::iterator it = m_TradeData.find(acc);
 	if (it == m_TradeData.end() || it->second.requiredItems.empty() || it->second.rewardItems.empty()) {
 		return phrase; // Return original phrase if no trade config
 	}
 
-	const auto& config = it->second;
+	const FAKEBOT_TRADE_ITEM& config = it->second;
 
 	// Build required items string
 	std::string requiredItems = "";
@@ -317,16 +317,22 @@ void LoadBotPhrasesFromFile(const char* filename)
 	g_BotPhrasesNight.clear();
 	g_BotPhrasesTrade.clear(); // ADD THIS LINE
 
-	std::ifstream file(filename);
-	if (!file.is_open()) { return; }
+	// Read file as UTF-8 to support Unicode characters
+	std::vector<std::string> lines;
+	if (!ReadUTF8File(filename, lines)) {
+		LogAdd(LOG_RED, "[BotPhrases] Failed to load: %s", filename);
+		return;
+	}
+	LogAdd(LOG_GREEN, "[BotPhrases] Loaded %d lines from: %s", lines.size(), filename);
 
-	std::string line;
 	int mode = 0;
 	const int MODE_NONE = 0, MODE_GENERAL = 1, MODE_NEAR = 2, MODE_IN_PARTY = 3, MODE_PVP = 4, MODE_MAP_SPECIFIC = 5, MODE_CLASS_SPECIFIC = 6;
 	int currentMapIndexForPhrases = -1, currentDBClassForPhrases = -1;
 
 	try {
-		while (std::getline(file, line)) {
+		// Use old-style loop for compatibility with older C++ compilers
+		for (size_t i = 0; i < lines.size(); i++) {
+			std::string line = lines[i];
 			if (line.empty() || line[0] == ';') continue;
 
 			if (line[0] == '#') {
@@ -479,8 +485,10 @@ void LoadBotPhrasesFromFile(const char* filename)
 	}
 	catch (...) {}
 
-	if (file.is_open())
-		file.close();
+	// File is already closed by ReadUTF8File
+	LogAdd(LOG_GREEN, "[BotPhrases] Loaded phrases: General=%d, Near=%d, Party=%d, PVP=%d", 
+		g_BotPhrasesGeneral.size(), g_BotPhrasesNear.size(), 
+		g_BotPhrasesInParty.size(), g_BotPhrasesPVP.size());
 }
 
 
@@ -497,10 +505,10 @@ static std::string GetRandomBotPhrase(int botDBClass, int currentMap, bool realP
     else if (inParty && !g_BotPhrasesInParty.empty()) { pSelectedList = &g_BotPhrasesInParty; }
     else if (realPlayerNearby && !g_BotPhrasesNear.empty()) { pSelectedList = &g_BotPhrasesNear; }
     else {
-        auto itClass = g_BotPhrasesClassSpecific.find(botDBClass);
+        std::map<int, std::vector<std::string> >::iterator itClass = g_BotPhrasesClassSpecific.find(botDBClass);
         if (itClass != g_BotPhrasesClassSpecific.end() && !itClass->second.empty()) { pSelectedList = &itClass->second;}
         else {
-            auto itMap = g_BotPhrasesMapSpecific.find(currentMap);
+            std::map<int, std::vector<std::string> >::iterator itMap = g_BotPhrasesMapSpecific.find(currentMap);
             if (itMap != g_BotPhrasesMapSpecific.end() && !itMap->second.empty()) { pSelectedList = &itMap->second; }
         }
     }
@@ -2299,15 +2307,21 @@ void LoadBotKeywordResponses(const char* filename)
 	g_KeywordTriggers.clear();
 	g_KeywordResponses.clear();
 
-	std::ifstream file(filename);
-	if (!file.is_open()) return;
+	// Read file as UTF-8 to support Unicode characters
+	std::vector<std::string> lines;
+	if (!ReadUTF8File(filename, lines)) {
+		LogAdd(LOG_RED, "[BotKeywords] Failed to load: %s", filename);
+		return;
+	}
+	LogAdd(LOG_GREEN, "[BotKeywords] Loaded %d lines from: %s", lines.size(), filename);
 
-	std::string line;
 	std::string currentCategory = "";
 	bool readingResponses = false;
 
-	while (std::getline(file, line))
+	// Use old-style loop for compatibility
+	for (size_t i = 0; i < lines.size(); i++)
 	{
+		std::string line = lines[i];
 		// Limpieza de espacios
 		line.erase(0, line.find_first_not_of(" \t\r\n"));
 		line.erase(line.find_last_not_of(" \t\r\n") + 1);
@@ -2337,7 +2351,8 @@ void LoadBotKeywordResponses(const char* filename)
 			g_KeywordResponses[currentCategory].push_back(line);
 	}
 
-	file.close();
+	// File is already closed by ReadUTF8File
+	LogAdd(LOG_GREEN, "[BotKeywords] Loaded keywords: %d categories", g_KeywordTriggers.size());
 }
 
 
@@ -2427,7 +2442,7 @@ bool CFakeOnline::CanTradeWithBot(const LPOBJ lpBot)
 	if (!lpBot || !lpBot->Account[0]) return false;
 	std::string acc = trim(lpBot->Account);
 	std::transform(acc.begin(), acc.end(), acc.begin(), ::toupper);
-	auto it = m_TradeData.find(acc);
+	std::map<std::string, FAKEBOT_TRADE_ITEM>::iterator it = m_TradeData.find(acc);
 	if (it != m_TradeData.end()) {
 		LogAdd(LOG_BLUE, "[FakeBot][CanTradeWithBot] Bot %s (Account: %s) SÍ está en la lista de trade.", lpBot->Name, lpBot->Account);
 		return true;
@@ -2593,13 +2608,13 @@ bool CFakeOnline::HandleFakeBotTrade(int playerIndex, LPOBJ lpBot) {
 	std::string acc = trim(lpBot->Account);
 	std::transform(acc.begin(), acc.end(), acc.begin(), ::toupper);
 
-	auto it = m_TradeData.find(acc);
+	std::map<std::string, FAKEBOT_TRADE_ITEM>::iterator it = m_TradeData.find(acc);
 	if (it == m_TradeData.end()) {
 		gNotice.NewNoticeSend(playerIndex, 0, 0, 0, 0, 0, "No deseo hacer trade.");
 		return false;
 	}
 
-	const auto& config = it->second;
+	const FAKEBOT_TRADE_ITEM& config = it->second;
 
 	if (config.requiredItems.empty() || config.rewardItems.empty()) {
 		gNotice.NewNoticeSend(playerIndex, 0, 0, 0, 0, 0, "Configuración de trade inválida.");
@@ -2716,13 +2731,13 @@ bool CFakeOnline::InitializeBotTrade(int playerIndex, LPOBJ lpBot) {
 	std::string acc = trim(lpBot->Account);
 	std::transform(acc.begin(), acc.end(), acc.begin(), ::toupper);
 
-	auto it = m_TradeData.find(acc);
+	std::map<std::string, FAKEBOT_TRADE_ITEM>::iterator it = m_TradeData.find(acc);
 	if (it == m_TradeData.end()) {
 		gNotice.NewNoticeSend(playerIndex, 0, 0, 0, 0, 0, "Este bot no puede hacer trade.");
 		return false;
 	}
 
-	const auto& config = it->second;
+	const FAKEBOT_TRADE_ITEM& config = it->second;
 
 	// FIXED: Check if bot has required items BEFORE accepting trade
 	if (!BotHasRewardItems(lpBot, config.rewardItems)) {
@@ -2760,28 +2775,30 @@ bool CFakeOnline::InitializeBotTrade(int playerIndex, LPOBJ lpBot) {
 void CFakeOnline::LoadFakeBotTradeConfig(const char* path) {
 	LogAdd(LOG_BLUE, "[FakeBotTrade] Intentando cargar archivo: %s", path);
 
-	FILE* file = fopen(path, "r");
-	if (!file) {
+	// Read file as UTF-8 to support Unicode item names/descriptions
+	std::vector<std::string> lines;
+	if (!ReadUTF8File(path, lines)) {
 		LogAdd(LOG_RED, "[FakeBotTrade] ERROR: No se pudo abrir el archivo %s", path);
 		return;
 	}
 
 	int section = 0;
-	char line[256];
 	int botsCargados = 0, itemsReq = 0, rewards = 0;
 	std::vector<std::string> botAccounts; // Store bot accounts in order
 
-	auto clean_upper = [](const char* input) -> std::string {
-		std::string s = input ? input : "";
-		size_t start = s.find_first_not_of(" \t\r\n");
-		size_t end = s.find_last_not_of(" \t\r\n");
-		s = (start == std::string::npos) ? "" : s.substr(start, end - start + 1);
-		std::transform(s.begin(), s.end(), s.begin(), ::toupper);
-		return s;
-		};
-
-	while (fgets(line, sizeof(line), file)) {
-		line[strcspn(line, "\r\n")] = 0;
+	// Use old-style loop for compatibility
+	for (size_t lineIdx = 0; lineIdx < lines.size(); lineIdx++) {
+		std::string lineStr = lines[lineIdx];
+		// Remove trailing whitespace/newlines (already done by ReadUTF8File, but be safe)
+		size_t endPos = lineStr.find_last_not_of(" \t\r\n");
+		if (endPos != std::string::npos) {
+			lineStr = lineStr.substr(0, endPos + 1);
+		}
+		
+		// Convert to char array for strtok (which modifies the string)
+		char line[256];
+		strncpy_s(line, sizeof(line), lineStr.c_str(), _TRUNCATE);
+		
 		if (line[0] == '/' || line[0] == 0) continue;
 
 		if (strncmp(line, "end", 3) == 0) {
@@ -2809,7 +2826,12 @@ void CFakeOnline::LoadFakeBotTradeConfig(const char* path) {
 			if (!token) continue;
 			int rate = atoi(token);
 
-			std::string accKey = clean_upper(acc);
+			// Clean and uppercase account (inline instead of lambda for old C++)
+			std::string accKey = acc;
+			size_t start = accKey.find_first_not_of(" \t\r\n");
+			size_t endPos = accKey.find_last_not_of(" \t\r\n");
+			accKey = (start == std::string::npos) ? "" : accKey.substr(start, endPos - start + 1);
+			std::transform(accKey.begin(), accKey.end(), accKey.begin(), ::toupper);
 			FAKEBOT_TRADE_ITEM& trade = m_TradeData[accKey];
 			trade.tradeName = tradeName;
 			trade.successRate = rate;
@@ -2877,7 +2899,7 @@ void CFakeOnline::LoadFakeBotTradeConfig(const char* path) {
 			reward.Exc = (BYTE)data[8];
 			reward.Dur = (BYTE)data[9];
 
-			for (auto it = m_TradeData.begin(); it != m_TradeData.end(); ++it) {
+			for (std::map<std::string, FAKEBOT_TRADE_ITEM>::iterator it = m_TradeData.begin(); it != m_TradeData.end(); ++it) {
 				if (strcmp(it->second.tradeName.c_str(), tradeName) == 0) {
 					it->second.rewardItems.push_back(reward);
 					rewards++;
@@ -2886,7 +2908,7 @@ void CFakeOnline::LoadFakeBotTradeConfig(const char* path) {
 		}
 	}
 
-	fclose(file);
+	// File is already closed by ReadUTF8File
 	LogAdd(LOG_GREEN, "[FakeBotTrade] Carga completa: Bots: %d | Items requeridos: %d | Recompensas: %d", botsCargados, itemsReq, rewards);
 }
 

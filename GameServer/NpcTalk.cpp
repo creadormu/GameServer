@@ -388,7 +388,8 @@ void CNpcTalk::SpiritNixie(LPOBJ lpNpc,LPOBJ lpObj) // OK
 	if(nixie == 0)
 	{
 		char text[100]; 
-		wsprintf(text,"Necesitas %s para acceder.",gItemManager.GetItemName(GET_ITEM(13,149)));
+		// Use sprintf_s instead of wsprintf for UTF-8 compatibility
+		sprintf_s(text, sizeof(text), "Necesitas %s para acceder.", gItemManager.GetItemName(GET_ITEM(13,149)));
 		gNotice.GCNoticeSend(lpObj->Index,1,0,0,0,0,0,text);
 	}
 }

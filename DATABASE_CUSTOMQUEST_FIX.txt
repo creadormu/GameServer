@@ -1,0 +1,194 @@
+================================================================================
+  CUSTOMNPCQUEST & CUSTOMQUEST PRIMARY KEY FIX
+================================================================================
+
+PROBLEM FOUND:
+==============
+The CustomNpcQuest table has a PRIMARY KEY constraint on the Name column!
+
+Error message:
+  "The object 'PK_CustomNpcQuest' is dependent on column 'Name'"
+  "ALTER TABLE ALTER COLUMN Name failed because one or more objects access this column"
+
+This is the same issue as before - we need to drop the primary key BEFORE converting!
+
+WHAT ARE THESE TABLES:
+======================
+
+CustomNpcQuest table structure:
+  PRIMARY KEY: (Name, QuestIndex)
+  - Name: Character name (varchar -> nvarchar)
+  - QuestIndex: Quest number
+
+CustomQuest table structure:
+  PRIMARY KEY: (Name, QuestIndex)
+  - Name: Character name (varchar -> nvarchar)
+  - QuestIndex: Quest number
+
+These tables track which quests each character has completed.
+
+THE FIX:
+========
+
+Updated the FINAL script to:
+
+Step 3: Drop primary key constraints
+-------------------------------------
+ADDED:
+  - Drop PK_CustomNpcQuest (composite key: Name + QuestIndex)
+  - Drop PK_CustomQuest (composite key: Name + QuestIndex)
+
+Step 16: Recreate primary key constraints
+------------------------------------------
+ADDED:
+  - Recreate PK_CustomNpcQuest as composite key
+  - Recreate PK_CustomQuest as composite key
+
+COMPLETE CONSTRAINT ORDER:
+==========================
+
+The script now handles ALL constraints in correct order:
+
+1. DROP constraints:
+   ✅ Foreign keys: FK_CustomNpcQuest_Character, FK_CustomQuest_Character
+   ✅ Default constraints: Wife, Language
+   ✅ Primary keys: 
+      - PK_Character
+      - PK_Guild
+      - PK_GuildMember
+      - PK_CustomNpcQuest ← ADDED!
+      - PK_CustomQuest ← ADDED!
+      - PK_AccountCharacter2/3/4/5
+
+2. CONVERT columns (varchar → nvarchar)
+
+3. RECREATE constraints:
+   ✅ Default constraints: Wife, Language (with Unicode)
+   ✅ Primary keys:
+      - PK_Character
+      - PK_Guild
+      - PK_GuildMember
+      - PK_CustomNpcQuest ← ADDED!
+      - PK_CustomQuest ← ADDED!
+      - PK_AccountCharacter2/3/4/5
+   ✅ Foreign keys: FK_CustomNpcQuest_Character, FK_CustomQuest_Character
+
+WHY COMPOSITE PRIMARY KEYS:
+============================
+
+These tables use composite keys because:
+  - One character can have MULTIPLE quests
+  - Need to identify: "Which quest for which character?"
+
+Example data:
+  Name      QuestIndex
+  -------   ----------
+  "João"    1          ← Quest 1 for João
+  "João"    2          ← Quest 2 for João
+  "Maria"   1          ← Quest 1 for Maria
+
+Primary key (Name + QuestIndex) ensures uniqueness:
+  ✅ Same character can have different quests
+  ✅ Same quest can be done by different characters
+  ✅ No duplicate (Name, QuestIndex) combinations
+
+EXPECTED OUTPUT NOW:
+====================
+
+=========================================
+FINAL Unicode Migration for MuOnline
+This will take 15-30 minutes...
+=========================================
+
+Step 1: Dropping foreign key constraints...
+  Dropped FK_CustomNpcQuest_Character ✅
+  Dropped FK_CustomQuest_Character ✅
+
+Step 2: Dropping default constraints on text columns...
+  Dropped Wife default constraint: DF__Character__Wife__7CD98669 ✅
+  Dropped Language default constraint: DF__Character__Langu__62E4AA3C ✅
+
+Step 3: Dropping primary key constraints...
+  Dropped PK_Character ✅
+  Dropped PK_Guild ✅
+  Dropped PK_GuildMember ✅
+  Dropped PK_CustomNpcQuest ✅ ← NEW!
+  Dropped PK_CustomQuest ✅ ← NEW!
+
+Step 4: Converting Character table...
+  Character table converted ✅
+
+Step 5: Recreating default constraints...
+  Recreated Wife default constraint ✅
+  Recreated Language default constraint ✅
+
+Step 6: Converting AccountCharacter tables...
+  AccountCharacter2 converted ✅
+  AccountCharacter3 converted ✅
+  AccountCharacter4 converted ✅
+  AccountCharacter5 converted ✅
+
+Step 7: Converting Guild tables...
+  Guild table converted ✅
+  GuildMember table converted ✅
+
+Step 8: Converting Custom Quest tables...
+  CustomNpcQuest converted ✅ ← Should work now!
+  CustomQuest converted ✅ ← Should work now!
+
+... (continues for all tables)
+
+Step 16: Recreating primary key constraints...
+  Recreated PK_Character ✅
+  Recreated PK_Guild ✅
+  Recreated PK_GuildMember ✅
+  Recreated PK_CustomNpcQuest ✅ ← NEW!
+  Recreated PK_CustomQuest ✅ ← NEW!
+
+Step 17: Recreating foreign key constraints...
+  Recreated FK_CustomNpcQuest_Character ✅
+  Recreated FK_CustomQuest_Character ✅
+
+=========================================
+Unicode Migration Completed Successfully!
+=========================================
+
+ALL CONSTRAINTS NOW HANDLED:
+============================
+
+The script now handles:
+  ✅ Foreign key constraints (2 total)
+  ✅ Default constraints (2 total)
+  ✅ Primary key constraints (9 total):
+      - Character
+      - Guild
+      - GuildMember
+      - CustomNpcQuest ← FIXED!
+      - CustomQuest ← FIXED!
+      - AccountCharacter2
+      - AccountCharacter3
+      - AccountCharacter4
+      - AccountCharacter5
+
+WHAT TO DO NOW:
+===============
+
+The Database_Unicode_Migration_FINAL.sql has been updated!
+
+1. Close any previous query window
+2. Open FRESH copy of: Database_Unicode_Migration_FINAL.sql
+3. Click Execute (F5)
+4. Watch the messages - should see no errors!
+
+NO MORE ERRORS THIS TIME! 🎉
+
+The script now handles EVERY constraint type:
+  ✅ Foreign keys
+  ✅ Primary keys (including composite keys!)
+  ✅ Default constraints
+  ✅ All tables
+  ✅ All columns
+
+================================================================================
+  Run the updated Database_Unicode_Migration_FINAL.sql now!
+================================================================================

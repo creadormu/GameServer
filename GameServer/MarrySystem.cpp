@@ -220,14 +220,16 @@ void Marry::Propose(LPOBJ lpObj,char * Wife)
 					return;			
 				}	
 		
-				lpObj->MarryCharacterInfo.MarrySeconds = 0;
-				wsprintf(gObj[lpTargetID].MarryCharacterInfo.MarryTarget,"%s",lpObj->Name);
+			lpObj->MarryCharacterInfo.MarrySeconds = 0;
+			// Use sprintf_s instead of wsprintf for UTF-8 compatibility
+			sprintf_s(gObj[lpTargetID].MarryCharacterInfo.MarryTarget, sizeof(gObj[lpTargetID].MarryCharacterInfo.MarryTarget), "%s", lpObj->Name);
 		
 				gNotice.NewNoticeSend(lpObj->Index,0,0,0,0,0,"[Propose] waiting for response: %s"
 				,gObj[lpTargetID].Name);
 					
-				gObj[lpTargetID].MarryCharacterInfo.MarrySeconds = this->MarryMaxTime;
-				wsprintf(lpObj->MarryCharacterInfo.MarryTarget,"%s",gObj[lpTargetID].Name);
+			gObj[lpTargetID].MarryCharacterInfo.MarrySeconds = this->MarryMaxTime;
+			// Use sprintf_s instead of wsprintf for UTF-8 compatibility
+			sprintf_s(lpObj->MarryCharacterInfo.MarryTarget, sizeof(lpObj->MarryCharacterInfo.MarryTarget), "%s", gObj[lpTargetID].Name);
 	
 				gNotice.NewNoticeSend(gObj[lpTargetID].Index,0,0,0,0,0,"[Propose] Accept marry with %s?",lpObj->Name);
 
@@ -268,15 +270,17 @@ void Marry::Accept(LPOBJ lpObj)
 		if (lpObj->MarryCharacterInfo.Married == 0)
 		{
 			lpObj->MarryCharacterInfo.Married = 1;
-			lpObj->MarryCharacterInfo.MarrySeconds = this->MarryMaxTime;
-	
-			wsprintf(lpObj->MarryCharacterInfo.MarriedName,"%s",lpObj->MarryCharacterInfo.MarryTarget);
+		lpObj->MarryCharacterInfo.MarrySeconds = this->MarryMaxTime;
+
+		// Use sprintf_s instead of wsprintf for UTF-8 compatibility
+		sprintf_s(lpObj->MarryCharacterInfo.MarriedName, sizeof(lpObj->MarryCharacterInfo.MarriedName), "%s", lpObj->MarryCharacterInfo.MarryTarget);
 			memset( lpObj->MarryCharacterInfo.MarryTarget, 0, MAX_ACCOUNT_LEN);
 
 			gObj[lpTargetID].MarryCharacterInfo.Married = 1;
-			gObj[lpTargetID].MarryCharacterInfo.MarrySeconds = this->MarryMaxTime;
-	
-			wsprintf(gObj[lpTargetID].MarryCharacterInfo.MarriedName,"%s",gObj[lpTargetID].MarryCharacterInfo.MarryTarget);
+		gObj[lpTargetID].MarryCharacterInfo.MarrySeconds = this->MarryMaxTime;
+
+		// Use sprintf_s instead of wsprintf for UTF-8 compatibility
+		sprintf_s(gObj[lpTargetID].MarryCharacterInfo.MarriedName, sizeof(gObj[lpTargetID].MarryCharacterInfo.MarriedName), "%s", gObj[lpTargetID].MarryCharacterInfo.MarryTarget);
 			memset( gObj[lpTargetID].MarryCharacterInfo.MarryTarget, 0, MAX_ACCOUNT_LEN);
 		
 			GCFireworksSend(lpObj,this->ProposeX,this->ProposeY);

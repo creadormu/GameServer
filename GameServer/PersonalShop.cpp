@@ -1470,7 +1470,8 @@ void CPersonalShop::SendMsgBotPsShop(int aIndex,int bIndex)
 				return;
 			}
 
-			wsprintf(sbuf,"Welcome to %s BotStore",lpObj->Name);
+			// Use sprintf_s instead of wsprintf for UTF-8 compatibility
+		sprintf_s(sbuf, sizeof(sbuf), "Welcome to %s BotStore", lpObj->Name);
 			gNotice.GCNoticeSend(aIndex,1,0,0,0,0,0,sbuf);
 
 			switch(lpTarget->BotPower)
@@ -1484,7 +1485,8 @@ void CPersonalShop::SendMsgBotPsShop(int aIndex,int bIndex)
 				{
 					gNotice.GCNoticeSend(aIndex,1,0,0,0,0,0,"This Personal Shop use WCoinC");
 
-						wsprintf(sbuf,"You have WCoinC = %d",gObj[aIndex].Coin1);//PCPoint
+						// Use sprintf_s instead of wsprintf for UTF-8 compatibility
+				sprintf_s(sbuf, sizeof(sbuf), "You have WCoinC = %d", gObj[aIndex].Coin1);//PCPoint
 						gNotice.GCNoticeSend(aIndex,1,0,0,0,0,0,sbuf);
 				}
 				break;
@@ -1492,7 +1494,8 @@ void CPersonalShop::SendMsgBotPsShop(int aIndex,int bIndex)
 				{
 					gNotice.GCNoticeSend(aIndex,1,0,0,0,0,0,"This Personal Shop use Vip Money");
 
-						wsprintf(sbuf,"VipMoney = %d",gObj[aIndex].VipMoney);
+						// Use sprintf_s instead of wsprintf for UTF-8 compatibility
+				sprintf_s(sbuf, sizeof(sbuf), "VipMoney = %d", gObj[aIndex].VipMoney);
 						gNotice.GCNoticeSend(aIndex,1,0,0,0,0,0,sbuf);
 				}
 				break;

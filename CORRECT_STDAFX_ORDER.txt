@@ -1,0 +1,64 @@
+================================================================================
+  CORRECT stdafx.h INCLUDE ORDER - COPY THIS!
+================================================================================
+
+My friend, the include order is CRITICAL!
+
+SQL headers MUST come BEFORE Unicode headers because the Unicode headers 
+use SQLWCHAR type which is defined in sql.h!
+
+YOUR stdafx.h should look EXACTLY like this (around line 145-157):
+================================================================================
+
+#include <dbghelp.h>
+#include <Psapi.h>
+#include <sql.h>               // ← SQL headers FIRST!
+#include <sqlext.h>            // ← SQL headers FIRST!
+#include "pugixml.hpp"
+#include "UnicodeSupport.h"   // ← Unicode headers AFTER SQL!
+#include "UnicodeODBC.h"       // ← Unicode headers AFTER SQL!
+#include "UnicodeFileIO.h"     // ← Unicode headers AFTER SQL!
+
+#pragma comment(lib,"ws2_32.lib")
+#pragma comment(lib,"Rpcrt4.lib")
+#pragma comment(lib,"dbghelp.lib")
+#pragma comment(lib,"Psapi.lib")
+#pragma comment(lib,"odbc32.lib")      // ← ODBC libraries!
+#pragma comment(lib,"odbccp32.lib")    // ← ODBC libraries!
+
+================================================================================
+
+WHY THIS ORDER MATTERS:
+=======================
+
+WRONG ORDER (Causes errors):
+---------------------------
+#include "UnicodeSupport.h"   // ← Uses SQLWCHAR (NOT DEFINED YET!)
+#include "UnicodeODBC.h"       // ← Uses SQLWCHAR (NOT DEFINED YET!)
+#include <sql.h>               // ← SQLWCHAR defined here (TOO LATE!)
+
+CORRECT ORDER (Works!):
+-----------------------
+#include <sql.h>               // ← Define SQLWCHAR first!
+#include <sqlext.h>            // ← Define other SQL types!
+#include "UnicodeSupport.h"   // ← Now SQLWCHAR is available!
+#include "UnicodeODBC.h"       // ← Now SQLWCHAR is available!
+
+STEPS TO FIX:
+=============
+
+1. Save stdafx.h (I just updated it with correct order)
+2. Visual Studio → Build → Clean Solution
+3. Build → Rebuild Solution (Ctrl+Shift+B)
+4. Should compile successfully! ✅
+
+VERIFY THE FILE:
+================
+
+Open stdafx.h and verify lines 145-157 look EXACTLY like shown above.
+
+If you manually edited it before, make sure you remove any duplicate includes!
+
+================================================================================
+  This should fix ALL SQLWCHAR errors!
+================================================================================
