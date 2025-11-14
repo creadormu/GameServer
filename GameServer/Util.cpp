@@ -270,7 +270,8 @@ void PostMessage1(char* name,char* message,char* text) // OK
 
 	char buff[256] = {0};
 
-	wsprintf(buff,message,name,text);
+	// Use sprintf_s instead of wsprintf for UTF-8 compatibility
+	sprintf_s(buff, sizeof(buff), message, name, text);
 
 	for(int n=OBJECT_START_USER;n < MAX_OBJECT;n++)
 	{
@@ -284,7 +285,8 @@ void PostMessage1(char* name,char* message,char* text) // OK
 
 	char buff[256] = {0};
 
-	wsprintf(buff,message,text);
+	// Use sprintf_s instead of wsprintf for UTF-8 compatibility
+	sprintf_s(buff, sizeof(buff), message, text);
 
 	int size = strlen(buff);
 
@@ -317,7 +319,8 @@ void PostMessage2(char* name,char* message,char* text) // OK
 
 	char buff[256] = {0};
 
-	wsprintf(buff,message,name,text);
+	// Use sprintf_s instead of wsprintf for UTF-8 compatibility
+	sprintf_s(buff, sizeof(buff), message, name, text);
 
 	for(int n=OBJECT_START_USER;n < MAX_OBJECT;n++)
 	{
@@ -358,7 +361,8 @@ void PostMessage3(char* name,char* message,char* text) // OK
 
 	char buff[256] = {0};
 
-	wsprintf(buff,message,name,text);
+	// Use sprintf_s instead of wsprintf for UTF-8 compatibility
+	sprintf_s(buff, sizeof(buff), message, name, text);
 
 	for(int n=OBJECT_START_USER;n < MAX_OBJECT;n++)
 	{
@@ -399,7 +403,8 @@ void PostMessage4(char* name,char* message,char* text) // OK
 
 	char buff[256] = {0};
 
-	wsprintf(buff,message,name,text);
+	// Use sprintf_s instead of wsprintf for UTF-8 compatibility
+	sprintf_s(buff, sizeof(buff), message, name, text);
 
 	for(int n=OBJECT_START_USER;n < MAX_OBJECT;n++)
 	{
@@ -440,7 +445,8 @@ void PostMessage5(char* name,char* message,char* text) // OK POST VIP
 
 	char buff[256] = {0};
 
-	wsprintf(buff,message,name,text);
+	// Use sprintf_s instead of wsprintf for UTF-8 compatibility
+	sprintf_s(buff, sizeof(buff), message, name, text);
 
 	for(int n=OBJECT_START_USER;n < MAX_OBJECT;n++)
 	{
@@ -481,7 +487,8 @@ void PostMessagePK(char* name,char* message,char* text) // OK
 
 	char buff[256] = {0};
 
-	wsprintf(buff,message,name,text);
+	// Use sprintf_s instead of wsprintf for UTF-8 compatibility
+	sprintf_s(buff, sizeof(buff), message, name, text);
 
 	for(int n=OBJECT_START_USER;n < MAX_OBJECT;n++)
 	{
@@ -522,7 +529,8 @@ void PostMessageUserON(char* name,char* message) // OK
 
 	char buff[256] = {0};
 
-	wsprintf(buff,message,name);
+	// Use sprintf_s instead of wsprintf for UTF-8 compatibility
+	sprintf_s(buff, sizeof(buff), message, name);
 
 	for(int n=OBJECT_START_USER;n < MAX_OBJECT;n++)
 	{
@@ -563,7 +571,8 @@ void PostMessageNew(char* name,char* message,char* text) // OK
 
 	char buff[256] = {0};
 
-	wsprintf(buff,message,name,text);
+	// Use sprintf_s instead of wsprintf for UTF-8 compatibility
+	sprintf_s(buff, sizeof(buff), message, name, text);
 
 	for(int n=OBJECT_START_USER;n < MAX_OBJECT;n++)
 	{
