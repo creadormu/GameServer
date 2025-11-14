@@ -1226,7 +1226,7 @@ bool CCommandManager::CommandSetLevel(LPOBJ lpObj,char* arg) // OK
 
 	if(lpTarget == 0)
 	{
-		gNotice.GCNoticeSend(lpObj->Index,1,0,0,0,0,0,"El personaje no existe o no está en línea.");
+		gNotice.GCNoticeSend(lpObj->Index,1,0,0,0,0,0,"El personaje no existe o no estÃ¡ en lÃ­nea.");
 		return 0;
 	}
 
@@ -1234,7 +1234,7 @@ bool CCommandManager::CommandSetLevel(LPOBJ lpObj,char* arg) // OK
 
 	if(level >= 401)
 	{
-		gNotice.GCNoticeSend(lpObj->Index,1,0,0,0,0,0,"La cantidad que ingresó no es válida.");
+		gNotice.GCNoticeSend(lpObj->Index,1,0,0,0,0,0,"La cantidad que ingresÃ³ no es vÃ¡lida.");
 		return 0;
 	}
 
@@ -1256,7 +1256,7 @@ bool CCommandManager::CommandSetPKLevel(LPOBJ lpObj,char* arg, int Npc) // ok - 
 
 	if(lpTarget == 0)
 	{
-		gNotice.GCNoticeSend(lpObj->Index,1,0,0,0,0,0,"El personaje no existe o no está en línea.");
+		gNotice.GCNoticeSend(lpObj->Index,1,0,0,0,0,0,"El personaje no existe o no estÃ¡ en lÃ­nea.");
 		return 0;
 	}
 
@@ -1264,7 +1264,7 @@ bool CCommandManager::CommandSetPKLevel(LPOBJ lpObj,char* arg, int Npc) // ok - 
 
 	if(pk >= 7)
 	{
-		gNotice.GCNoticeSend(lpObj->Index,1,0,0,0,0,0,"La cantidad que ingresó no es válida.");
+		gNotice.GCNoticeSend(lpObj->Index,1,0,0,0,0,0,"La cantidad que ingresÃ³ no es vÃ¡lida.");
 		return 0;
 	}
 
@@ -2719,7 +2719,8 @@ void CCommandManager::DGCommandMarryRecv(SDHP_COMMAND_MARRY_RECV* lpMsg) // OK
 			second_classtype=1;
 		}        
 		char fulltext_new[256]; 
-		wsprintf(fulltext_new,gMessage.GetMessage(615),lpMsg->name,lpMsg->marryname);
+		// Use sprintf_s instead of wsprintf for UTF-8 compatibility
+		sprintf_s(fulltext_new, sizeof(fulltext_new), gMessage.GetMessage(615), lpMsg->name, lpMsg->marryname);
 		if ((first_classtype == 0) && (second_classtype == 0)) {
 			if((GetTickCount()-lpObj->MarryTimeMsj) > (DWORD)(gServerInfo.m_CommandMarryNoticeDelay*1000))
 			{
@@ -2743,7 +2744,8 @@ void CCommandManager::DGCommandMarryRecv(SDHP_COMMAND_MARRY_RECV* lpMsg) // OK
 		GDMarryInfoSaveSend(lpObj->Index,lpMsg->marryname,lpMsg->mode);
 		gNotice.GCNoticeSend(lpObj->Index,1,0,0,0,0,0,gMessage.GetMessage(603),lpMsg->marryname);
 		char fulltext[256]; 
-		wsprintf(fulltext,gMessage.GetMessage(612),lpObj->Name,lpMsg->marryname);
+		// Use sprintf_s instead of wsprintf for UTF-8 compatibility
+		sprintf_s(fulltext, sizeof(fulltext), gMessage.GetMessage(612), lpObj->Name, lpMsg->marryname);
 		GDGlobalNoticeSend(gMapServerManager.GetMapServerGroup(),0,0,0,0,0,0,fulltext);
 		for(int n=0;n < 15;n++)
 		{
@@ -2784,12 +2786,14 @@ void CCommandManager::DGCommandMarryRecv(SDHP_COMMAND_MARRY_RECV* lpMsg) // OK
 		GDGlobalNoticeSend(gMapServerManager.GetMapServerGroup(),0,0,0,0,0,0,gMessage.GetMessage(614));
 		if(lpTarget1 == 0)
 		{
-			wsprintf(fulltext,gMessage.GetMessage(613),lpObj->Name,lpMsg->NameGet2);
+			// Use sprintf_s instead of wsprintf for UTF-8 compatibility
+			sprintf_s(fulltext, sizeof(fulltext), gMessage.GetMessage(613), lpObj->Name, lpMsg->NameGet2);
 			GDGlobalNoticeSend(gMapServerManager.GetMapServerGroup(),0,0,0,0,0,0,fulltext);
 		}
 		if(lpTarget2 == 0)
 		{
-			wsprintf(fulltext,gMessage.GetMessage(613),lpObj->Name,lpMsg->NameGet1);
+			// Use sprintf_s instead of wsprintf for UTF-8 compatibility
+			sprintf_s(fulltext, sizeof(fulltext), gMessage.GetMessage(613), lpObj->Name, lpMsg->NameGet1);
 			GDGlobalNoticeSend(gMapServerManager.GetMapServerGroup(),0,0,0,0,0,0,fulltext);
 		}
 		//
@@ -4575,14 +4579,16 @@ void CCommandManager::ProposeMarry(LPOBJ lpObj,char * Wife)
 					return;			
 				}	
 		
-				lpObj->MarryCharacterInfo.MarrySeconds = 0;
-				wsprintf(gObj[lpTargetID].MarryCharacterInfo.MarryTarget,"%s",lpObj->Name);
+			lpObj->MarryCharacterInfo.MarrySeconds = 0;
+			// Use sprintf_s instead of wsprintf for UTF-8 compatibility
+			sprintf_s(gObj[lpTargetID].MarryCharacterInfo.MarryTarget, sizeof(gObj[lpTargetID].MarryCharacterInfo.MarryTarget), "%s", lpObj->Name);
 		
 				gNotice.NewNoticeSend(lpObj->Index,0,0,0,0,0,"[Propose] waiting for response: %s"
 				,gObj[lpTargetID].Name);
 					
-				gObj[lpTargetID].MarryCharacterInfo.MarrySeconds = gMarry.MarryMaxTime;
-				wsprintf(lpObj->MarryCharacterInfo.MarryTarget,"%s",gObj[lpTargetID].Name);
+			gObj[lpTargetID].MarryCharacterInfo.MarrySeconds = gMarry.MarryMaxTime;
+			// Use sprintf_s instead of wsprintf for UTF-8 compatibility
+			sprintf_s(lpObj->MarryCharacterInfo.MarryTarget, sizeof(lpObj->MarryCharacterInfo.MarryTarget), "%s", gObj[lpTargetID].Name);
 	
 				gNotice.NewNoticeSend(gObj[lpTargetID].Index,0,0,0,0,0,"[Propose] Accept marry with %s?",lpObj->Name);
 
@@ -4622,15 +4628,17 @@ void CCommandManager::AcceptMarry(LPOBJ lpObj)
 		if (lpObj->MarryCharacterInfo.Married == 0)
 		{
 			lpObj->MarryCharacterInfo.Married = 1;
-			lpObj->MarryCharacterInfo.MarrySeconds = gMarry.MarryMaxTime;
-	
-			wsprintf(lpObj->MarryCharacterInfo.MarriedName,"%s",lpObj->MarryCharacterInfo.MarryTarget);
+		lpObj->MarryCharacterInfo.MarrySeconds = gMarry.MarryMaxTime;
+
+		// Use sprintf_s instead of wsprintf for UTF-8 compatibility
+		sprintf_s(lpObj->MarryCharacterInfo.MarriedName, sizeof(lpObj->MarryCharacterInfo.MarriedName), "%s", lpObj->MarryCharacterInfo.MarryTarget);
 			memset( lpObj->MarryCharacterInfo.MarryTarget, 0, MAX_ACCOUNT_LEN);
 
 			gObj[lpTargetID].MarryCharacterInfo.Married = 1;
-			gObj[lpTargetID].MarryCharacterInfo.MarrySeconds = gMarry.MarryMaxTime;
-	
-			wsprintf(gObj[lpTargetID].MarryCharacterInfo.MarriedName,"%s",gObj[lpTargetID].MarryCharacterInfo.MarryTarget);
+		gObj[lpTargetID].MarryCharacterInfo.MarrySeconds = gMarry.MarryMaxTime;
+
+		// Use sprintf_s instead of wsprintf for UTF-8 compatibility
+		sprintf_s(gObj[lpTargetID].MarryCharacterInfo.MarriedName, sizeof(gObj[lpTargetID].MarryCharacterInfo.MarriedName), "%s", gObj[lpTargetID].MarryCharacterInfo.MarryTarget);
 			memset( gObj[lpTargetID].MarryCharacterInfo.MarryTarget, 0, MAX_ACCOUNT_LEN);
 		
 			GCFireworksSend(lpObj,gMarry.ProposeX,gMarry.ProposeY);

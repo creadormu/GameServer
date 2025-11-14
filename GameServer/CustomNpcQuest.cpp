@@ -604,11 +604,13 @@ bool CCustomNpcQuest::CheckItem(LPOBJ lpObj,int quest,int Npc) // OK
 
 			if (Qtd < it->Quantity)
 			{
-				char text[100]; 
-				char level[10];
-				wsprintf(level,"+%d", it->Level);
+			char text[100]; 
+			char level[10];
+			// Use sprintf_s instead of wsprintf for UTF-8 compatibility
+			sprintf_s(level, sizeof(level), "+%d", it->Level);
 
-				wsprintf(text,"%d %s %s %s %s",it->Quantity,gItemManager.GetItemName(GET_ITEM(it->Category,it->ItemIndex)),(it->Level >= 0) ? level : "",(it->Luck >= 0) ? (it->Luck == 1) ? "+Luck" : "-No Luck" : "",(it->Skill >= 0) ? (it->Skill == 1) ? "+Skill" : "-No Skill" : "");
+			// Use sprintf_s instead of wsprintf for UTF-8 compatibility
+			sprintf_s(text, sizeof(text), "%d %s %s %s %s", it->Quantity, gItemManager.GetItemName(GET_ITEM(it->Category,it->ItemIndex)), (it->Level >= 0) ? level : "", (it->Luck >= 0) ? (it->Luck == 1) ? "+Luck" : "-No Luck" : "", (it->Skill >= 0) ? (it->Skill == 1) ? "+Skill" : "-No Skill" : "");
 				gNotice.GCNoticeSend(lpObj->Index,1,0,0,0,0,0,gMessage.GetMessage(698),quest,text);
 
 				if (Npc >= 0)

@@ -1480,8 +1480,9 @@ void CCastleSiege::ProcState_READYSIEGE()
 		{
 			if( ( GetTickCount() - this->m_dwCS_STARTTIME_TICK_COUNT ) > 60000 )
 			{
-				char szBuff[256]={0};
-				wsprintf(szBuff, gMessage.GetMessage(422), (this->m_iCS_REMAIN_MSEC/60000)+1);
+			char szBuff[256]={0};
+			// Use sprintf_s instead of wsprintf for UTF-8 compatibility
+			sprintf_s(szBuff, sizeof(szBuff), gMessage.GetMessage(422), (this->m_iCS_REMAIN_MSEC/60000)+1);
 				this->SendAllUserAnyMsg(szBuff, 2);
 				this->m_dwCS_STARTTIME_TICK_COUNT = GetTickCount();
 			}
@@ -4646,16 +4647,18 @@ int CCastleSiege::CheckCastleSiegeResult()
 	{
 		if(strcmp(this->m_szMiddleWinnerGuild,"") == FALSE || strcmp(this->m_szMiddleWinnerGuild,this->m_szCastleOwnerGuild) == FALSE)
 		{
-			this->m_btIsCastleOccupied = 1;
-			wsprintf(szMsg,gMessage.GetMessage(424),this->m_szCastleOwnerGuild);
+		this->m_btIsCastleOccupied = 1;
+		// Use sprintf_s instead of wsprintf for UTF-8 compatibility
+		sprintf_s(szMsg, sizeof(szMsg), gMessage.GetMessage(424), this->m_szCastleOwnerGuild);
 			bRETVAL = FALSE;
 		}
 		else
 		{
 			this->m_btIsCastleOccupied = 1;
-			memset(this->m_szCastleOwnerGuild,0,sizeof(this->m_szCastleOwnerGuild));
-			memcpy(this->m_szCastleOwnerGuild,this->m_szMiddleWinnerGuild,8);
-			wsprintf(szMsg,gMessage.GetMessage(425),this->m_szCastleOwnerGuild);
+		memset(this->m_szCastleOwnerGuild,0,sizeof(this->m_szCastleOwnerGuild));
+		memcpy(this->m_szCastleOwnerGuild,this->m_szMiddleWinnerGuild,8);
+		// Use sprintf_s instead of wsprintf for UTF-8 compatibility
+		sprintf_s(szMsg, sizeof(szMsg), gMessage.GetMessage(425), this->m_szCastleOwnerGuild);
 			bRETVAL = TRUE;
 		}
 	}
@@ -4663,16 +4666,18 @@ int CCastleSiege::CheckCastleSiegeResult()
 	{
 		if(strcmp(this->m_szMiddleWinnerGuild,"") == FALSE)
 		{
-			this->m_btIsCastleOccupied = 0;
-			wsprintf(szMsg,gMessage.GetMessage(426));
+		this->m_btIsCastleOccupied = 0;
+		// Use sprintf_s instead of wsprintf for UTF-8 compatibility
+		sprintf_s(szMsg, sizeof(szMsg), "%s", gMessage.GetMessage(426));
 			bRETVAL = FALSE;
 		}
 		else
 		{
 			this->m_btIsCastleOccupied = 1;
-			memset(this->m_szCastleOwnerGuild,0,sizeof(this->m_szCastleOwnerGuild));
-			memcpy(this->m_szCastleOwnerGuild,this->m_szMiddleWinnerGuild,8);
-			wsprintf(szMsg,gMessage.GetMessage(425),this->m_szCastleOwnerGuild);
+		memset(this->m_szCastleOwnerGuild,0,sizeof(this->m_szCastleOwnerGuild));
+		memcpy(this->m_szCastleOwnerGuild,this->m_szMiddleWinnerGuild,8);
+		// Use sprintf_s instead of wsprintf for UTF-8 compatibility
+		sprintf_s(szMsg, sizeof(szMsg), gMessage.GetMessage(425), this->m_szCastleOwnerGuild);
 			bRETVAL = TRUE;
 		}
 	}
