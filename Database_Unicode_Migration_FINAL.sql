@@ -350,17 +350,41 @@ IF EXISTS (SELECT * FROM sys.indexes WHERE name = 'PK_AccountCharacter4')
 IF EXISTS (SELECT * FROM sys.indexes WHERE name = 'PK_AccountCharacter5')
     ALTER TABLE [dbo].[AccountCharacter5] DROP CONSTRAINT [PK_AccountCharacter5]
 
--- Drop UNIQUE KEY constraints (not indexes!) that block column alterations
+-- Drop UNIQUE KEY constraints that block column alterations
+-- Check both sys.key_constraints AND sys.indexes (can be stored in either!)
+
+-- IX_ATTACK_GUILD_SUBKEY
 IF EXISTS (SELECT * FROM sys.key_constraints WHERE name = 'IX_ATTACK_GUILD_SUBKEY' AND object_id = OBJECT_ID('MuCastle_REG_SIEGE'))
 BEGIN
     ALTER TABLE [dbo].[MuCastle_REG_SIEGE] DROP CONSTRAINT [IX_ATTACK_GUILD_SUBKEY]
-    PRINT '  Dropped IX_ATTACK_GUILD_SUBKEY unique constraint'
+    PRINT '  Dropped IX_ATTACK_GUILD_SUBKEY (key_constraints)'
+END
+ELSE IF EXISTS (SELECT * FROM sys.indexes WHERE name = 'IX_ATTACK_GUILD_SUBKEY' AND object_id = OBJECT_ID('MuCastle_REG_SIEGE') AND is_unique_constraint = 1)
+BEGIN
+    ALTER TABLE [dbo].[MuCastle_REG_SIEGE] DROP CONSTRAINT [IX_ATTACK_GUILD_SUBKEY]
+    PRINT '  Dropped IX_ATTACK_GUILD_SUBKEY (indexes)'
+END
+ELSE IF EXISTS (SELECT * FROM sys.indexes WHERE name = 'IX_ATTACK_GUILD_SUBKEY' AND object_id = OBJECT_ID('MuCastle_REG_SIEGE') AND is_unique = 1)
+BEGIN
+    ALTER TABLE [dbo].[MuCastle_REG_SIEGE] DROP CONSTRAINT [IX_ATTACK_GUILD_SUBKEY]
+    PRINT '  Dropped IX_ATTACK_GUILD_SUBKEY (unique index)'
 END
 
+-- IX_GUILD_NAME_SUBKEY
 IF EXISTS (SELECT * FROM sys.key_constraints WHERE name = 'IX_GUILD_NAME_SUBKEY' AND object_id = OBJECT_ID('MuCastle_SIEGE_GUILDLIST'))
 BEGIN
     ALTER TABLE [dbo].[MuCastle_SIEGE_GUILDLIST] DROP CONSTRAINT [IX_GUILD_NAME_SUBKEY]
-    PRINT '  Dropped IX_GUILD_NAME_SUBKEY unique constraint'
+    PRINT '  Dropped IX_GUILD_NAME_SUBKEY (key_constraints)'
+END
+ELSE IF EXISTS (SELECT * FROM sys.indexes WHERE name = 'IX_GUILD_NAME_SUBKEY' AND object_id = OBJECT_ID('MuCastle_SIEGE_GUILDLIST') AND is_unique_constraint = 1)
+BEGIN
+    ALTER TABLE [dbo].[MuCastle_SIEGE_GUILDLIST] DROP CONSTRAINT [IX_GUILD_NAME_SUBKEY]
+    PRINT '  Dropped IX_GUILD_NAME_SUBKEY (indexes)'
+END
+ELSE IF EXISTS (SELECT * FROM sys.indexes WHERE name = 'IX_GUILD_NAME_SUBKEY' AND object_id = OBJECT_ID('MuCastle_SIEGE_GUILDLIST') AND is_unique = 1)
+BEGIN
+    ALTER TABLE [dbo].[MuCastle_SIEGE_GUILDLIST] DROP CONSTRAINT [IX_GUILD_NAME_SUBKEY]
+    PRINT '  Dropped IX_GUILD_NAME_SUBKEY (unique index)'
 END
 
 PRINT ''
