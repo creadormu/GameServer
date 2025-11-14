@@ -108,6 +108,166 @@ BEGIN
     PRINT '  Dropped PK_CustomQuest'
 END
 
+-- Other game table primary keys
+IF EXISTS (SELECT * FROM sys.indexes WHERE name = 'PK_CustomAttack' AND object_id = OBJECT_ID('CustomAttack'))
+BEGIN
+    ALTER TABLE [dbo].[CustomAttack] DROP CONSTRAINT [PK_CustomAttack]
+    PRINT '  Dropped PK_CustomAttack'
+END
+
+IF EXISTS (SELECT * FROM sys.indexes WHERE name = 'PK_EventLeoTheHelper' AND object_id = OBJECT_ID('EventLeoTheHelper'))
+BEGIN
+    ALTER TABLE [dbo].[EventLeoTheHelper] DROP CONSTRAINT [PK_EventLeoTheHelper]
+    PRINT '  Dropped PK_EventLeoTheHelper'
+END
+
+IF EXISTS (SELECT * FROM sys.indexes WHERE name = 'PK_EventSantaClaus' AND object_id = OBJECT_ID('EventSantaClaus'))
+BEGIN
+    ALTER TABLE [dbo].[EventSantaClaus] DROP CONSTRAINT [PK_EventSantaClaus]
+    PRINT '  Dropped PK_EventSantaClaus'
+END
+
+IF EXISTS (SELECT * FROM sys.indexes WHERE name = 'PK_HelperData' AND object_id = OBJECT_ID('HelperData'))
+BEGIN
+    ALTER TABLE [dbo].[HelperData] DROP CONSTRAINT [PK_HelperData]
+    PRINT '  Dropped PK_HelperData'
+END
+
+IF EXISTS (SELECT * FROM sys.indexes WHERE name = 'PK_MasterSkillTree' AND object_id = OBJECT_ID('MasterSkillTree'))
+BEGIN
+    ALTER TABLE [dbo].[MasterSkillTree] DROP CONSTRAINT [PK_MasterSkillTree]
+    PRINT '  Dropped PK_MasterSkillTree'
+END
+
+IF EXISTS (SELECT * FROM sys.indexes WHERE name = 'PK_MuunInventory' AND object_id = OBJECT_ID('MuunInventory'))
+BEGIN
+    ALTER TABLE [dbo].[MuunInventory] DROP CONSTRAINT [PK_MuunInventory]
+    PRINT '  Dropped PK_MuunInventory'
+END
+
+IF EXISTS (SELECT * FROM sys.indexes WHERE name = 'PK_OptionData' AND object_id = OBJECT_ID('OptionData'))
+BEGIN
+    ALTER TABLE [dbo].[OptionData] DROP CONSTRAINT [PK_OptionData]
+    PRINT '  Dropped PK_OptionData'
+END
+
+IF EXISTS (SELECT * FROM sys.indexes WHERE name = 'PK_QuestKillCount' AND object_id = OBJECT_ID('QuestKillCount'))
+BEGIN
+    ALTER TABLE [dbo].[QuestKillCount] DROP CONSTRAINT [PK_QuestKillCount]
+    PRINT '  Dropped PK_QuestKillCount'
+END
+
+IF EXISTS (SELECT * FROM sys.indexes WHERE name = 'PK_QuestWorld' AND object_id = OBJECT_ID('QuestWorld'))
+BEGIN
+    ALTER TABLE [dbo].[QuestWorld] DROP CONSTRAINT [PK_QuestWorld]
+    PRINT '  Dropped PK_QuestWorld'
+END
+
+IF EXISTS (SELECT * FROM sys.indexes WHERE name = 'PK_warehouse' AND object_id = OBJECT_ID('warehouse'))
+BEGIN
+    ALTER TABLE [dbo].[warehouse] DROP CONSTRAINT [PK_warehouse]
+    PRINT '  Dropped PK_warehouse'
+END
+
+IF EXISTS (SELECT * FROM sys.indexes WHERE name = 'PK_WarehouseGuild' AND object_id = OBJECT_ID('WarehouseGuild'))
+BEGIN
+    ALTER TABLE [dbo].[WarehouseGuild] DROP CONSTRAINT [PK_WarehouseGuild]
+    PRINT '  Dropped PK_WarehouseGuild'
+END
+
+-- Ranking table primary keys
+IF EXISTS (SELECT * FROM sys.indexes WHERE name = 'PK_RankingBloodCastle' AND object_id = OBJECT_ID('RankingBloodCastle'))
+BEGIN
+    ALTER TABLE [dbo].[RankingBloodCastle] DROP CONSTRAINT [PK_RankingBloodCastle]
+    PRINT '  Dropped PK_RankingBloodCastle'
+END
+
+IF EXISTS (SELECT * FROM sys.indexes WHERE name = 'PK_RankingChaosCastle' AND object_id = OBJECT_ID('RankingChaosCastle'))
+BEGIN
+    ALTER TABLE [dbo].[RankingChaosCastle] DROP CONSTRAINT [PK_RankingChaosCastle]
+    PRINT '  Dropped PK_RankingChaosCastle'
+END
+
+IF EXISTS (SELECT * FROM sys.indexes WHERE name = 'PK_RankingDevilSquare' AND object_id = OBJECT_ID('RankingDevilSquare'))
+BEGIN
+    ALTER TABLE [dbo].[RankingDevilSquare] DROP CONSTRAINT [PK_RankingDevilSquare]
+    PRINT '  Dropped PK_RankingDevilSquare'
+END
+
+IF EXISTS (SELECT * FROM sys.indexes WHERE name = 'PK_RankingDuel' AND object_id = OBJECT_ID('RankingDuel'))
+BEGIN
+    ALTER TABLE [dbo].[RankingDuel] DROP CONSTRAINT [PK_RankingDuel]
+    PRINT '  Dropped PK_RankingDuel'
+END
+
+IF EXISTS (SELECT * FROM sys.indexes WHERE name = 'PK_RankingIllusionTemple' AND object_id = OBJECT_ID('RankingIllusionTemple'))
+BEGIN
+    ALTER TABLE [dbo].[RankingIllusionTemple] DROP CONSTRAINT [PK_RankingIllusionTemple]
+    PRINT '  Dropped PK_RankingIllusionTemple'
+END
+
+IF EXISTS (SELECT * FROM sys.indexes WHERE name = 'PK_RankingKingGuild' AND object_id = OBJECT_ID('RankingKingGuild'))
+BEGIN
+    ALTER TABLE [dbo].[RankingKingGuild] DROP CONSTRAINT [PK_RankingKingGuild]
+    PRINT '  Dropped PK_RankingKingGuild'
+END
+
+IF EXISTS (SELECT * FROM sys.indexes WHERE name = 'PK_RankingKingPlayer' AND object_id = OBJECT_ID('RankingKingPlayer'))
+BEGIN
+    ALTER TABLE [dbo].[RankingKingPlayer] DROP CONSTRAINT [PK_RankingKingPlayer]
+    PRINT '  Dropped PK_RankingKingPlayer'
+END
+
+IF EXISTS (SELECT * FROM sys.indexes WHERE name = 'PK_RankingTvT' AND object_id = OBJECT_ID('RankingTvT'))
+BEGIN
+    ALTER TABLE [dbo].[RankingTvT] DROP CONSTRAINT [PK_RankingTvT]
+    PRINT '  Dropped PK_RankingTvT'
+END
+
+-- Gens table primary keys
+IF EXISTS (SELECT * FROM sys.indexes WHERE name = 'PK_Gens_Duprian' AND object_id = OBJECT_ID('Gens_Duprian'))
+BEGIN
+    ALTER TABLE [dbo].[Gens_Duprian] DROP CONSTRAINT [PK_Gens_Duprian]
+    PRINT '  Dropped PK_Gens_Duprian'
+END
+
+IF EXISTS (SELECT * FROM sys.indexes WHERE name = 'PK_Gens_Rank' AND object_id = OBJECT_ID('Gens_Rank'))
+BEGIN
+    ALTER TABLE [dbo].[Gens_Rank] DROP CONSTRAINT [PK_Gens_Rank]
+    PRINT '  Dropped PK_Gens_Rank'
+END
+
+IF EXISTS (SELECT * FROM sys.indexes WHERE name = 'PK_Gens_Reward' AND object_id = OBJECT_ID('Gens_Reward'))
+BEGIN
+    ALTER TABLE [dbo].[Gens_Reward] DROP CONSTRAINT [PK_Gens_Reward]
+    PRINT '  Dropped PK_Gens_Reward'
+END
+
+IF EXISTS (SELECT * FROM sys.indexes WHERE name = 'PK_Gens_Varnert' AND object_id = OBJECT_ID('Gens_Varnert'))
+BEGIN
+    ALTER TABLE [dbo].[Gens_Varnert] DROP CONSTRAINT [PK_Gens_Varnert]
+    PRINT '  Dropped PK_Gens_Varnert'
+END
+
+-- Friend/social table primary keys
+IF EXISTS (SELECT * FROM sys.indexes WHERE name = 'PK_T_CGuid' AND object_id = OBJECT_ID('T_CGuid'))
+BEGIN
+    ALTER TABLE [dbo].[T_CGuid] DROP CONSTRAINT [PK_T_CGuid]
+    PRINT '  Dropped PK_T_CGuid'
+END
+
+IF EXISTS (SELECT * FROM sys.indexes WHERE name = 'PK_T_FriendMain' AND object_id = OBJECT_ID('T_FriendMain'))
+BEGIN
+    ALTER TABLE [dbo].[T_FriendMain] DROP CONSTRAINT [PK_T_FriendMain]
+    PRINT '  Dropped PK_T_FriendMain'
+END
+
+IF EXISTS (SELECT * FROM sys.indexes WHERE name = 'PK_T_WaitFriend' AND object_id = OBJECT_ID('T_WaitFriend'))
+BEGIN
+    ALTER TABLE [dbo].[T_WaitFriend] DROP CONSTRAINT [PK_T_WaitFriend]
+    PRINT '  Dropped PK_T_WaitFriend'
+END
+
 -- AccountCharacter tables
 IF EXISTS (SELECT * FROM sys.indexes WHERE name = 'PK_AccountCharacter2')
     ALTER TABLE [dbo].[AccountCharacter2] DROP CONSTRAINT [PK_AccountCharacter2]
@@ -373,6 +533,195 @@ ADD CONSTRAINT [PK_CustomQuest] PRIMARY KEY CLUSTERED ([Name] ASC, [QuestIndex] 
 WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, 
       ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
 PRINT '  Recreated PK_CustomQuest'
+
+-- Other game table primary keys (recreate with proper key structure)
+-- Note: Add these back with their original key definitions from your schema
+-- If any fail, comment them out - not all tables may have had PKs
+
+IF OBJECT_ID('CustomAttack', 'U') IS NOT NULL
+BEGIN
+    ALTER TABLE [dbo].[CustomAttack] 
+    ADD CONSTRAINT [PK_CustomAttack] PRIMARY KEY CLUSTERED ([Name] ASC, [SkillIndex] ASC)
+    PRINT '  Recreated PK_CustomAttack'
+END
+
+IF OBJECT_ID('EventLeoTheHelper', 'U') IS NOT NULL
+BEGIN
+    ALTER TABLE [dbo].[EventLeoTheHelper] 
+    ADD CONSTRAINT [PK_EventLeoTheHelper] PRIMARY KEY CLUSTERED ([Name] ASC)
+    PRINT '  Recreated PK_EventLeoTheHelper'
+END
+
+IF OBJECT_ID('EventSantaClaus', 'U') IS NOT NULL
+BEGIN
+    ALTER TABLE [dbo].[EventSantaClaus] 
+    ADD CONSTRAINT [PK_EventSantaClaus] PRIMARY KEY CLUSTERED ([Name] ASC)
+    PRINT '  Recreated PK_EventSantaClaus'
+END
+
+IF OBJECT_ID('HelperData', 'U') IS NOT NULL
+BEGIN
+    ALTER TABLE [dbo].[HelperData] 
+    ADD CONSTRAINT [PK_HelperData] PRIMARY KEY CLUSTERED ([Name] ASC)
+    PRINT '  Recreated PK_HelperData'
+END
+
+IF OBJECT_ID('MasterSkillTree', 'U') IS NOT NULL
+BEGIN
+    ALTER TABLE [dbo].[MasterSkillTree] 
+    ADD CONSTRAINT [PK_MasterSkillTree] PRIMARY KEY CLUSTERED ([Name] ASC)
+    PRINT '  Recreated PK_MasterSkillTree'
+END
+
+IF OBJECT_ID('MuunInventory', 'U') IS NOT NULL
+BEGIN
+    ALTER TABLE [dbo].[MuunInventory] 
+    ADD CONSTRAINT [PK_MuunInventory] PRIMARY KEY CLUSTERED ([Name] ASC, [MuunIndex] ASC)
+    PRINT '  Recreated PK_MuunInventory'
+END
+
+IF OBJECT_ID('OptionData', 'U') IS NOT NULL
+BEGIN
+    ALTER TABLE [dbo].[OptionData] 
+    ADD CONSTRAINT [PK_OptionData] PRIMARY KEY CLUSTERED ([Name] ASC)
+    PRINT '  Recreated PK_OptionData'
+END
+
+IF OBJECT_ID('QuestKillCount', 'U') IS NOT NULL
+BEGIN
+    ALTER TABLE [dbo].[QuestKillCount] 
+    ADD CONSTRAINT [PK_QuestKillCount] PRIMARY KEY CLUSTERED ([Name] ASC, [QuestIndex] ASC)
+    PRINT '  Recreated PK_QuestKillCount'
+END
+
+IF OBJECT_ID('QuestWorld', 'U') IS NOT NULL
+BEGIN
+    ALTER TABLE [dbo].[QuestWorld] 
+    ADD CONSTRAINT [PK_QuestWorld] PRIMARY KEY CLUSTERED ([Name] ASC)
+    PRINT '  Recreated PK_QuestWorld'
+END
+
+IF OBJECT_ID('warehouse', 'U') IS NOT NULL
+BEGIN
+    ALTER TABLE [dbo].[warehouse] 
+    ADD CONSTRAINT [PK_warehouse] PRIMARY KEY CLUSTERED ([AccountID] ASC)
+    PRINT '  Recreated PK_warehouse'
+END
+
+IF OBJECT_ID('WarehouseGuild', 'U') IS NOT NULL
+BEGIN
+    ALTER TABLE [dbo].[WarehouseGuild] 
+    ADD CONSTRAINT [PK_WarehouseGuild] PRIMARY KEY CLUSTERED ([Guild] ASC)
+    PRINT '  Recreated PK_WarehouseGuild'
+END
+
+-- Ranking table primary keys
+IF OBJECT_ID('RankingBloodCastle', 'U') IS NOT NULL
+BEGIN
+    ALTER TABLE [dbo].[RankingBloodCastle] 
+    ADD CONSTRAINT [PK_RankingBloodCastle] PRIMARY KEY CLUSTERED ([Name] ASC)
+    PRINT '  Recreated PK_RankingBloodCastle'
+END
+
+IF OBJECT_ID('RankingChaosCastle', 'U') IS NOT NULL
+BEGIN
+    ALTER TABLE [dbo].[RankingChaosCastle] 
+    ADD CONSTRAINT [PK_RankingChaosCastle] PRIMARY KEY CLUSTERED ([Name] ASC)
+    PRINT '  Recreated PK_RankingChaosCastle'
+END
+
+IF OBJECT_ID('RankingDevilSquare', 'U') IS NOT NULL
+BEGIN
+    ALTER TABLE [dbo].[RankingDevilSquare] 
+    ADD CONSTRAINT [PK_RankingDevilSquare] PRIMARY KEY CLUSTERED ([Name] ASC)
+    PRINT '  Recreated PK_RankingDevilSquare'
+END
+
+IF OBJECT_ID('RankingDuel', 'U') IS NOT NULL
+BEGIN
+    ALTER TABLE [dbo].[RankingDuel] 
+    ADD CONSTRAINT [PK_RankingDuel] PRIMARY KEY CLUSTERED ([Name] ASC)
+    PRINT '  Recreated PK_RankingDuel'
+END
+
+IF OBJECT_ID('RankingIllusionTemple', 'U') IS NOT NULL
+BEGIN
+    ALTER TABLE [dbo].[RankingIllusionTemple] 
+    ADD CONSTRAINT [PK_RankingIllusionTemple] PRIMARY KEY CLUSTERED ([Name] ASC)
+    PRINT '  Recreated PK_RankingIllusionTemple'
+END
+
+IF OBJECT_ID('RankingKingGuild', 'U') IS NOT NULL
+BEGIN
+    ALTER TABLE [dbo].[RankingKingGuild] 
+    ADD CONSTRAINT [PK_RankingKingGuild] PRIMARY KEY CLUSTERED ([Name] ASC)
+    PRINT '  Recreated PK_RankingKingGuild'
+END
+
+IF OBJECT_ID('RankingKingPlayer', 'U') IS NOT NULL
+BEGIN
+    ALTER TABLE [dbo].[RankingKingPlayer] 
+    ADD CONSTRAINT [PK_RankingKingPlayer] PRIMARY KEY CLUSTERED ([Name] ASC)
+    PRINT '  Recreated PK_RankingKingPlayer'
+END
+
+IF OBJECT_ID('RankingTvT', 'U') IS NOT NULL
+BEGIN
+    ALTER TABLE [dbo].[RankingTvT] 
+    ADD CONSTRAINT [PK_RankingTvT] PRIMARY KEY CLUSTERED ([Name] ASC)
+    PRINT '  Recreated PK_RankingTvT'
+END
+
+-- Gens table primary keys
+IF OBJECT_ID('Gens_Duprian', 'U') IS NOT NULL
+BEGIN
+    ALTER TABLE [dbo].[Gens_Duprian] 
+    ADD CONSTRAINT [PK_Gens_Duprian] PRIMARY KEY CLUSTERED ([Name] ASC)
+    PRINT '  Recreated PK_Gens_Duprian'
+END
+
+IF OBJECT_ID('Gens_Rank', 'U') IS NOT NULL
+BEGIN
+    ALTER TABLE [dbo].[Gens_Rank] 
+    ADD CONSTRAINT [PK_Gens_Rank] PRIMARY KEY CLUSTERED ([Name] ASC)
+    PRINT '  Recreated PK_Gens_Rank'
+END
+
+IF OBJECT_ID('Gens_Reward', 'U') IS NOT NULL
+BEGIN
+    ALTER TABLE [dbo].[Gens_Reward] 
+    ADD CONSTRAINT [PK_Gens_Reward] PRIMARY KEY CLUSTERED ([Name] ASC)
+    PRINT '  Recreated PK_Gens_Reward'
+END
+
+IF OBJECT_ID('Gens_Varnert', 'U') IS NOT NULL
+BEGIN
+    ALTER TABLE [dbo].[Gens_Varnert] 
+    ADD CONSTRAINT [PK_Gens_Varnert] PRIMARY KEY CLUSTERED ([Name] ASC)
+    PRINT '  Recreated PK_Gens_Varnert'
+END
+
+-- Friend/social table primary keys
+IF OBJECT_ID('T_CGuid', 'U') IS NOT NULL
+BEGIN
+    ALTER TABLE [dbo].[T_CGuid] 
+    ADD CONSTRAINT [PK_T_CGuid] PRIMARY KEY CLUSTERED ([Name] ASC)
+    PRINT '  Recreated PK_T_CGuid'
+END
+
+IF OBJECT_ID('T_FriendMain', 'U') IS NOT NULL
+BEGIN
+    ALTER TABLE [dbo].[T_FriendMain] 
+    ADD CONSTRAINT [PK_T_FriendMain] PRIMARY KEY CLUSTERED ([Name] ASC)
+    PRINT '  Recreated PK_T_FriendMain'
+END
+
+IF OBJECT_ID('T_WaitFriend', 'U') IS NOT NULL
+BEGIN
+    ALTER TABLE [dbo].[T_WaitFriend] 
+    ADD CONSTRAINT [PK_T_WaitFriend] PRIMARY KEY CLUSTERED ([Name] ASC, [FriendName] ASC)
+    PRINT '  Recreated PK_T_WaitFriend'
+END
 
 -- AccountCharacter tables
 ALTER TABLE [dbo].[AccountCharacter2] 
