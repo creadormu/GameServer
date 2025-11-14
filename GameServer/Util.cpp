@@ -334,7 +334,8 @@ void PostMessage2(char* name,char* message,char* text) // OK
 
 	char buff[256] = {'~'};
 
-	wsprintf(&buff[1],message,text);
+	// Use sprintf_s instead of wsprintf for UTF-8 compatibility
+	sprintf_s(&buff[1], sizeof(buff) - 1, message, text);
 
 	int size = strlen(buff);
 
@@ -376,7 +377,8 @@ void PostMessage3(char* name,char* message,char* text) // OK
 
 	char buff[256] = {'@'};
 
-	wsprintf(&buff[1],message,text);
+	// Use sprintf_s instead of wsprintf for UTF-8 compatibility
+	sprintf_s(&buff[1], sizeof(buff) - 1, message, text);
 
 	int size = strlen(buff);
 
@@ -418,7 +420,8 @@ void PostMessage4(char* name,char* message,char* text) // OK
 
 	char buff[256] = {'$'};
 
-	wsprintf(&buff[1],message,text);
+	// Use sprintf_s instead of wsprintf for UTF-8 compatibility
+	sprintf_s(&buff[1], sizeof(buff) - 1, message, text);
 
 	int size = strlen(buff);
 
@@ -460,7 +463,8 @@ void PostMessage5(char* name,char* message,char* text) // OK POST VIP
 
 	char buff[256] = {"@@"};
 
-	wsprintf(&buff[2],message,text);
+	// Use sprintf_s instead of wsprintf for UTF-8 compatibility
+	sprintf_s(&buff[2], sizeof(buff) - 2, message, text);
 
 	int size = strlen(buff);
 
@@ -502,7 +506,8 @@ void PostMessagePK(char* name,char* message,char* text) // OK
 
 	char buff[256] = {'~'};
 
-	wsprintf(&buff[1],message,name,text);
+	// Use sprintf_s instead of wsprintf for UTF-8 compatibility
+	sprintf_s(&buff[1], sizeof(buff) - 1, message, name, text);
 
 	int size = strlen(buff);
 
@@ -544,7 +549,8 @@ void PostMessageUserON(char* name,char* message) // OK
 
 	char buff[256] = {'@'};
 
-	wsprintf(&buff[1],message,name);
+	// Use sprintf_s instead of wsprintf for UTF-8 compatibility
+	sprintf_s(&buff[1], sizeof(buff) - 1, message, name);
 
 	int size = strlen(buff);
 
@@ -586,7 +592,8 @@ void PostMessageNew(char* name,char* message,char* text) // OK
 
 	char buff[256] = {0};
 
-	wsprintf(buff,message,name,text);
+	// Use sprintf_s instead of wsprintf for UTF-8 compatibility
+	sprintf_s(buff, sizeof(buff), message, name, text);
 
 	int size = strlen(buff);
 
