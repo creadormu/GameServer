@@ -115,6 +115,72 @@ BEGIN
     PRINT '  Dropped PK_CustomAttack'
 END
 
+IF EXISTS (SELECT * FROM sys.indexes WHERE name = 'PK_CustomGift' AND object_id = OBJECT_ID('CustomGift'))
+BEGIN
+    ALTER TABLE [dbo].[CustomGift] DROP CONSTRAINT [PK_CustomGift]
+    PRINT '  Dropped PK_CustomGift'
+END
+
+IF EXISTS (SELECT * FROM sys.indexes WHERE name = 'PK_ExtWarehouse' AND object_id = OBJECT_ID('ExtWarehouse'))
+BEGIN
+    ALTER TABLE [dbo].[ExtWarehouse] DROP CONSTRAINT [PK_ExtWarehouse]
+    PRINT '  Dropped PK_ExtWarehouse'
+END
+
+IF EXISTS (SELECT * FROM sys.indexes WHERE name = 'PK_LuckyCoin' AND object_id = OBJECT_ID('LuckyCoin'))
+BEGIN
+    ALTER TABLE [dbo].[LuckyCoin] DROP CONSTRAINT [PK_LuckyCoin]
+    PRINT '  Dropped PK_LuckyCoin'
+END
+
+IF EXISTS (SELECT * FROM sys.indexes WHERE name = 'PK_Marry' AND object_id = OBJECT_ID('Marry'))
+BEGIN
+    ALTER TABLE [dbo].[Marry] DROP CONSTRAINT [PK_Marry]
+    PRINT '  Dropped PK_Marry'
+END
+
+IF EXISTS (SELECT * FROM sys.indexes WHERE name = 'PK_QuestSystem' AND object_id = OBJECT_ID('QuestSystem'))
+BEGIN
+    ALTER TABLE [dbo].[QuestSystem] DROP CONSTRAINT [PK_QuestSystem]
+    PRINT '  Dropped PK_QuestSystem'
+END
+
+IF EXISTS (SELECT * FROM sys.indexes WHERE name = 'PK_CashShopData' AND object_id = OBJECT_ID('CashShopData'))
+BEGIN
+    ALTER TABLE [dbo].[CashShopData] DROP CONSTRAINT [PK_CashShopData]
+    PRINT '  Dropped PK_CashShopData'
+END
+
+IF EXISTS (SELECT * FROM sys.indexes WHERE name = 'PK_CashShopInventory' AND object_id = OBJECT_ID('CashShopInventory'))
+BEGIN
+    ALTER TABLE [dbo].[CashShopInventory] DROP CONSTRAINT [PK_CashShopInventory]
+    PRINT '  Dropped PK_CashShopInventory'
+END
+
+IF EXISTS (SELECT * FROM sys.indexes WHERE name = 'PK_MuCastle_DATA' AND object_id = OBJECT_ID('MuCastle_DATA'))
+BEGIN
+    ALTER TABLE [dbo].[MuCastle_DATA] DROP CONSTRAINT [PK_MuCastle_DATA]
+    PRINT '  Dropped PK_MuCastle_DATA'
+END
+
+IF EXISTS (SELECT * FROM sys.indexes WHERE name = 'PK_MuCastle_REG_SIEGE' AND object_id = OBJECT_ID('MuCastle_REG_SIEGE'))
+BEGIN
+    ALTER TABLE [dbo].[MuCastle_REG_SIEGE] DROP CONSTRAINT [PK_MuCastle_REG_SIEGE]
+    PRINT '  Dropped PK_MuCastle_REG_SIEGE'
+END
+
+IF EXISTS (SELECT * FROM sys.indexes WHERE name = 'PK_MuCastle_SIEGE_GUILDLIST' AND object_id = OBJECT_ID('MuCastle_SIEGE_GUILDLIST'))
+BEGIN
+    ALTER TABLE [dbo].[MuCastle_SIEGE_GUILDLIST] DROP CONSTRAINT [PK_MuCastle_SIEGE_GUILDLIST]
+    PRINT '  Dropped PK_MuCastle_SIEGE_GUILDLIST'
+END
+
+IF EXISTS (SELECT * FROM sys.indexes WHERE name = 'PK_MEMB_STAT' AND object_id = OBJECT_ID('MEMB_STAT'))
+BEGIN
+    ALTER TABLE [dbo].[MEMB_STAT] DROP CONSTRAINT [PK_MEMB_STAT]
+    PRINT '  Dropped PK_MEMB_STAT'
+END
+
 IF EXISTS (SELECT * FROM sys.indexes WHERE name = 'PK_EventLeoTheHelper' AND object_id = OBJECT_ID('EventLeoTheHelper'))
 BEGIN
     ALTER TABLE [dbo].[EventLeoTheHelper] DROP CONSTRAINT [PK_EventLeoTheHelper]
@@ -543,6 +609,83 @@ BEGIN
     ALTER TABLE [dbo].[CustomAttack] 
     ADD CONSTRAINT [PK_CustomAttack] PRIMARY KEY CLUSTERED ([Name] ASC, [SkillIndex] ASC)
     PRINT '  Recreated PK_CustomAttack'
+END
+
+IF OBJECT_ID('CustomGift', 'U') IS NOT NULL
+BEGIN
+    ALTER TABLE [dbo].[CustomGift] 
+    ADD CONSTRAINT [PK_CustomGift] PRIMARY KEY CLUSTERED ([AccountID] ASC, [Name] ASC)
+    PRINT '  Recreated PK_CustomGift'
+END
+
+IF OBJECT_ID('ExtWarehouse', 'U') IS NOT NULL
+BEGIN
+    ALTER TABLE [dbo].[ExtWarehouse] 
+    ADD CONSTRAINT [PK_ExtWarehouse] PRIMARY KEY CLUSTERED ([AccountID] ASC)
+    PRINT '  Recreated PK_ExtWarehouse'
+END
+
+IF OBJECT_ID('LuckyCoin', 'U') IS NOT NULL
+BEGIN
+    ALTER TABLE [dbo].[LuckyCoin] 
+    ADD CONSTRAINT [PK_LuckyCoin] PRIMARY KEY CLUSTERED ([AccountID] ASC)
+    PRINT '  Recreated PK_LuckyCoin'
+END
+
+IF OBJECT_ID('Marry', 'U') IS NOT NULL
+BEGIN
+    ALTER TABLE [dbo].[Marry] 
+    ADD CONSTRAINT [PK_Marry] PRIMARY KEY CLUSTERED ([Character] ASC)
+    PRINT '  Recreated PK_Marry'
+END
+
+IF OBJECT_ID('QuestSystem', 'U') IS NOT NULL
+BEGIN
+    ALTER TABLE [dbo].[QuestSystem] 
+    ADD CONSTRAINT [PK_QuestSystem] PRIMARY KEY CLUSTERED ([AccountID] ASC, [Name] ASC, [QuestIndex] ASC)
+    PRINT '  Recreated PK_QuestSystem'
+END
+
+IF OBJECT_ID('CashShopData', 'U') IS NOT NULL
+BEGIN
+    ALTER TABLE [dbo].[CashShopData] 
+    ADD CONSTRAINT [PK_CashShopData] PRIMARY KEY CLUSTERED ([AccountID] ASC)
+    PRINT '  Recreated PK_CashShopData'
+END
+
+IF OBJECT_ID('CashShopInventory', 'U') IS NOT NULL
+BEGIN
+    ALTER TABLE [dbo].[CashShopInventory] 
+    ADD CONSTRAINT [PK_CashShopInventory] PRIMARY KEY CLUSTERED ([InventoryID] ASC)
+    PRINT '  Recreated PK_CashShopInventory'
+END
+
+IF OBJECT_ID('MuCastle_DATA', 'U') IS NOT NULL
+BEGIN
+    ALTER TABLE [dbo].[MuCastle_DATA] 
+    ADD CONSTRAINT [PK_MuCastle_DATA] PRIMARY KEY CLUSTERED ([MAP_SVR_GROUP] ASC)
+    PRINT '  Recreated PK_MuCastle_DATA'
+END
+
+IF OBJECT_ID('MuCastle_REG_SIEGE', 'U') IS NOT NULL
+BEGIN
+    ALTER TABLE [dbo].[MuCastle_REG_SIEGE] 
+    ADD CONSTRAINT [PK_MuCastle_REG_SIEGE] PRIMARY KEY CLUSTERED ([MAP_SVR_GROUP] ASC, [REG_SIEGE_GUILD] ASC)
+    PRINT '  Recreated PK_MuCastle_REG_SIEGE'
+END
+
+IF OBJECT_ID('MuCastle_SIEGE_GUILDLIST', 'U') IS NOT NULL
+BEGIN
+    ALTER TABLE [dbo].[MuCastle_SIEGE_GUILDLIST] 
+    ADD CONSTRAINT [PK_MuCastle_SIEGE_GUILDLIST] PRIMARY KEY CLUSTERED ([MAP_SVR_GROUP] ASC, [GUILD_NAME] ASC)
+    PRINT '  Recreated PK_MuCastle_SIEGE_GUILDLIST'
+END
+
+IF OBJECT_ID('MEMB_STAT', 'U') IS NOT NULL
+BEGIN
+    ALTER TABLE [dbo].[MEMB_STAT] 
+    ADD CONSTRAINT [PK_MEMB_STAT] PRIMARY KEY CLUSTERED ([memb___id] ASC, [ServerName] ASC)
+    PRINT '  Recreated PK_MEMB_STAT'
 END
 
 IF OBJECT_ID('EventLeoTheHelper', 'U') IS NOT NULL
