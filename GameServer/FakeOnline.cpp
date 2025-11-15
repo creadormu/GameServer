@@ -1660,7 +1660,8 @@ void CFakeOnline::InitializeCityMode(LPOBJ lpObj)
 	lpObj->IsFakeCitySpawnMap = -1;
 	
 	// Start in hunting mode first
-	LogAdd(LOG_BLUE, "[CityWander][%s] City wandering initialized - starting in hunting mode", lpObj->Name);
+	LogAdd(LOG_BLUE, "[CityWander][%s] City wandering initialized - starting in hunting mode. TimeReturn=%d min, TimeForCity=%d min. Map=%d Pos=(%d,%d)", 
+		lpObj->Name, pBotData->TimeReturn, pBotData->TimeForCity, lpObj->Map, lpObj->X, lpObj->Y);
 }
 
 // Switch bot to city mode
@@ -1679,6 +1680,9 @@ void CFakeOnline::SwitchToCityMode(LPOBJ lpObj, OFFEXP_DATA* pBotData)
 		// Teleport bot to safe zone
 		gObjTeleport(lpObj->Index, cityMap, citySpawnX, citySpawnY);
 		
+		// Refresh viewport to make bot visible to other players
+		gObjViewportListProtocolCreate(lpObj);
+		
 		lpObj->IsFakeInCityMode = true;
 		lpObj->IsFakeCityModeStartTime = GetTickCount();
 		lpObj->IsFakeCitySpawnX = citySpawnX;
@@ -1695,6 +1699,9 @@ void CFakeOnline::SwitchToCityMode(LPOBJ lpObj, OFFEXP_DATA* pBotData)
 		if (GetRandomSafeZoneCoords(cityMap, &citySpawnX, &citySpawnY))
 		{
 			gObjTeleport(lpObj->Index, cityMap, citySpawnX, citySpawnY);
+			
+			// Refresh viewport to make bot visible to other players
+			gObjViewportListProtocolCreate(lpObj);
 			
 			lpObj->IsFakeInCityMode = true;
 			lpObj->IsFakeCityModeStartTime = GetTickCount();
@@ -1722,6 +1729,9 @@ void CFakeOnline::SwitchToHuntingMode(LPOBJ lpObj, OFFEXP_DATA* pBotData)
 	
 	// Teleport bot back to hunting gate
 	gObjMoveGate(lpObj->Index, pBotData->GateNumber);
+	
+	// Refresh viewport to make bot visible to other players
+	gObjViewportListProtocolCreate(lpObj);
 	
 	LogAdd(LOG_BLUE, "[CityWander][%s] Switched to HUNTING mode at gate %d for %d minutes", 
 		lpObj->Name, pBotData->GateNumber, pBotData->TimeReturn);
@@ -1767,6 +1777,10 @@ void CFakeOnline::UpdateBotMode(LPOBJ lpObj, OFFEXP_DATA* pBotData)
 	
 	DWORD currentTime = GetTickCount();
 	DWORD timeSinceSwitch = currentTime - lpObj->IsFakeCityModeStartTime;
+	
+	// Don't switch modes for at least 30 seconds after spawn/last switch
+	// This prevents visibility issues and gives time for the bot to stabilize
+	if (timeSinceSwitch < 30000) return;
 	
 	if (lpObj->IsFakeInCityMode)
 	{
