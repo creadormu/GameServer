@@ -1538,6 +1538,14 @@ void CFakeOnline::QuayLaiToaDoGoc(int aIndex) {
 			// Check if bot has been online for at least a few seconds
 			if (lpObj->ConnectTickCount != 0 && (GetTickCount() - lpObj->ConnectTickCount) >= 5000)
 			{
+				// Debug: Log that we're calling UpdateBotMode
+				static DWORD lastCallLog[MAX_OBJECT] = {0};
+				if (GetTickCount() - lastCallLog[lpObj->Index] > 60000) {
+					LogAdd(LOG_BLUE, "[CityWander][%s] Calling UpdateBotMode (ConnectTick=%u, elapsed=%d sec)", 
+						lpObj->Name, lpObj->ConnectTickCount, (GetTickCount() - lpObj->ConnectTickCount)/1000);
+					lastCallLog[lpObj->Index] = GetTickCount();
+				}
+				
 				// Update bot mode (city/hunting) and handle wandering
 				UpdateBotMode(lpObj, info);
 				
@@ -1545,6 +1553,17 @@ void CFakeOnline::QuayLaiToaDoGoc(int aIndex) {
 				if (lpObj->IsFakeInCityMode)
 				{
 					return;
+				}
+			}
+			else
+			{
+				// Debug: Log why we're not calling UpdateBotMode
+				static DWORD lastSkipLog[MAX_OBJECT] = {0};
+				if (GetTickCount() - lastSkipLog[lpObj->Index] > 30000) {
+					LogAdd(LOG_BLUE, "[CityWander][%s] NOT calling UpdateBotMode yet (ConnectTick=%u, elapsed=%d sec, need 5 sec)", 
+						lpObj->Name, lpObj->ConnectTickCount, 
+						lpObj->ConnectTickCount ? (GetTickCount() - lpObj->ConnectTickCount)/1000 : 0);
+					lastSkipLog[lpObj->Index] = GetTickCount();
 				}
 			}
 		}
@@ -1803,7 +1822,10 @@ void CFakeOnline::UpdateBotMode(LPOBJ lpObj, OFFEXP_DATA* pBotData)
 	
 	// Safety check: if IsFakeCityModeStartTime is 0, it means the bot wasn't properly initialized
 	// or city mode is disabled. Don't proceed.
-	if (lpObj->IsFakeCityModeStartTime == 0) return;
+	if (lpObj->IsFakeCityModeStartTime == 0) {
+		LogAdd(LOG_RED, "[CityWander][%s] ERROR: IsFakeCityModeStartTime is 0, bot not initialized!", lpObj->Name);
+		return;
+	}
 	
 	DWORD currentTime = GetTickCount();
 	DWORD timeSinceSwitch = currentTime - lpObj->IsFakeCityModeStartTime;
@@ -1811,12 +1833,29 @@ void CFakeOnline::UpdateBotMode(LPOBJ lpObj, OFFEXP_DATA* pBotData)
 	// Don't switch modes for at least 60 seconds after spawn/last switch
 	// This prevents visibility issues and gives time for the bot to stabilize
 	// Increased to 60 seconds to ensure proper viewport synchronization
-	if (timeSinceSwitch < 60000) return;
+	if (timeSinceSwitch < 60000) {
+		// Log every 30 seconds to show we're waiting
+		static DWORD lastLogTime[MAX_OBJECT] = {0};
+		if (GetTickCount() - lastLogTime[lpObj->Index] > 30000) {
+			LogAdd(LOG_BLUE, "[CityWander][%s] Waiting for stabilization: %d/%d seconds", 
+				lpObj->Name, timeSinceSwitch/1000, 60);
+			lastLogTime[lpObj->Index] = GetTickCount();
+		}
+		return;
+	}
 	
 	if (lpObj->IsFakeInCityMode)
 	{
 		// In city mode - check if it's time to go hunting
 		DWORD cityTimeLimit = pBotData->TimeForCity * 60 * 1000; // Convert minutes to milliseconds
+		
+		// Log every 10 seconds in city mode
+		static DWORD lastCityLogTime[MAX_OBJECT] = {0};
+		if (GetTickCount() - lastCityLogTime[lpObj->Index] > 10000) {
+			LogAdd(LOG_BLUE, "[CityWander][%s] CITY mode: Time %d/%d seconds (limit=%d min)", 
+				lpObj->Name, timeSinceSwitch/1000, cityTimeLimit/1000, pBotData->TimeForCity);
+			lastCityLogTime[lpObj->Index] = GetTickCount();
+		}
 		
 		if (timeSinceSwitch >= cityTimeLimit)
 		{
@@ -1832,6 +1871,14 @@ void CFakeOnline::UpdateBotMode(LPOBJ lpObj, OFFEXP_DATA* pBotData)
 	{
 		// In hunting mode - check if it's time to go to city
 		DWORD huntingTimeLimit = pBotData->TimeReturn * 60 * 1000; // Convert minutes to milliseconds
+		
+		// Log every 30 seconds to avoid spam
+		static DWORD lastHuntLogTime[MAX_OBJECT] = {0};
+		if (GetTickCount() - lastHuntLogTime[lpObj->Index] > 30000) {
+			LogAdd(LOG_BLUE, "[CityWander][%s] HUNTING mode: Time %d/%d seconds (limit=%d min)", 
+				lpObj->Name, timeSinceSwitch/1000, huntingTimeLimit/1000, pBotData->TimeReturn);
+			lastHuntLogTime[lpObj->Index] = GetTickCount();
+		}
 		
 		if (timeSinceSwitch >= huntingTimeLimit)
 		{
