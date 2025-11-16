@@ -313,6 +313,7 @@
     <ClInclude Include="BloodCastle.h" />
     <ClInclude Include="BonusManager.h" />
     <ClInclude Include="BotAlchemist.h" />
+    <ClInclude Include="BotCityWander.h" />
     <ClInclude Include="BotBuffer.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release_EX401CS|Win32'">true</ExcludedFromBuild>
     </ClInclude>
@@ -831,6 +832,7 @@
     <ClCompile Include="RewardSystem.cpp" />
     <ClCompile Include="RuudTokenSellTemplate.cpp" />
     <ClCompile Include="SafeZoneManager.cpp" />
+    <ClCompile Include="BotCityWander.cpp" />
     <ClCompile Include="ScheduleManager.cpp" />
     <ClCompile Include="SerialCheck.cpp" />
     <ClCompile Include="ServerDisplayer.cpp" />
