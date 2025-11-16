@@ -195,8 +195,18 @@ void TeleportBotToHunting(int aIndex)
 	LogAdd(LOG_RED, "[BotCityWander] Target hunting coords: Map=%d (%d,%d)", 
 		pBotData->Map, pBotData->MapX, pBotData->MapY);
 	
+	// Add small random offset so bot doesn't spawn at EXACT home position
+	// This forces bot to move and triggers normal hunting movement
+	int offsetX = (rand() % 5) - 2; // -2 to +2
+	int offsetY = (rand() % 5) - 2;
+	int returnX = pBotData->MapX + offsetX;
+	int returnY = pBotData->MapY + offsetY;
+	
+	LogAdd(LOG_BLUE, "[BotCityWander] %s teleporting to (%d,%d) [offset from home: %+d,%+d]", 
+		lpObj->Name, returnX, returnY, offsetX, offsetY);
+	
 	// Teleport directly to hunting coordinates (NOT gate, since bot is not at gate!)
-	gObjTeleport(aIndex, pBotData->Map, pBotData->MapX, pBotData->MapY);
+	gObjTeleport(aIndex, pBotData->Map, returnX, returnY);
 	
 	// Get current time for all timers
 	DWORD currentTime = GetTickCount();
@@ -211,7 +221,10 @@ void TeleportBotToHunting(int aIndex)
 	// CRITICAL: Reset city mode AFTER teleport
 	lpObj->IsFakeInCityMode = false;
 	lpObj->IsFakeCityModeStartTime = currentTime;
-	lpObj->IsFakeRegen = true; // Bot is back at hunting spot, ready to fight!
+	
+	// CRITICAL FIX: Set IsFakeRegen = FALSE first to trigger movement initialization!
+	// Bot will detect it's far from monsters and start wandering
+	lpObj->IsFakeRegen = false;
 	
 	// CRITICAL FIX: Reset ALL movement timers so bot can move again!
 	lpObj->m_OfflineMoveDelay = currentTime;
