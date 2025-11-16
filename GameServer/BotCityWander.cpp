@@ -71,24 +71,55 @@ void TeleportBotToCity(int aIndex)
 	
 	LPOBJ lpObj = &gObj[aIndex];
 	
-	// Find safe zone coordinates
-	int cityX = 0, cityY = 0;
-	if (!GetRandomSafeZoneCoords(0, &cityX, &cityY)) // Lorencia
+	// Known safe walkable coordinates in Lorencia (main square, shop areas)
+	// These are guaranteed to be in safe zone and walkable
+	const int safeCoords[][2] = {
+		{130, 125}, // Center of Lorencia
+		{135, 130}, // Near shops
+		{140, 128}, // Main square
+		{132, 120}, // Safe walkable area
+		{138, 135}, // Market area
+		{125, 127}, // Safe zone
+		{145, 130}, // Safe walkable
+		{128, 135}, // Near NPCs
+		{142, 125}, // Town center
+		{136, 122}  // Safe area
+	};
+	
+	// Pick a random safe coordinate
+	int coordIndex = rand() % 10;
+	int cityX = safeCoords[coordIndex][0];
+	int cityY = safeCoords[coordIndex][1];
+	int cityMap = 0; // Lorencia
+	
+	// Double-check it's walkable
+	BYTE attr = gMap[cityMap].GetAttr(cityX, cityY);
+	if ((attr & 1) != 0 || (attr & 4) != 0) // Wall or river
 	{
-		cityX = 130; cityY = 125; // Default Lorencia center
+		LogAdd(LOG_RED, "[BotCityWander] %s coordinate (%d,%d) has bad attribute %d! Using fallback.", 
+			lpObj->Name, cityX, cityY, attr);
+		// Fallback to guaranteed safe spot
+		cityX = 130;
+		cityY = 125;
 	}
 	
+	// Log final coordinates and their attributes
+	attr = gMap[cityMap].GetAttr(cityX, cityY);
+	LogAdd(LOG_GREEN, "[BotCityWander] %s final city coords: (%d,%d) attribute=%d (1=wall,2=obj,4=water,8=safe)", 
+		lpObj->Name, cityX, cityY, attr);
+	
 	// Teleport to city
-	gObjTeleport(aIndex, 0, cityX, cityY);
+	gObjTeleport(aIndex, cityMap, cityX, cityY);
 	
 	// Update state
 	lpObj->IsFakeInCityMode = true;
 	lpObj->IsFakeCityModeStartTime = GetTickCount();
 	lpObj->IsFakeCitySpawnX = cityX;
 	lpObj->IsFakeCitySpawnY = cityY;
-	lpObj->IsFakeCitySpawnMap = 0;
+	lpObj->IsFakeCitySpawnMap = cityMap;
 	
-	// Refresh viewport
+	// CRITICAL: Refresh viewport to make bot visible
+	gObjViewportListCreate(aIndex);
 	gObjViewportListProtocolCreate(lpObj);
 	
 	LogAdd(LOG_BLUE, "[BotCityWander] %s teleported to CITY at (%d,%d)", lpObj->Name, cityX, cityY);
@@ -110,7 +141,8 @@ void TeleportBotToHunting(int aIndex)
 	// Teleport to hunting gate
 	gObjMoveGate(aIndex, pBotData->GateNumber);
 	
-	// Refresh viewport
+	// CRITICAL: Refresh viewport to make bot visible
+	gObjViewportListCreate(aIndex);
 	gObjViewportListProtocolCreate(lpObj);
 	
 	LogAdd(LOG_BLUE, "[BotCityWander] %s returned to HUNTING at gate %d", lpObj->Name, pBotData->GateNumber);
@@ -123,26 +155,46 @@ void BotWanderInCity(int aIndex)
 	
 	LPOBJ lpObj = &gObj[aIndex];
 	
-	// Only wander every 3 seconds
-	if (GetTickCount() < lpObj->m_OfflineMoveDelay + 3000) return;
+	// Only wander every 4 seconds
+	if (GetTickCount() < lpObj->m_OfflineMoveDelay + 4000) return;
 	
-	// Simple random walk
-	int newX = lpObj->X + (rand() % 7) - 3; // -3 to +3
-	int newY = lpObj->Y + (rand() % 7) - 3;
-	
-	// Clamp to map bounds
-	if (newX < 0) newX = 0;
-	if (newY < 0) newY = 0;
-	if (newX > 255) newX = 255;
-	if (newY > 255) newY = 255;
-	
-	// Check if walkable
-	BYTE attr = gMap[lpObj->Map].GetAttr(newX, newY);
-	if ((attr & 1) == 0) // Not a wall
+	// Try to find a walkable spot nearby
+	for (int attempt = 0; attempt < 15; attempt++)
 	{
-		lpObj->TX = newX;
-		lpObj->TY = newY;
-		lpObj->m_OfflineMoveDelay = GetTickCount();
+		// Random walk in a small area (3-5 tiles)
+		int newX = lpObj->X + (rand() % 7) - 3; // -3 to +3
+		int newY = lpObj->Y + (rand() % 7) - 3;
+		
+		// Clamp to map bounds
+		if (newX < 0) newX = 0;
+		if (newY < 0) newY = 0;
+		if (newX > 255) newX = 255;
+		if (newY > 255) newY = 255;
+		
+		// Check map attributes
+		BYTE attr = gMap[lpObj->Map].GetAttr(newX, newY);
+		
+		// Must be walkable: no walls, no rivers, no blocked areas
+		if ((attr & 1) == 0 && (attr & 4) == 0)
+		{
+			// Check if still in safe zone
+			if (IsInSafeZoneArea(lpObj->Map, newX, newY))
+			{
+				lpObj->TX = newX;
+				lpObj->TY = newY;
+				lpObj->MTX = newX;
+				lpObj->MTY = newY;
+				lpObj->m_OfflineMoveDelay = GetTickCount();
+				return;
+			}
+		}
+	}
+	
+	// If we couldn't find a good spot, return to city spawn point
+	if (lpObj->IsFakeCitySpawnX > 0 && lpObj->IsFakeCitySpawnY > 0)
+	{
+		lpObj->TX = lpObj->IsFakeCitySpawnX;
+		lpObj->TY = lpObj->IsFakeCitySpawnY;
 	}
 }
 
