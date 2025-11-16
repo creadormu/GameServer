@@ -63,10 +63,31 @@ bool GetRandomSafeZoneCoords(int mapNumber, int* outX, int* outY)
             int rangeX = g_SafeZones[i].maxX - g_SafeZones[i].minX;
             int rangeY = g_SafeZones[i].maxY - g_SafeZones[i].minY;
 
-            *outX = g_SafeZones[i].minX + (GetLargeRand() % rangeX);
-            *outY = g_SafeZones[i].minY + (GetLargeRand() % rangeY);
+            // Try up to 50 times to find a walkable spot
+            for (int attempt = 0; attempt < 50; attempt++)
+            {
+                int testX = g_SafeZones[i].minX + (GetLargeRand() % rangeX);
+                int testY = g_SafeZones[i].minY + (GetLargeRand() % rangeY);
 
-            return true;
+                // Check map attributes: must not be wall, river, blocked, or safe zone boundary
+                BYTE attr = gMap[mapNumber].GetAttr(testX, testY);
+
+                // attr & 1 = wall
+                // attr & 2 = object
+                // attr & 4 = water/river
+                // attr & 8 = safe zone
+
+                // We want ONLY walkable tiles (no walls, no rivers, no blocked areas)
+                if ((attr & 1) == 0 && (attr & 4) == 0)
+                {
+                    *outX = testX;
+                    *outY = testY;
+                    return true;
+                }
+            }
+
+            // If we couldn't find a good spot after 50 tries, return false
+            return false;
         }
     }
     return false;

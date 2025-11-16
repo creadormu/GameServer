@@ -624,6 +624,7 @@ struct OBJECTSTRUCT
 	DWORD LastMoveTime;
 	DWORD LastAttackTime;
 	DWORD TeleportTime;
+	int IsAttackState;
 	char Teleport;
 	char KillerType;
 	char DieRegen;

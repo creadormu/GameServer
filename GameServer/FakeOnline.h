@@ -82,11 +82,6 @@ public:
 	void QuayLaiToaDoGoc(int aIndex);
 	void PostChatMSG(LPOBJ lpObj);
 	// City wandering functions
-	void InitializeCityMode(LPOBJ lpObj);
-	void UpdateBotMode(LPOBJ lpObj, OFFEXP_DATA* pBotData);
-	void HandleCityWandering(LPOBJ lpObj, OFFEXP_DATA* pBotData);
-	void SwitchToHuntingMode(LPOBJ lpObj, OFFEXP_DATA* pBotData);
-	void SwitchToCityMode(LPOBJ lpObj, OFFEXP_DATA* pBotData);
 	bool IsBotInCityMode(LPOBJ lpObj);
 	int	IndexMsgMin; 
 	int	IndexMsgMax; 

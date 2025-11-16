@@ -1017,6 +1017,12 @@
     <ClInclude Include="UnicodeSupport.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="SafeZoneManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="BotCityWander.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -1845,6 +1851,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="UpdateManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SafeZoneManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="BotCityWander.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
