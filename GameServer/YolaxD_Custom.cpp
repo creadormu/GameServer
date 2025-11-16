@@ -1325,10 +1325,10 @@ void CNotice::MakeNoticeMsg(void * lpNotice, BYTE btType, char * szNoticeMsg)
 	memcpy(pNotice->szNoticeMessage, szTempMsg, sizeof(pNotice->szNoticeMessage));
 	pNotice->szNoticeMessage[254]=0;
 	pNotice->szNoticeMessage[255]=0;
-	wsprintf(pNotice->Notice, szNoticeMsg);
+	sprintf_s(pNotice->Notice, sizeof(pNotice->Notice), "%s", szNoticeMsg);
 	PHeadSetB(&pNotice->PacketHeader, 0x0D, wcslen((unsigned short *)pNotice->szNoticeMessage)*2+ 0x12);
 #else
-	wsprintf(pNotice->message, szNoticeMsg);
+	sprintf_s(pNotice->message, sizeof(pNotice->message), "%s", szNoticeMsg);
 	PHeadSetB((LPBYTE)pNotice, 0x0D, strlen(pNotice->message) + sizeof(PMSG_NOTICE_SEND) - sizeof(pNotice->message) + 1 );
 #endif
 }

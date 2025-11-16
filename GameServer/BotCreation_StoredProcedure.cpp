@@ -650,11 +650,6 @@ bool CreateMultipleBotsAdvanced_StoredProc(int botCount, int startFrom, int gate
 
     }
 
-
-
-
-
-
     // =====================================================
 
 
@@ -665,228 +660,148 @@ bool CreateMultipleBotsAdvanced_StoredProc(int botCount, int startFrom, int gate
 
 
     bool CleanBotAccounts()
-
-
     {
-
-
         if (!g_OdbcInitialized || g_hOdbcConn == SQL_NULL_HDBC)
-
-
         {
-
-
             LogAdd(LOG_RED, (char*)"[CleanBots] Database not connected!");
-
-
             return false;
-
-
         }
 
-
-
-
-
         SQLHSTMT hStmt = SQL_NULL_HSTMT;
-
-
         SQLRETURN ret;
-
-
-
-
 
         LogAdd(LOG_BLACK, (char*)"[CleanBots] ===== START CLEANING BOT ACCOUNTS =====");
 
-
-
-
-
         // Allocate statement handle
-
-
         ret = SQLAllocHandle(SQL_HANDLE_STMT, g_hOdbcConn, &hStmt);
-
-
         if (ret != SQL_SUCCESS && ret != SQL_SUCCESS_WITH_INFO)
-
-
         {
-
-
             LogAdd(LOG_RED, (char*)"[CleanBots] Failed to allocate statement handle");
-
-
             return false;
-
-
         }
 
+        // =====================================================
+        // STEP 1: Create temporary table with bot character names
+        // =====================================================
+        const char* createTempTable =
+            "IF OBJECT_ID('tempdb..#BotNames') IS NOT NULL DROP TABLE #BotNames; "
+            "SELECT Name INTO #BotNames FROM Character WHERE AccountID LIKE 'Bot%'";
 
+        LogAdd(LOG_BLUE, (char*)"[CleanBots] Creating temporary table with bot names...");
+        ret = SQLExecDirect(hStmt, (SQLCHAR*)createTempTable, SQL_NTS);
 
+        if (ret == SQL_SUCCESS || ret == SQL_SUCCESS_WITH_INFO)
+        {
+            SQLLEN rowCount = 0;
+            SQLRowCount(hStmt, &rowCount);
+            LogAdd(LOG_GREEN, (char*)"[CleanBots] Found %d bot character names", (int)rowCount);
+        }
+        else
+        {
+            LogAdd(LOG_RED, (char*)"[CleanBots] Failed to create temporary table");
+        }
 
+        SQLCloseCursor(hStmt);
 
-        // Array of SQL queries to clean bot accounts
-
-
+        // =====================================================
+        // STEP 2: Delete using temporary table
+        // =====================================================
         const char* queries[] = {
+            // Guild tables (using temp table)
+            "DELETE FROM GuildMember WHERE Name IN (SELECT Name FROM #BotNames)",
+            "DELETE FROM Guild WHERE G_Master IN (SELECT Name FROM #BotNames)",
 
+            // Friends system (using temp table)
+            "DELETE FROM T_FriendList WHERE GUID IN (SELECT GUID FROM T_FriendMain WHERE Name IN (SELECT Name FROM #BotNames))",
+            "DELETE FROM T_FriendMail WHERE GUID IN (SELECT GUID FROM T_FriendMain WHERE Name IN (SELECT Name FROM #BotNames))",
+            "DELETE FROM T_FriendMain WHERE Name IN (SELECT Name FROM #BotNames)",
+            "DELETE FROM T_WaitFriend WHERE FriendName IN (SELECT Name FROM #BotNames)",
 
-            "DELETE FROM MEMB_INFO WHERE memb___id LIKE 'Bot%'",
+            // Pet system - FIXED: Use correct column name
+            "DELETE FROM T_PetItem_Info WHERE AccountID IN (SELECT AccountID FROM Character WHERE Name IN (SELECT Name FROM #BotNames))",
 
+            // Castle Siege - REMOVED: These tables use different columns or don't exist
+            // "DELETE FROM MuCastle_MONEY_STATISTICS WHERE Name IN (SELECT Name FROM #BotNames)",
+            // "DELETE FROM MuCastle_REG_SIEGE WHERE REG_MARKS IN (SELECT Name FROM #BotNames)",
 
-            "DELETE FROM CHARACTER WHERE AccountID LIKE 'Bot%'",
+            // MASTER SKILL TABLE (using temp table) - THIS WORKS!
+            "DELETE FROM MasterSkillTree WHERE Name IN (SELECT Name FROM #BotNames)",
 
-
-            "DELETE FROM MEMB_STAT WHERE memb___id LIKE 'Bot%'",
-
-
+            // Storage tables (by AccountID)
             "DELETE FROM warehouse WHERE AccountID LIKE 'Bot%'",
-
-
             "DELETE FROM ExtWareHouse WHERE AccountID LIKE 'Bot%'",
 
+            // Core account tables (delete LAST)
+            "DELETE FROM Character WHERE AccountID LIKE 'Bot%'",
+            "DELETE FROM MEMB_STAT WHERE memb___id LIKE 'Bot%'",
+            "DELETE FROM MEMB_INFO WHERE memb___id LIKE 'Bot%'",
 
-            "DELETE FROM GuildMember WHERE Name IN (SELECT Name FROM CHARACTER WHERE AccountID LIKE 'Bot%')",
-
-
+            // Other tables - REMOVED: GameServerInfo doesn't have AccountID column
+            // "DELETE FROM GameServerInfo WHERE AccountID LIKE 'Bot%'",
             "DELETE FROM AccountCharacter WHERE Id LIKE 'Bot%'",
 
-
-            "DELETE FROM GameServerInfo WHERE AccountID LIKE 'Bot%'",
-
-
-            "DELETE FROM MuCastle_MONEY_STATISTICS WHERE AccountID LIKE 'Bot%'",
-
-
-            "DELETE FROM T_FriendList WHERE GUID IN (SELECT GUID FROM T_FriendMain WHERE Name IN (SELECT Name FROM CHARACTER WHERE AccountID LIKE 'Bot%'))",
-
-
-            "DELETE FROM T_FriendMail WHERE GUID IN (SELECT GUID FROM T_FriendMain WHERE Name IN (SELECT Name FROM CHARACTER WHERE AccountID LIKE 'Bot%'))",
-
-
-            "DELETE FROM T_FriendMain WHERE Name IN (SELECT Name FROM CHARACTER WHERE AccountID LIKE 'Bot%')",
-
-
-            "DELETE FROM T_PetItem_Info WHERE AccountID LIKE 'Bot%'",
-
-
-            "DELETE FROM T_WaitFriend WHERE FriendName IN (SELECT Name FROM CHARACTER WHERE AccountID LIKE 'Bot%')",
-
-
-            "UPDATE MasterSkillTree SET MasterSkill = 0 WHERE Name IN (SELECT Name FROM CHARACTER WHERE AccountID LIKE 'Bot%')",
-
+            // Drop temp table
+            "DROP TABLE #BotNames",
 
             NULL
-
-
         };
 
-
-
-
-
         int successCount = 0;
-
-
         int failCount = 0;
 
-
-
-
-
         // Execute each query
-
-
         for (int i = 0; queries[i] != NULL; i++)
-
-
         {
-
-
             LogAdd(LOG_BLUE, (char*)"[CleanBots] Executing query %d...", i + 1);
-
-
-
-
 
             ret = SQLExecDirect(hStmt, (SQLCHAR*)queries[i], SQL_NTS);
 
-
-
-
-
             if (ret == SQL_SUCCESS || ret == SQL_SUCCESS_WITH_INFO)
-
-
             {
-
-
                 SQLLEN rowCount = 0;
-
-
                 SQLRowCount(hStmt, &rowCount);
-
-
                 LogAdd(LOG_GREEN, (char*)"[CleanBots] Query %d succeeded: %d rows affected", i + 1, (int)rowCount);
-
-
                 successCount++;
-
-
             }
-
-
             else
-
-
             {
-
-
                 SQLCHAR sqlState[6], errorMsg[SQL_MAX_MESSAGE_LENGTH];
-
-
                 SQLINTEGER nativeError;
-
-
                 SQLSMALLINT msgLen;
 
-
-                SQLGetDiagRec(SQL_HANDLE_STMT, hStmt, 1, sqlState, &nativeError,
-
-
-                    errorMsg, sizeof(errorMsg), &msgLen);
-
-                LogAdd(LOG_RED, (char*)"[CleanBots] Query %d failed: %s", i + 1, errorMsg);
-
-
-                failCount++;
-
-
+                if (SQLGetDiagRec(SQL_HANDLE_STMT, hStmt, 1, sqlState, &nativeError,
+                    errorMsg, sizeof(errorMsg), &msgLen) == SQL_SUCCESS)
+                {
+                    // Only log actual errors, not "0 rows affected"
+                    if (nativeError != 0)
+                    {
+                        LogAdd(LOG_RED, (char*)"[CleanBots] Query %d failed: %s", i + 1, errorMsg);
+                        failCount++;
+                    }
+                    else
+                    {
+                        LogAdd(LOG_BLUE, (char*)"[CleanBots] Query %d: No rows to delete", i + 1);
+                        successCount++;
+                    }
+                }
+                else
+                {
+                    failCount++;
+                }
             }
 
-
-            // Close cursor for next query
-
             SQLCloseCursor(hStmt);
-
-
         }
 
         // Free statement handle
-
-
         SQLFreeHandle(SQL_HANDLE_STMT, hStmt);
 
         LogAdd(LOG_GREEN, (char*)"[CleanBots] ===== COMPLETED =====");
-
-
         LogAdd(LOG_GREEN, (char*)"[CleanBots] Success: %d queries, Failed: %d queries", successCount, failCount);
 
+        // Return true if no REAL failures (ignore "table doesn't exist" errors)
         return (failCount == 0);
-
-}
+    }
 // =====================================================
 // Cleanup function
 // =====================================================

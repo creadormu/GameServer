@@ -144,11 +144,18 @@ extern int Conectar;
 #include <atltime.h>
 #include <dbghelp.h>
 #include <Psapi.h>
+#include <sql.h>               //  Define SQLWCHAR FIRST!
+#include <sqlext.h>            //  Define other SQL types!
 #include "pugixml.hpp"
+#include "UnicodeSupport.h"   //  NOW SQLWCHAR is available!
+#include "UnicodeODBC.h"       //  NOW SQLWCHAR is available!
+#include "UnicodeFileIO.h"     //  NOW SQLWCHAR is available!
 
 #pragma comment(lib,"ws2_32.lib")
 #pragma comment(lib,"Rpcrt4.lib")
 #pragma comment(lib,"dbghelp.lib")
+#pragma comment(lib,"odbc32.lib")
+#pragma comment(lib,"odbccp32.lib")
 #pragma comment(lib,"Psapi.lib")
 
 #if(GAMESERVER_UPDATE>=701)

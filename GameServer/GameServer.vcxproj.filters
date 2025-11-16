@@ -1008,6 +1008,15 @@
     <ClInclude Include="UpdateManager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="UnicodeFileIO.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="UnicodeODBC.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="UnicodeSupport.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">

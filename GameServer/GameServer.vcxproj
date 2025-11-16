@@ -550,6 +550,7 @@
     <ClInclude Include="RespawnLocation.h" />
     <ClInclude Include="RewardSystem.h" />
     <ClInclude Include="RuudTokenSellTemplate.h" />
+	<ClInclude Include="SafeZoneManager.h" />
     <ClInclude Include="ScheduleManager.h" />
     <ClInclude Include="SerialCheck.h" />
     <ClInclude Include="ServerDisplayer.h" />
@@ -576,6 +577,9 @@
     <ClInclude Include="ThemidaSDK.h" />
     <ClInclude Include="Trade.h" />
     <ClInclude Include="TuChan.h" />
+    <ClInclude Include="UnicodeFileIO.h" />
+    <ClInclude Include="UnicodeODBC.h" />
+    <ClInclude Include="UnicodeSupport.h" />
     <ClInclude Include="Union.h" />
     <ClInclude Include="UnionInfo.h" />
     <ClInclude Include="UpdateManager.h" />
@@ -829,6 +833,7 @@
     <ClCompile Include="RespawnLocation.cpp" />
     <ClCompile Include="RewardSystem.cpp" />
     <ClCompile Include="RuudTokenSellTemplate.cpp" />
+	<ClCompile Include="SafeZoneManager.cpp" />
     <ClCompile Include="ScheduleManager.cpp" />
     <ClCompile Include="SerialCheck.cpp" />
     <ClCompile Include="ServerDisplayer.cpp" />
