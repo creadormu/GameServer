@@ -758,6 +758,10 @@ void CFakeOnline::RestoreFakeOnline()
 			
 			// Initialize city wandering mode if enabled
 			InitializeCityMode(lpObj);
+			
+			// CRITICAL DEBUG: Verify initialization was called
+			LogAdd(LOG_RED, "[DEBUG] InitializeCityMode called for [%s], BotStayCity=%d", 
+				lpObj->Name, it->second.BotStayCity);
 
 			LogAdd(LOG_RED, "[FakeOnline]  [TK: %s NV: %s][Cls:%d] Online at Map:%d X:%d Y:%d Gate:%d", it->second.Account, it->second.Name, lpObj->Class, lpObj->Map, lpObj->X, lpObj->Y, lpObj->GateNumber);
 		}
@@ -1534,6 +1538,14 @@ void CFakeOnline::QuayLaiToaDoGoc(int aIndex) {
 		// Check if bot has city wandering enabled
 		if (info->BotStayCity == 1)
 		{
+			// CRITICAL DEBUG: Log that we entered this block
+			static bool loggedOnce[MAX_OBJECT] = {false};
+			if (!loggedOnce[aIndex]) {
+				LogAdd(LOG_RED, "[DEBUG][%s] ENTERED CITY WANDER BLOCK! BotStayCity=%d, ConnectTick=%u", 
+					lpObj->Name, info->BotStayCity, lpObj->ConnectTickCount);
+				loggedOnce[aIndex] = true;
+			}
+			
 			// Only update mode if bot is fully connected and stable
 			// Check if bot has been online for at least a few seconds
 			if (lpObj->ConnectTickCount != 0 && (GetTickCount() - lpObj->ConnectTickCount) >= 5000)
