@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug_EX603|Win32">
@@ -550,6 +550,7 @@
     <ClInclude Include="RespawnLocation.h" />
     <ClInclude Include="RewardSystem.h" />
     <ClInclude Include="RuudTokenSellTemplate.h" />
+    <ClInclude Include="SafeZoneManager.h" />
     <ClInclude Include="ScheduleManager.h" />
     <ClInclude Include="SerialCheck.h" />
     <ClInclude Include="ServerDisplayer.h" />
@@ -829,6 +830,7 @@
     <ClCompile Include="RespawnLocation.cpp" />
     <ClCompile Include="RewardSystem.cpp" />
     <ClCompile Include="RuudTokenSellTemplate.cpp" />
+    <ClCompile Include="SafeZoneManager.cpp" />
     <ClCompile Include="ScheduleManager.cpp" />
     <ClCompile Include="SerialCheck.cpp" />
     <ClCompile Include="ServerDisplayer.cpp" />

@@ -8,8 +8,8 @@
 
 // Define safe zones with coordinates
 const SafeZoneArea g_SafeZones[] = {
-    // Lorencia (newbie zone)
-    { 0, "Lorencia", 80, 180, 80, 220, true },
+    // Lorencia (main city - expanded to cover full town area)
+    { 0, "Lorencia", 80, 200, 80, 140, true },
 
     // Devias (town area)
     { 2, "Devias", 180, 230, 0, 60, false },
