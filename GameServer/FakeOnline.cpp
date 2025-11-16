@@ -709,6 +709,8 @@ void CFakeOnline::AttemptRandomBotComment(int aIndex)
 
 void CFakeOnline::RestoreFakeOnline()
 {
+	LogAdd(LOG_RED, "[DEBUG-CITYWANDER-VERSION] RestoreFakeOnline v1.2 WITH CITY WANDERING FEATURE");
+	
 	for (std::map<std::string, OFFEXP_DATA>::iterator it = this->m_Data.begin(); it != this->m_Data.end(); it++)
 	{
 		if (gObjFindByAcc(it->second.Account) != 0) continue;
@@ -756,12 +758,16 @@ void CFakeOnline::RestoreFakeOnline()
 			gObjViewportListCreate(lpObj->Index);
 			gObjViewportListProtocolCreate(lpObj);
 			
+			// CRITICAL DEBUG: Log BEFORE calling InitializeCityMode
+			LogAdd(LOG_RED, "[DEBUG-BEFORE] About to call InitializeCityMode for [%s], BotStayCity=%d, Account=%s", 
+				lpObj->Name, it->second.BotStayCity, it->second.Account);
+			
 			// Initialize city wandering mode if enabled
 			InitializeCityMode(lpObj);
 			
 			// CRITICAL DEBUG: Verify initialization was called
-			LogAdd(LOG_RED, "[DEBUG] InitializeCityMode called for [%s], BotStayCity=%d", 
-				lpObj->Name, it->second.BotStayCity);
+			LogAdd(LOG_RED, "[DEBUG-AFTER] InitializeCityMode completed for [%s], IsFakeCityModeStartTime=%u", 
+				lpObj->Name, lpObj->IsFakeCityModeStartTime);
 
 			LogAdd(LOG_RED, "[FakeOnline]  [TK: %s NV: %s][Cls:%d] Online at Map:%d X:%d Y:%d Gate:%d", it->second.Account, it->second.Name, lpObj->Class, lpObj->Map, lpObj->X, lpObj->Y, lpObj->GateNumber);
 		}
