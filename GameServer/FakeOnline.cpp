@@ -1556,17 +1556,18 @@ void CFakeOnline::QuayLaiToaDoGoc(int aIndex) {
 			if (lpObj->IsFakeInCityMode)
 			{
 				BotWanderInCity(aIndex);
-				return;
+				return; // CRITICAL: Exit here to prevent emergency gate return!
 			}
 		}
 		
+		// ONLY run hunting logic if NOT in city mode
 		int PhamViDiTrain = (int)sqrt(pow(((float)lpObj->X - (float)info->MapX), 2) + pow(((float)lpObj->Y - (float)info->MapY), 2));
 
-			if ((GetTickCount() >= static_cast<DWORD>(lpObj->IsFakeTimeLag) + 30000) &&
-				(GetTickCount() >= static_cast<DWORD>(lpObj->AttackCustomDelay) + 30000) &&
-				lpObj->IsFakeRegen &&
-				(GetTickCount() >= static_cast<DWORD>(lpObj->m_OfflineMoveDelay) + 30000)) {
-			
+		if ((GetTickCount() >= static_cast<DWORD>(lpObj->IsFakeTimeLag) + 30000) &&
+			(GetTickCount() >= static_cast<DWORD>(lpObj->AttackCustomDelay) + 30000) &&
+			lpObj->IsFakeRegen &&
+			(GetTickCount() >= static_cast<DWORD>(lpObj->m_OfflineMoveDelay) + 30000)) {
+		
 			lpObj->IsFakeRegen = false;
 			lpObj->IsFakeTimeLag = GetTickCount();
 			lpObj->m_OfflineMoveDelay = GetTickCount();
@@ -1575,75 +1576,87 @@ void CFakeOnline::QuayLaiToaDoGoc(int aIndex) {
 			LogAdd(LOG_BLUE, "[FakeOnline][%s] Fix Lag Reset Move", lpObj->Name);
 		}
 
-		if (gGate.MapIsInGate(lpObj, info->GateNumber) == 0 || (PhamViDiTrain >= 100 && !lpObj->IsFakeRegen)) {
-			gObjMoveGate(lpObj->Index, info->GateNumber);
-			LogAdd(LOG_BLUE, "[FakeOnline][%s] Move Gate", lpObj->Name);
-			return;
+		// Emergency return to gate - but SKIP if in city mode!
+		if (!lpObj->IsFakeInCityMode)
+		{
+			if (gGate.MapIsInGate(lpObj, info->GateNumber) == 0 || (PhamViDiTrain >= 100 && !lpObj->IsFakeRegen)) {
+				gObjMoveGate(lpObj->Index, info->GateNumber);
+				LogAdd(LOG_BLUE, "[FakeOnline][%s] Move Gate (Emergency return)", lpObj->Name);
+				return;
+			}
 		}
-		if (GetTickCount() >= lpObj->m_OfflineTimeResetMove + 2000) {
-			if ((PhamViDiTrain >= (lpObj->IsFakeMoveRange + 5) && !lpObj->IsFakeRegen) || gServerInfo.InSafeZone(lpObj->Index) == true) {
-				int DiChuyenX = lpObj->X;
-				int DiChuyenY = lpObj->Y;
-				for (int n = 0; n < 16; n++) { 
-					if (lpObj->X > info->MapX) { DiChuyenX -= random_bot_range(1, 3); } 
-					else if (lpObj->X < info->MapX){ DiChuyenX += random_bot_range(1, 3); }
-					else { DiChuyenX = info->MapX; }
+		// "Return to corner" logic - but SKIP if in city mode!
+		if (!lpObj->IsFakeInCityMode)
+		{
+			if (GetTickCount() >= lpObj->m_OfflineTimeResetMove + 2000) {
+				if ((PhamViDiTrain >= (lpObj->IsFakeMoveRange + 5) && !lpObj->IsFakeRegen) || gServerInfo.InSafeZone(lpObj->Index) == true) {
+					int DiChuyenX = lpObj->X;
+					int DiChuyenY = lpObj->Y;
+					for (int n = 0; n < 16; n++) { 
+						if (lpObj->X > info->MapX) { DiChuyenX -= random_bot_range(1, 3); } 
+						else if (lpObj->X < info->MapX){ DiChuyenX += random_bot_range(1, 3); }
+						else { DiChuyenX = info->MapX; }
 
-					if (lpObj->Y > info->MapY) { DiChuyenY -= random_bot_range(1, 3); }
-					else if (lpObj->Y < info->MapY) { DiChuyenY += random_bot_range(1, 3); }
-					else { DiChuyenY = info->MapY; }
+						if (lpObj->Y > info->MapY) { DiChuyenY -= random_bot_range(1, 3); }
+						else if (lpObj->Y < info->MapY) { DiChuyenY += random_bot_range(1, 3); }
+						else { DiChuyenY = info->MapY; }
 
-					if (DiChuyenX == info->MapX && DiChuyenY == info->MapY) { lpObj->IsFakeRegen = true; }
+						if (DiChuyenX == info->MapX && DiChuyenY == info->MapY) { lpObj->IsFakeRegen = true; }
 
-					BYTE attr = gMap[lpObj->Map].GetAttr(DiChuyenX, DiChuyenY);
-					if ((attr & 1) == 0 && (attr & 4) == 0 && (attr & 8) == 0) { 
-						lpObj->m_OfflineTimeResetMove = GetTickCount();
-						FakeAnimationMove(lpObj->Index, DiChuyenX, DiChuyenY, false);
-						LogAdd(LOG_BLUE, "[FakeOnline][%s] Mover a ubicación predeterminada (%d/%d)", lpObj->Name, DiChuyenX, DiChuyenY);
-						return;
+						BYTE attr = gMap[lpObj->Map].GetAttr(DiChuyenX, DiChuyenY);
+						if ((attr & 1) == 0 && (attr & 4) == 0 && (attr & 8) == 0) { 
+							lpObj->m_OfflineTimeResetMove = GetTickCount();
+							FakeAnimationMove(lpObj->Index, DiChuyenX, DiChuyenY, false);
+							LogAdd(LOG_BLUE, "[FakeOnline][%s] Mover a ubicación predeterminada (%d/%d)", lpObj->Name, DiChuyenX, DiChuyenY);
+							return;
+						}
 					}
+					return; 
+				} else if (!lpObj->IsFakeRegen) {
+					lpObj->m_OfflineTimeResetMove = GetTickCount();
+					lpObj->IsFakeRegen = true;
 				}
-				return; 
-			} else if (!lpObj->IsFakeRegen) {
-				lpObj->m_OfflineTimeResetMove = GetTickCount();
-				lpObj->IsFakeRegen = true;
 			}
 		}
 
-		if (lpObj->IsFakeMoveRange != 0) {
-			if (GetTickCount() >= lpObj->m_OfflineTimeResetMove + 2000 && lpObj->IsFakeRegen) {
-				int MoveRangeVal = 3; 
-				int maxmoverange = MoveRangeVal * 2 + 1;
-				int searchc = 10;
-				
-				BYTE tpx = static_cast<BYTE>(lpObj->X);
-				BYTE tpy = static_cast<BYTE>(lpObj->Y);
-
-				while (searchc-- != 0) {
-					int randXOffset = (GetLargeRand() % maxmoverange) - MoveRangeVal; 
-					int randYOffset = (GetLargeRand() % maxmoverange) - MoveRangeVal;
-					tpx = lpObj->X + randXOffset;
-					tpy = lpObj->Y + randYOffset;
+		// Normal hunting movement - but SKIP if in city mode!
+		if (!lpObj->IsFakeInCityMode)
+		{
+			if (lpObj->IsFakeMoveRange != 0) {
+				if (GetTickCount() >= lpObj->m_OfflineTimeResetMove + 2000 && lpObj->IsFakeRegen) {
+					int MoveRangeVal = 3; 
+					int maxmoverange = MoveRangeVal * 2 + 1;
+					int searchc = 10;
 					
-					BYTE attr = gMap[lpObj->Map].GetAttr(tpx, tpy);
-					if ((attr & 1) != 1 && (attr & 2) != 2 && (attr & 4) != 4 && (attr & 8) != 8 && GetTickCount() >= lpObj->m_OfflineMoveDelay + 2000) {
-						LogAdd(LOG_BLUE, "[FakeOnline] Rango de movimiento (%d,%d)", tpx, tpy);
-						lpObj->m_OfflineMoveDelay = GetTickCount();
-						FakeAnimationMove(lpObj->Index, tpx, tpy, false);
-						return;
+					BYTE tpx = static_cast<BYTE>(lpObj->X);
+					BYTE tpy = static_cast<BYTE>(lpObj->Y);
+
+					while (searchc-- != 0) {
+						int randXOffset = (GetLargeRand() % maxmoverange) - MoveRangeVal; 
+						int randYOffset = (GetLargeRand() % maxmoverange) - MoveRangeVal;
+						tpx = lpObj->X + randXOffset;
+						tpy = lpObj->Y + randYOffset;
+						
+						BYTE attr = gMap[lpObj->Map].GetAttr(tpx, tpy);
+						if ((attr & 1) != 1 && (attr & 2) != 2 && (attr & 4) != 4 && (attr & 8) != 8 && GetTickCount() >= lpObj->m_OfflineMoveDelay + 2000) {
+							LogAdd(LOG_BLUE, "[FakeOnline] Rango de movimiento (%d,%d)", tpx, tpy);
+							lpObj->m_OfflineMoveDelay = GetTickCount();
+							FakeAnimationMove(lpObj->Index, tpx, tpy, false);
+							return;
+						}
 					}
 				}
 			}
-		}
-		
-		if (lpObj->DistanceReturnOn != 0) { 
-			if (GetTickCount() >= lpObj->m_OfflineTimeResetMove + 1000 + ((lpObj->DistanceMin * 60) * 1000)) {
-				if (lpObj->m_OfflineCoordX != lpObj->X && lpObj->m_OfflineCoordY != lpObj->Y) {
-					LogAdd(LOG_BLUE, "[FakeOnline] Volver a Coordenadas de esquina (%d,%d)", lpObj->m_OfflineCoordX, lpObj->m_OfflineCoordY);
-					FakeAnimationMove(lpObj->Index, lpObj->m_OfflineCoordX, lpObj->m_OfflineCoordY, false);
-					return;
+			
+			if (lpObj->DistanceReturnOn != 0) { 
+				if (GetTickCount() >= lpObj->m_OfflineTimeResetMove + 1000 + ((lpObj->DistanceMin * 60) * 1000)) {
+					if (lpObj->m_OfflineCoordX != lpObj->X && lpObj->m_OfflineCoordY != lpObj->Y) {
+						LogAdd(LOG_BLUE, "[FakeOnline] Volver a Coordenadas de esquina (%d,%d)", lpObj->m_OfflineCoordX, lpObj->m_OfflineCoordY);
+						FakeAnimationMove(lpObj->Index, lpObj->m_OfflineCoordX, lpObj->m_OfflineCoordY, false);
+						return;
+					}
+					lpObj->m_OfflineTimeResetMove = GetTickCount();
 				}
-				lpObj->m_OfflineTimeResetMove = GetTickCount();
 			}
 		}
 	}

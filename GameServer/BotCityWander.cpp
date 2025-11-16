@@ -58,11 +58,30 @@ bool ShouldBotReturnToHunting(int aIndex)
 	if (!lpObj->IsFakeInCityMode) return false;
 	
 	// Check if enough time has passed in city mode
-	DWORD timeSinceSwitch = GetTickCount() - lpObj->IsFakeCityModeStartTime;
+	DWORD currentTick = GetTickCount();
+	DWORD timeSinceSwitch = currentTick - lpObj->IsFakeCityModeStartTime;
 	DWORD cityTimeLimit = pBotData->TimeForCity * 60 * 1000;
 	
+	// Log timer check every 10 seconds for debugging
+	static DWORD lastLogTime[MAX_OBJECT] = {0};
+	if (currentTick - lastLogTime[aIndex] > 10000)
+	{
+		float minutesElapsed = (float)timeSinceSwitch / 60000.0f;
+		float minutesLimit = (float)cityTimeLimit / 60000.0f;
+		LogAdd(LOG_BLUE, "[BotCityWander][Timer] %s in CITY: %.1f/%.1f min (TimeForCity=%d)", 
+			lpObj->Name, minutesElapsed, minutesLimit, pBotData->TimeForCity);
+		lastLogTime[aIndex] = currentTick;
+	}
+	
 	// Time to go back to hunting?
-	return (timeSinceSwitch >= cityTimeLimit);
+	bool shouldReturn = (timeSinceSwitch >= cityTimeLimit);
+	if (shouldReturn)
+	{
+		LogAdd(LOG_RED, "[BotCityWander] %s TIME TO RETURN! Elapsed=%.1f min, Limit=%.1f min", 
+			lpObj->Name, (float)timeSinceSwitch/60000.0f, (float)cityTimeLimit/60000.0f);
+	}
+	
+	return shouldReturn;
 }
 
 // Teleport bot to safe zone (city)
@@ -171,8 +190,11 @@ void TeleportBotToHunting(int aIndex)
 	int oldX = lpObj->X;
 	int oldY = lpObj->Y;
 	
-	LogAdd(LOG_BLUE, "[BotCityWander] %s returning to HUNTING at gate %d [CityPos=%d,%d,%d]", 
-		lpObj->Name, pBotData->GateNumber, oldMap, oldX, oldY);
+	LogAdd(LOG_RED, "[BotCityWander] ========== %s RETURNING TO HUNTING ==========", lpObj->Name);
+	LogAdd(LOG_RED, "[BotCityWander] Current position: Map=%d (%d,%d)", oldMap, oldX, oldY);
+	LogAdd(LOG_RED, "[BotCityWander] Gate number: %d", pBotData->GateNumber);
+	LogAdd(LOG_RED, "[BotCityWander] Target hunting coords: Map=%d (%d,%d)", 
+		pBotData->Map, pBotData->MapX, pBotData->MapY);
 	
 	// CRITICAL: Reset bot state BEFORE gate movement
 	lpObj->IsFakeInCityMode = false;
@@ -180,9 +202,19 @@ void TeleportBotToHunting(int aIndex)
 	lpObj->PathCount = 0;
 	lpObj->Teleport = 0;
 	lpObj->State = OBJECT_PLAYING;
+	lpObj->Rest = 0;
+	lpObj->DieRegen = 0;
 	
 	// Use game's built-in gate movement (handles all visibility automatically)
-	gObjMoveGate(aIndex, pBotData->GateNumber);
+	LogAdd(LOG_RED, "[BotCityWander] Calling gObjMoveGate(aIndex=%d, gateNum=%d)...", 
+		aIndex, pBotData->GateNumber);
+	
+	BOOL gateResult = gObjMoveGate(aIndex, pBotData->GateNumber);
+	
+	LogAdd(LOG_RED, "[BotCityWander] gObjMoveGate result: %s (Now at Map=%d, X=%d, Y=%d, State=%d)", 
+		gateResult ? "SUCCESS" : "FAILED", 
+		lpObj->Map, lpObj->X, lpObj->Y, lpObj->State);
+	LogAdd(LOG_RED, "[BotCityWander] ========================================");
 }
 
 // Make bot wander in city
