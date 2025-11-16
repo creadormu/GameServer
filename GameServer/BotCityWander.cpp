@@ -196,53 +196,68 @@ void TeleportBotToHunting(int aIndex)
 	LogAdd(LOG_RED, "[BotCityWander] Target hunting coords: Map=%d (%d,%d)", 
 		pBotData->Map, pBotData->MapX, pBotData->MapY);
 	
-	// Add LARGE random offset so bot spawns far from home position
-	// This triggers the "return to corner" logic (requires distance >= MoveRange+5)
-	// MoveRange is usually 30, so we need offset of ~40-50 to ensure movement
-	int offsetX = (rand() % 61) - 30; // -30 to +30
-	int offsetY = (rand() % 61) - 30;
+	// CRITICAL FIX: Force bot to spawn EXACTLY 40 tiles away in a random direction
+	// This MUST trigger the "return to corner" logic which requires distance >= MoveRange+5 (usually 35)
+	// Random direction: 0=North, 1=South, 2=East, 3=West
+	int direction = rand() % 4;
+	int offsetX = 0;
+	int offsetY = 0;
 	
-	// Ensure minimum distance of 35 tiles from home to trigger movement
-	int distance = (int)sqrt((float)(offsetX * offsetX + offsetY * offsetY));
-	if (distance < 35)
+	switch(direction)
 	{
-		// Force larger offset if too close
-		offsetX = 40;
-		offsetY = 0;
+		case 0: offsetY = -40; break; // North
+		case 1: offsetY = +40; break; // South  
+		case 2: offsetX = +40; break; // East
+		case 3: offsetX = -40; break; // West
 	}
 	
 	int returnX = pBotData->MapX + offsetX;
 	int returnY = pBotData->MapY + offsetY;
+	int actualDist = (int)sqrt((float)(offsetX * offsetX + offsetY * offsetY));
 	
-	LogAdd(LOG_BLUE, "[BotCityWander] %s teleporting to (%d,%d) [offset: %+d,%+d, dist:%d]", 
-		lpObj->Name, returnX, returnY, offsetX, offsetY, distance);
+	LogAdd(LOG_BLUE, "[BotCityWander] %s teleporting to (%d,%d) [offset: %+d,%+d, dist:%d, dir:%d]", 
+		lpObj->Name, returnX, returnY, offsetX, offsetY, actualDist, direction);
 	
 	// Teleport directly to hunting coordinates (NOT gate, since bot is not at gate!)
 	gObjTeleport(aIndex, pBotData->Map, returnX, returnY);
 	
-	// Get current time for all timers
+	// ========== COMPREHENSIVE STATE RESET ==========
+	// Match what RestoreFakeOnline() does for initial bot spawn
+	
 	DWORD currentTime = GetTickCount();
 	
-	// Restore bot state after teleport (gObjTeleport sets OBJECT_DELCMD temporarily)
+	// 1. Restore object state after teleport (gObjTeleport sets OBJECT_DELCMD temporarily)
 	lpObj->State = OBJECT_PLAYING;
 	lpObj->Teleport = 0;
 	lpObj->Rest = 0;
 	lpObj->DieRegen = 0;
-	lpObj->PathCount = 0;
+	lpObj->RegenOk = 0;
 	
-	// CRITICAL: Reset city mode AFTER teleport
+	// 2. Reset movement path completely
+	lpObj->PathCount = 0;
+	lpObj->PathCur = 0;
+	lpObj->PathStartEnd = 0;
+	memset(lpObj->PathX, 0, sizeof(lpObj->PathX));
+	memset(lpObj->PathY, 0, sizeof(lpObj->PathY));
+	memset(lpObj->PathDir, 0, sizeof(lpObj->PathDir));
+	
+	// 3. Reset city mode
 	lpObj->IsFakeInCityMode = false;
 	lpObj->IsFakeCityModeStartTime = currentTime;
 	
-	// CRITICAL FIX: Set IsFakeRegen = FALSE first to trigger movement initialization!
-	// Bot will detect it's far from monsters and start wandering
+	// 4. CRITICAL: Reset movement state to trigger "return to corner" logic
 	lpObj->IsFakeRegen = false;
 	
-	// CRITICAL FIX: Reset ALL movement timers so bot can move again!
-	lpObj->m_OfflineMoveDelay = currentTime;
-	lpObj->m_OfflineTimeResetMove = currentTime;
-	lpObj->IsFakeTimeLag = currentTime;
-	lpObj->AttackCustomDelay = currentTime;
+	// 5. CRITICAL FIX: Set movement timers to ZERO or PAST values to allow IMMEDIATE movement!
+	// RestoreFakeOnline sets these to 0, NOT GetTickCount()!
+	lpObj->IsFakeTimeLag = 0;                          // Was 0 in RestoreFakeOnline
+	lpObj->m_OfflineMoveDelay = 0;                     // Was 0 in RestoreFakeOnline  
+	lpObj->m_OfflineTimeResetMove = currentTime - 5000; // Allow move immediately
+	lpObj->AttackCustomDelay = currentTime - 31000;    // Allow attack immediately
+	
+	// 6. Reset combat state
+	lpObj->AttackCustom = 0;
+	lpObj->IsAttackState = 0;
 	
 	LogAdd(LOG_GREEN, "[BotCityWander] %s successfully returned to HUNTING at Map=%d (%d,%d)", 
 		lpObj->Name, lpObj->Map, lpObj->X, lpObj->Y);
