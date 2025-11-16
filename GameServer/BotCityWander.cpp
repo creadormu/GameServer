@@ -80,34 +80,46 @@ void TeleportBotToCity(int aIndex)
 	bool foundGoodSpot = false;
 	
 	// Search for a truly walkable spot in Lorencia safe zone
-	// AVOID the PVP ring area (coordinates 140-155)
-	// Search in the main city square instead (120-138 X, 120-135 Y)
+	// Based on user's map editor:
+	// 0x0001 = Safe zone
+	// 0x0002 = Character (can stand)
+	// 0x0004 = No Move (AVOID!)
+	// 0x0008 = No Ground (AVOID!)
+	// 0x0010 = Water (AVOID!)
+	// 0x0100 = No attack (PVP ring - AVOID!)
+	
+	// We want: Safe zone (0x0001) OR Character (0x0002), but NOT No Move (0x0004)
 	for (int attempt = 0; attempt < 100 && !foundGoodSpot; attempt++)
 	{
 		// Search in main city square area, AVOIDING PVP ring (140-155)
 		int baseX = 120 + (rand() % 18); // 120-138 (stops before PVP ring at 140)
 		int baseY = 120 + (rand() % 15); // 120-135
 		
+		// Double-check: make sure we're NOT in PVP ring area
+		if (baseX >= 140 && baseX <= 155 && baseY >= 120 && baseY <= 135)
+		{
+			continue; // Skip PVP ring coordinates
+		}
+		
 		BYTE attr = gMap[cityMap].GetAttr(baseX, baseY);
 		
-		// We want ONLY walkable tiles with NO restrictions
-		// attr == 0 means NO flags set = completely walkable
-		// This ensures we avoid PVP rings, walls, water, etc.
-		if (attr == 0)
+		// Accept tiles with ONLY safe zone (0x0001) or character (0x0002) flags
+		// REJECT tiles with No Move (0x0004), No Ground (0x0008), Water (0x0010), or No Attack (0x0100)
+		bool hasNoMove = (attr & 0x04) != 0;  // No Move flag
+		bool hasWater = (attr & 0x10) != 0;   // Water flag
+		bool hasNoGround = (attr & 0x08) != 0; // No Ground flag
+		bool hasNoAttack = (attr & 0x100) != 0; // No Attack (PVP) flag
+		
+		// Tile must NOT have any blocking flags
+		if (!hasNoMove && !hasWater && !hasNoGround && !hasNoAttack)
 		{
-			// Double-check: make sure we're NOT in PVP ring area
-			if (baseX >= 140 && baseX <= 155 && baseY >= 120 && baseY <= 135)
-			{
-				continue; // Skip PVP ring coordinates
-			}
-			
 			// Verify it's in safe zone using our safe zone manager
 			if (IsInSafeZoneArea(cityMap, baseX, baseY))
 			{
 				cityX = baseX;
 				cityY = baseY;
 				foundGoodSpot = true;
-				LogAdd(LOG_GREEN, "[BotCityWander] %s found walkable city spot at (%d,%d) attribute=%d", 
+				LogAdd(LOG_GREEN, "[BotCityWander] %s found walkable city spot at (%d,%d) attribute=0x%02X", 
 					lpObj->Name, cityX, cityY, attr);
 				break;
 			}
@@ -159,15 +171,17 @@ void TeleportBotToHunting(int aIndex)
 	int oldX = lpObj->X;
 	int oldY = lpObj->Y;
 	
-	// Update state BEFORE teleport
-	lpObj->IsFakeInCityMode = false;
-	lpObj->IsFakeCityModeStartTime = GetTickCount();
-	
 	LogAdd(LOG_BLUE, "[BotCityWander] %s returning to HUNTING at gate %d [CityPos=%d,%d,%d]", 
 		lpObj->Name, pBotData->GateNumber, oldMap, oldX, oldY);
 	
+	// CRITICAL: Reset bot state BEFORE gate movement
+	lpObj->IsFakeInCityMode = false;
+	lpObj->IsFakeCityModeStartTime = GetTickCount();
+	lpObj->PathCount = 0;
+	lpObj->Teleport = 0;
+	lpObj->State = OBJECT_PLAYING;
+	
 	// Use game's built-in gate movement (handles all visibility automatically)
-	// Let the game do its thing - don't interfere with viewport or state
 	gObjMoveGate(aIndex, pBotData->GateNumber);
 }
 
@@ -197,11 +211,15 @@ void BotWanderInCity(int aIndex)
 		// Clamp to map bounds
 		if (newX < 0 || newY < 0 || newX > 255 || newY > 255) continue;
 		
-		// Check map attributes (ONLY accept attribute=0, completely clean)
+		// Check map attributes - avoid No Move, Water, No Ground
 		BYTE attr = gMap[lpObj->Map].GetAttr(newX, newY);
 		
-		// Only walk on completely clean tiles (no flags set)
-		if (attr == 0)
+		// Only walk on tiles WITHOUT blocking flags
+		bool hasNoMove = (attr & 0x04) != 0;
+		bool hasWater = (attr & 0x10) != 0;
+		bool hasNoGround = (attr & 0x08) != 0;
+		
+		if (!hasNoMove && !hasWater && !hasNoGround)
 		{
 			// Verify still in safe zone
 			if (IsInSafeZoneArea(lpObj->Map, newX, newY))
