@@ -192,28 +192,26 @@ void TeleportBotToHunting(int aIndex)
 	
 	LogAdd(LOG_RED, "[BotCityWander] ========== %s RETURNING TO HUNTING ==========", lpObj->Name);
 	LogAdd(LOG_RED, "[BotCityWander] Current position: Map=%d (%d,%d)", oldMap, oldX, oldY);
-	LogAdd(LOG_RED, "[BotCityWander] Gate number: %d", pBotData->GateNumber);
 	LogAdd(LOG_RED, "[BotCityWander] Target hunting coords: Map=%d (%d,%d)", 
 		pBotData->Map, pBotData->MapX, pBotData->MapY);
 	
-	// CRITICAL: Reset bot state BEFORE gate movement
-	lpObj->IsFakeInCityMode = false;
-	lpObj->IsFakeCityModeStartTime = GetTickCount();
-	lpObj->PathCount = 0;
-	lpObj->Teleport = 0;
+	// Teleport directly to hunting coordinates (NOT gate, since bot is not at gate!)
+	gObjTeleport(aIndex, pBotData->Map, pBotData->MapX, pBotData->MapY);
+	
+	// Restore bot state after teleport (gObjTeleport sets OBJECT_DELCMD temporarily)
 	lpObj->State = OBJECT_PLAYING;
+	lpObj->Teleport = 0;
 	lpObj->Rest = 0;
 	lpObj->DieRegen = 0;
+	lpObj->PathCount = 0;
 	
-	// Use game's built-in gate movement (handles all visibility automatically)
-	LogAdd(LOG_RED, "[BotCityWander] Calling gObjMoveGate(aIndex=%d, gateNum=%d)...", 
-		aIndex, pBotData->GateNumber);
+	// CRITICAL: Reset city mode AFTER teleport
+	lpObj->IsFakeInCityMode = false;
+	lpObj->IsFakeCityModeStartTime = GetTickCount();
+	lpObj->IsFakeRegen = true; // Bot is back at hunting spot, ready to fight!
 	
-	BOOL gateResult = gObjMoveGate(aIndex, pBotData->GateNumber);
-	
-	LogAdd(LOG_RED, "[BotCityWander] gObjMoveGate result: %s (Now at Map=%d, X=%d, Y=%d, State=%d)", 
-		gateResult ? "SUCCESS" : "FAILED", 
-		lpObj->Map, lpObj->X, lpObj->Y, lpObj->State);
+	LogAdd(LOG_GREEN, "[BotCityWander] %s successfully returned to HUNTING at Map=%d (%d,%d)", 
+		lpObj->Name, lpObj->Map, lpObj->X, lpObj->Y);
 	LogAdd(LOG_RED, "[BotCityWander] ========================================");
 }
 
