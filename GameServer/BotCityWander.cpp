@@ -89,11 +89,20 @@ void TeleportBotToCity(int aIndex)
 		
 		BYTE attr = gMap[cityMap].GetAttr(baseX, baseY);
 		
-		// We want ONLY attribute 0 or 8 (empty or safe zone marker)
-		// NO walls (1), NO objects (2), NO water (4)
-		if (attr == 0 || attr == 8)
+		// Based on user's map editor info:
+		// 0x0001 = Safe zone
+		// 0x0002 = Character
+		// 0x0004 = No Move
+		// 0x0008 = No Ground
+		// 0x0010 = Water (16 decimal)
+		// 0x0100 = No attack (256 decimal)
+		
+		// We want ONLY walkable tiles with NO restrictions
+		// attr == 0 means NO flags set = completely walkable
+		// We specifically AVOID 0x0100 (no attack zones like PVP rings)
+		if (attr == 0)
 		{
-			// Verify it's in safe zone
+			// Verify it's in safe zone using our safe zone manager
 			if (IsInSafeZoneArea(cityMap, baseX, baseY))
 			{
 				cityX = baseX;
@@ -111,67 +120,31 @@ void TeleportBotToCity(int aIndex)
 		LogAdd(LOG_RED, "[BotCityWander] %s couldn't find walkable spot! Using default.", lpObj->Name);
 	}
 	
-	// Save old position for map attribute cleanup
+	// Save old position for logging
 	int oldMap = lpObj->Map;
 	int oldX = lpObj->X;
 	int oldY = lpObj->Y;
 	
-	// Remove bot from old map position
-	if (oldMap >= 0 && oldMap < MAX_MAP)
-	{
-		gMap[oldMap].DelStandAttr(oldX, oldY);
-	}
+	// Use the game's built-in teleport function (same as real players)
+	// This handles ALL visibility, viewport, and packet sending automatically
+	gObjTeleport(aIndex, cityMap, cityX, cityY);
 	
-	// Clear viewport from old position
-	gObjViewportListDestroy(aIndex);
+	// CRITICAL: gObjTeleport sets State=OBJECT_DELCMD, we need to restore it immediately
+	lpObj->State = OBJECT_PLAYING;
+	lpObj->Teleport = 0;
+	lpObj->Rest = 0;
+	lpObj->DieRegen = 0;
 	
-	// Move bot to city (direct coordinate change like hunting movement)
-	lpObj->Map = cityMap;
-	lpObj->X = cityX;
-	lpObj->Y = cityY;
-	lpObj->TX = cityX;
-	lpObj->TY = cityY;
-	lpObj->OldX = cityX;
-	lpObj->OldY = cityY;
-	lpObj->MTX = cityX;
-	lpObj->MTY = cityY;
-	
-	// Update state
+	// Update bot city mode state AFTER teleport
 	lpObj->IsFakeInCityMode = true;
 	lpObj->IsFakeCityModeStartTime = GetTickCount();
 	lpObj->IsFakeCitySpawnX = cityX;
 	lpObj->IsFakeCitySpawnY = cityY;
 	lpObj->IsFakeCitySpawnMap = cityMap;
 	
-	// Add bot to new map position
-	gMap[cityMap].SetStandAttr(cityX, cityY);
-	
-	// CRITICAL: Recreate viewport and send character info
-	gObjViewportListCreate(aIndex);
+	// Add extra viewport refresh to ensure visibility
+	Sleep(100); // Small delay to let teleport packet process
 	gObjViewportListProtocolCreate(lpObj);
-	
-	// Send character position update packet (like when bot first spawns)
-	PMSG_MOVE_SEND pMsgMove;
-	pMsgMove.header.set(PROTOCOL_CODE1, sizeof(pMsgMove));
-	pMsgMove.index[0] = SET_NUMBERHB(aIndex);
-	pMsgMove.index[1] = SET_NUMBERLB(aIndex);
-	pMsgMove.x = cityX;
-	pMsgMove.y = cityY;
-	pMsgMove.dir = lpObj->Dir << 4;
-	
-	// Send to all players in viewport
-	for (int n = 0; n < MAX_VIEWPORT; n++)
-	{
-		if (lpObj->VpPlayer2[n].type == OBJECT_USER)
-		{
-			if (lpObj->VpPlayer2[n].state != OBJECT_EMPTY && 
-				lpObj->VpPlayer2[n].state != OBJECT_DIECMD && 
-				lpObj->VpPlayer2[n].state != OBJECT_DIED)
-			{
-				DataSend(lpObj->VpPlayer2[n].index, (BYTE*)&pMsgMove, pMsgMove.header.size);
-			}
-		}
-	}
 	
 	LogAdd(LOG_BLUE, "[BotCityWander] %s teleported to CITY at (%d,%d) [OldPos=%d,%d,%d]", 
 		lpObj->Name, cityX, cityY, oldMap, oldX, oldY);
@@ -186,29 +159,26 @@ void TeleportBotToHunting(int aIndex)
 	OFFEXP_DATA* pBotData = s_FakeOnline.GetOffExpInfo(lpObj);
 	if (!pBotData) return;
 	
-	// Save old city position
+	// Save old city position for logging
 	int oldMap = lpObj->Map;
 	int oldX = lpObj->X;
 	int oldY = lpObj->Y;
 	
-	// Remove from old map
-	if (oldMap >= 0 && oldMap < MAX_MAP)
-	{
-		gMap[oldMap].DelStandAttr(oldX, oldY);
-	}
-	
-	// Clear viewport
-	gObjViewportListDestroy(aIndex);
-	
-	// Update state
+	// Update state BEFORE teleport
 	lpObj->IsFakeInCityMode = false;
 	lpObj->IsFakeCityModeStartTime = GetTickCount();
 	
-	// Use gate system to teleport back
+	// Use game's built-in gate movement (handles all visibility automatically)
 	gObjMoveGate(aIndex, pBotData->GateNumber);
 	
-	// CRITICAL: Recreate viewport for visibility
-	gObjViewportListCreate(aIndex);
+	// CRITICAL: gObjMoveGate might set State=OBJECT_DELCMD, restore it immediately
+	lpObj->State = OBJECT_PLAYING;
+	lpObj->Teleport = 0;
+	lpObj->Rest = 0;
+	lpObj->DieRegen = 0;
+	
+	// Add extra viewport refresh to ensure visibility
+	Sleep(100); // Small delay to let gate movement process
 	gObjViewportListProtocolCreate(lpObj);
 	
 	LogAdd(LOG_BLUE, "[BotCityWander] %s returned to HUNTING at gate %d [OldPos=%d,%d,%d]", 
@@ -222,47 +192,44 @@ void BotWanderInCity(int aIndex)
 	
 	LPOBJ lpObj = &gObj[aIndex];
 	
-	// Only wander every 4 seconds
-	if (GetTickCount() < lpObj->m_OfflineMoveDelay + 4000) return;
+	// Only wander every 3 seconds
+	if (GetTickCount() < lpObj->m_OfflineMoveDelay + 3000) return;
 	
-	// Try to find a walkable spot nearby
-	for (int attempt = 0; attempt < 15; attempt++)
+	// Try to find a walkable spot nearby (similar to hunting movement)
+	for (int attempt = 0; attempt < 10; attempt++)
 	{
-		// Random walk in a small area (3-5 tiles)
-		int newX = lpObj->X + (rand() % 7) - 3; // -3 to +3
-		int newY = lpObj->Y + (rand() % 7) - 3;
+		// Random walk in a small area (like city wandering)
+		int moveRange = 3;
+		int maxRange = moveRange * 2 + 1;
+		
+		int offsetX = (GetLargeRand() % maxRange) - moveRange; // -3 to +3
+		int offsetY = (GetLargeRand() % maxRange) - moveRange;
+		
+		int newX = lpObj->X + offsetX;
+		int newY = lpObj->Y + offsetY;
 		
 		// Clamp to map bounds
-		if (newX < 0) newX = 0;
-		if (newY < 0) newY = 0;
-		if (newX > 255) newX = 255;
-		if (newY > 255) newY = 255;
+		if (newX < 0 || newY < 0 || newX > 255 || newY > 255) continue;
 		
-		// Check map attributes
+		// Check map attributes (ONLY accept attribute=0, completely clean)
 		BYTE attr = gMap[lpObj->Map].GetAttr(newX, newY);
 		
-		// Must be walkable: no walls, no rivers, no blocked areas
-		if ((attr & 1) == 0 && (attr & 4) == 0)
+		// Only walk on completely clean tiles (no flags set)
+		if (attr == 0)
 		{
-			// Check if still in safe zone
+			// Verify still in safe zone
 			if (IsInSafeZoneArea(lpObj->Map, newX, newY))
 			{
-				lpObj->TX = newX;
-				lpObj->TY = newY;
-				lpObj->MTX = newX;
-				lpObj->MTY = newY;
+				// Use FakeAnimationMove for proper visible movement (same as hunting)
 				lpObj->m_OfflineMoveDelay = GetTickCount();
+				FakeAnimationMove(aIndex, newX, newY, false);
 				return;
 			}
 		}
 	}
 	
-	// If we couldn't find a good spot, return to city spawn point
-	if (lpObj->IsFakeCitySpawnX > 0 && lpObj->IsFakeCitySpawnY > 0)
-	{
-		lpObj->TX = lpObj->IsFakeCitySpawnX;
-		lpObj->TY = lpObj->IsFakeCitySpawnY;
-	}
+	// If we couldn't find a good spot, don't move this cycle
+	// Bot will try again in 3 seconds
 }
 
 #endif // USE_FAKE_ONLINE

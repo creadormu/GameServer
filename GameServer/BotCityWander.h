@@ -3,6 +3,9 @@
 
 #if USE_FAKE_ONLINE == TRUE
 
+// Forward declaration of FakeAnimationMove from FakeOnline.cpp
+extern void FakeAnimationMove(int aIndex, int x, int y, bool dixa);
+
 // Check if bot should switch to city mode
 bool ShouldBotGoToCity(int aIndex);
 
