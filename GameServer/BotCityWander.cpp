@@ -198,6 +198,9 @@ void TeleportBotToHunting(int aIndex)
 	// Teleport directly to hunting coordinates (NOT gate, since bot is not at gate!)
 	gObjTeleport(aIndex, pBotData->Map, pBotData->MapX, pBotData->MapY);
 	
+	// Get current time for all timers
+	DWORD currentTime = GetTickCount();
+	
 	// Restore bot state after teleport (gObjTeleport sets OBJECT_DELCMD temporarily)
 	lpObj->State = OBJECT_PLAYING;
 	lpObj->Teleport = 0;
@@ -207,8 +210,14 @@ void TeleportBotToHunting(int aIndex)
 	
 	// CRITICAL: Reset city mode AFTER teleport
 	lpObj->IsFakeInCityMode = false;
-	lpObj->IsFakeCityModeStartTime = GetTickCount();
+	lpObj->IsFakeCityModeStartTime = currentTime;
 	lpObj->IsFakeRegen = true; // Bot is back at hunting spot, ready to fight!
+	
+	// CRITICAL FIX: Reset ALL movement timers so bot can move again!
+	lpObj->m_OfflineMoveDelay = currentTime;
+	lpObj->m_OfflineTimeResetMove = currentTime;
+	lpObj->IsFakeTimeLag = currentTime;
+	lpObj->AttackCustomDelay = currentTime;
 	
 	LogAdd(LOG_GREEN, "[BotCityWander] %s successfully returned to HUNTING at Map=%d (%d,%d)", 
 		lpObj->Name, lpObj->Map, lpObj->X, lpObj->Y);
