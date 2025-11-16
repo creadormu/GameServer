@@ -10,6 +10,7 @@
 #include "Move.h"
 #include "Viewport.h"
 #include "SafeZoneManager.h"
+#include "Protocol.h"
 
 #if USE_FAKE_ONLINE == TRUE
 
@@ -70,46 +71,70 @@ void TeleportBotToCity(int aIndex)
 	if (!gObjIsConnectedGP(aIndex)) return;
 	
 	LPOBJ lpObj = &gObj[aIndex];
+	OFFEXP_DATA* pBotData = s_FakeOnline.GetOffExpInfo(lpObj);
+	if (!pBotData) return;
 	
-	// Known safe walkable coordinates in Lorencia (main square, shop areas)
-	// These are guaranteed to be in safe zone and walkable
-	const int safeCoords[][2] = {
-		{130, 125}, // Center of Lorencia
-		{135, 130}, // Near shops
-		{140, 128}, // Main square
-		{132, 120}, // Safe walkable area
-		{138, 135}, // Market area
-		{125, 127}, // Safe zone
-		{145, 130}, // Safe walkable
-		{128, 135}, // Near NPCs
-		{142, 125}, // Town center
-		{136, 122}  // Safe area
-	};
-	
-	// Pick a random safe coordinate
-	int coordIndex = rand() % 10;
-	int cityX = safeCoords[coordIndex][0];
-	int cityY = safeCoords[coordIndex][1];
 	int cityMap = 0; // Lorencia
+	int cityX = 135;
+	int cityY = 125;
+	bool foundGoodSpot = false;
 	
-	// Double-check it's walkable
-	BYTE attr = gMap[cityMap].GetAttr(cityX, cityY);
-	if ((attr & 1) != 0 || (attr & 4) != 0) // Wall or river
+	// Search for a truly walkable spot in Lorencia safe zone
+	// Try different areas of the city
+	for (int attempt = 0; attempt < 100 && !foundGoodSpot; attempt++)
 	{
-		LogAdd(LOG_RED, "[BotCityWander] %s coordinate (%d,%d) has bad attribute %d! Using fallback.", 
-			lpObj->Name, cityX, cityY, attr);
-		// Fallback to guaranteed safe spot
-		cityX = 130;
-		cityY = 125;
+		// Search in different city areas
+		int baseX = 120 + (rand() % 40); // 120-160
+		int baseY = 120 + (rand() % 20); // 120-140
+		
+		BYTE attr = gMap[cityMap].GetAttr(baseX, baseY);
+		
+		// We want ONLY attribute 0 or 8 (empty or safe zone marker)
+		// NO walls (1), NO objects (2), NO water (4)
+		if (attr == 0 || attr == 8)
+		{
+			// Verify it's in safe zone
+			if (IsInSafeZoneArea(cityMap, baseX, baseY))
+			{
+				cityX = baseX;
+				cityY = baseY;
+				foundGoodSpot = true;
+				LogAdd(LOG_GREEN, "[BotCityWander] %s found walkable city spot at (%d,%d) attribute=%d", 
+					lpObj->Name, cityX, cityY, attr);
+				break;
+			}
+		}
 	}
 	
-	// Log final coordinates and their attributes
-	attr = gMap[cityMap].GetAttr(cityX, cityY);
-	LogAdd(LOG_GREEN, "[BotCityWander] %s final city coords: (%d,%d) attribute=%d (1=wall,2=obj,4=water,8=safe)", 
-		lpObj->Name, cityX, cityY, attr);
+	if (!foundGoodSpot)
+	{
+		LogAdd(LOG_RED, "[BotCityWander] %s couldn't find walkable spot! Using default.", lpObj->Name);
+	}
 	
-	// Teleport to city
-	gObjTeleport(aIndex, cityMap, cityX, cityY);
+	// Save old position for map attribute cleanup
+	int oldMap = lpObj->Map;
+	int oldX = lpObj->X;
+	int oldY = lpObj->Y;
+	
+	// Remove bot from old map position
+	if (oldMap >= 0 && oldMap < MAX_MAP)
+	{
+		gMap[oldMap].DelStandAttr(oldX, oldY);
+	}
+	
+	// Clear viewport from old position
+	gObjViewportListDestroy(aIndex);
+	
+	// Move bot to city (direct coordinate change like hunting movement)
+	lpObj->Map = cityMap;
+	lpObj->X = cityX;
+	lpObj->Y = cityY;
+	lpObj->TX = cityX;
+	lpObj->TY = cityY;
+	lpObj->OldX = cityX;
+	lpObj->OldY = cityY;
+	lpObj->MTX = cityX;
+	lpObj->MTY = cityY;
 	
 	// Update state
 	lpObj->IsFakeInCityMode = true;
@@ -118,11 +143,38 @@ void TeleportBotToCity(int aIndex)
 	lpObj->IsFakeCitySpawnY = cityY;
 	lpObj->IsFakeCitySpawnMap = cityMap;
 	
-	// CRITICAL: Refresh viewport to make bot visible
+	// Add bot to new map position
+	gMap[cityMap].SetStandAttr(cityX, cityY);
+	
+	// CRITICAL: Recreate viewport and send character info
 	gObjViewportListCreate(aIndex);
 	gObjViewportListProtocolCreate(lpObj);
 	
-	LogAdd(LOG_BLUE, "[BotCityWander] %s teleported to CITY at (%d,%d)", lpObj->Name, cityX, cityY);
+	// Send character position update packet (like when bot first spawns)
+	PMSG_MOVE_SEND pMsgMove;
+	pMsgMove.header.set(PROTOCOL_CODE1, sizeof(pMsgMove));
+	pMsgMove.index[0] = SET_NUMBERHB(aIndex);
+	pMsgMove.index[1] = SET_NUMBERLB(aIndex);
+	pMsgMove.x = cityX;
+	pMsgMove.y = cityY;
+	pMsgMove.dir = lpObj->Dir << 4;
+	
+	// Send to all players in viewport
+	for (int n = 0; n < MAX_VIEWPORT; n++)
+	{
+		if (lpObj->VpPlayer2[n].type == OBJECT_USER)
+		{
+			if (lpObj->VpPlayer2[n].state != OBJECT_EMPTY && 
+				lpObj->VpPlayer2[n].state != OBJECT_DIECMD && 
+				lpObj->VpPlayer2[n].state != OBJECT_DIED)
+			{
+				DataSend(lpObj->VpPlayer2[n].index, (BYTE*)&pMsgMove, pMsgMove.header.size);
+			}
+		}
+	}
+	
+	LogAdd(LOG_BLUE, "[BotCityWander] %s teleported to CITY at (%d,%d) [OldPos=%d,%d,%d]", 
+		lpObj->Name, cityX, cityY, oldMap, oldX, oldY);
 }
 
 // Teleport bot back to hunting gate
@@ -134,18 +186,33 @@ void TeleportBotToHunting(int aIndex)
 	OFFEXP_DATA* pBotData = s_FakeOnline.GetOffExpInfo(lpObj);
 	if (!pBotData) return;
 	
-	// Update state first
+	// Save old city position
+	int oldMap = lpObj->Map;
+	int oldX = lpObj->X;
+	int oldY = lpObj->Y;
+	
+	// Remove from old map
+	if (oldMap >= 0 && oldMap < MAX_MAP)
+	{
+		gMap[oldMap].DelStandAttr(oldX, oldY);
+	}
+	
+	// Clear viewport
+	gObjViewportListDestroy(aIndex);
+	
+	// Update state
 	lpObj->IsFakeInCityMode = false;
 	lpObj->IsFakeCityModeStartTime = GetTickCount();
 	
-	// Teleport to hunting gate
+	// Use gate system to teleport back
 	gObjMoveGate(aIndex, pBotData->GateNumber);
 	
-	// CRITICAL: Refresh viewport to make bot visible
+	// CRITICAL: Recreate viewport for visibility
 	gObjViewportListCreate(aIndex);
 	gObjViewportListProtocolCreate(lpObj);
 	
-	LogAdd(LOG_BLUE, "[BotCityWander] %s returned to HUNTING at gate %d", lpObj->Name, pBotData->GateNumber);
+	LogAdd(LOG_BLUE, "[BotCityWander] %s returned to HUNTING at gate %d [OldPos=%d,%d,%d]", 
+		lpObj->Name, pBotData->GateNumber, oldMap, oldX, oldY);
 }
 
 // Make bot wander in city
