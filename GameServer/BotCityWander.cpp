@@ -11,6 +11,7 @@
 #include "Viewport.h"
 #include "SafeZoneManager.h"
 #include "Protocol.h"
+#include <cmath>
 
 #if USE_FAKE_ONLINE == TRUE
 
@@ -195,15 +196,26 @@ void TeleportBotToHunting(int aIndex)
 	LogAdd(LOG_RED, "[BotCityWander] Target hunting coords: Map=%d (%d,%d)", 
 		pBotData->Map, pBotData->MapX, pBotData->MapY);
 	
-	// Add small random offset so bot doesn't spawn at EXACT home position
-	// This forces bot to move and triggers normal hunting movement
-	int offsetX = (rand() % 5) - 2; // -2 to +2
-	int offsetY = (rand() % 5) - 2;
+	// Add LARGE random offset so bot spawns far from home position
+	// This triggers the "return to corner" logic (requires distance >= MoveRange+5)
+	// MoveRange is usually 30, so we need offset of ~40-50 to ensure movement
+	int offsetX = (rand() % 61) - 30; // -30 to +30
+	int offsetY = (rand() % 61) - 30;
+	
+	// Ensure minimum distance of 35 tiles from home to trigger movement
+	int distance = (int)sqrt((float)(offsetX * offsetX + offsetY * offsetY));
+	if (distance < 35)
+	{
+		// Force larger offset if too close
+		offsetX = 40;
+		offsetY = 0;
+	}
+	
 	int returnX = pBotData->MapX + offsetX;
 	int returnY = pBotData->MapY + offsetY;
 	
-	LogAdd(LOG_BLUE, "[BotCityWander] %s teleporting to (%d,%d) [offset from home: %+d,%+d]", 
-		lpObj->Name, returnX, returnY, offsetX, offsetY);
+	LogAdd(LOG_BLUE, "[BotCityWander] %s teleporting to (%d,%d) [offset: %+d,%+d, dist:%d]", 
+		lpObj->Name, returnX, returnY, offsetX, offsetY, distance);
 	
 	// Teleport directly to hunting coordinates (NOT gate, since bot is not at gate!)
 	gObjTeleport(aIndex, pBotData->Map, returnX, returnY);
