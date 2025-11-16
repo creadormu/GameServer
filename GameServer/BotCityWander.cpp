@@ -80,28 +80,27 @@ void TeleportBotToCity(int aIndex)
 	bool foundGoodSpot = false;
 	
 	// Search for a truly walkable spot in Lorencia safe zone
-	// Try different areas of the city
+	// AVOID the PVP ring area (coordinates 140-155)
+	// Search in the main city square instead (120-138 X, 120-135 Y)
 	for (int attempt = 0; attempt < 100 && !foundGoodSpot; attempt++)
 	{
-		// Search in different city areas
-		int baseX = 120 + (rand() % 40); // 120-160
-		int baseY = 120 + (rand() % 20); // 120-140
+		// Search in main city square area, AVOIDING PVP ring (140-155)
+		int baseX = 120 + (rand() % 18); // 120-138 (stops before PVP ring at 140)
+		int baseY = 120 + (rand() % 15); // 120-135
 		
 		BYTE attr = gMap[cityMap].GetAttr(baseX, baseY);
 		
-		// Based on user's map editor info:
-		// 0x0001 = Safe zone
-		// 0x0002 = Character
-		// 0x0004 = No Move
-		// 0x0008 = No Ground
-		// 0x0010 = Water (16 decimal)
-		// 0x0100 = No attack (256 decimal)
-		
 		// We want ONLY walkable tiles with NO restrictions
 		// attr == 0 means NO flags set = completely walkable
-		// We specifically AVOID 0x0100 (no attack zones like PVP rings)
+		// This ensures we avoid PVP rings, walls, water, etc.
 		if (attr == 0)
 		{
+			// Double-check: make sure we're NOT in PVP ring area
+			if (baseX >= 140 && baseX <= 155 && baseY >= 120 && baseY <= 135)
+			{
+				continue; // Skip PVP ring coordinates
+			}
+			
 			// Verify it's in safe zone using our safe zone manager
 			if (IsInSafeZoneArea(cityMap, baseX, baseY))
 			{
@@ -142,10 +141,6 @@ void TeleportBotToCity(int aIndex)
 	lpObj->IsFakeCitySpawnY = cityY;
 	lpObj->IsFakeCitySpawnMap = cityMap;
 	
-	// Add extra viewport refresh to ensure visibility
-	Sleep(100); // Small delay to let teleport packet process
-	gObjViewportListProtocolCreate(lpObj);
-	
 	LogAdd(LOG_BLUE, "[BotCityWander] %s teleported to CITY at (%d,%d) [OldPos=%d,%d,%d]", 
 		lpObj->Name, cityX, cityY, oldMap, oldX, oldY);
 }
@@ -168,21 +163,12 @@ void TeleportBotToHunting(int aIndex)
 	lpObj->IsFakeInCityMode = false;
 	lpObj->IsFakeCityModeStartTime = GetTickCount();
 	
-	// Use game's built-in gate movement (handles all visibility automatically)
-	gObjMoveGate(aIndex, pBotData->GateNumber);
-	
-	// CRITICAL: gObjMoveGate might set State=OBJECT_DELCMD, restore it immediately
-	lpObj->State = OBJECT_PLAYING;
-	lpObj->Teleport = 0;
-	lpObj->Rest = 0;
-	lpObj->DieRegen = 0;
-	
-	// Add extra viewport refresh to ensure visibility
-	Sleep(100); // Small delay to let gate movement process
-	gObjViewportListProtocolCreate(lpObj);
-	
-	LogAdd(LOG_BLUE, "[BotCityWander] %s returned to HUNTING at gate %d [OldPos=%d,%d,%d]", 
+	LogAdd(LOG_BLUE, "[BotCityWander] %s returning to HUNTING at gate %d [CityPos=%d,%d,%d]", 
 		lpObj->Name, pBotData->GateNumber, oldMap, oldX, oldY);
+	
+	// Use game's built-in gate movement (handles all visibility automatically)
+	// Let the game do its thing - don't interfere with viewport or state
+	gObjMoveGate(aIndex, pBotData->GateNumber);
 }
 
 // Make bot wander in city
