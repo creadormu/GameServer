@@ -13,6 +13,7 @@
 #include <vector>
 #include <string>
 #include <map>
+#include "BotCreation_StoredProcedure.h"
 
 #pragma comment(lib, "odbc32.lib")
 #pragma comment(lib, "odbccp32.lib")
@@ -205,6 +206,8 @@ struct BotCreationData {
     int partyMode;
     int pvpMode;
     int postKhiDie;
+    int botStayCity; // Agregado para solucionar el error
+    int timeForCity; // Agregado para mantener consistencia con el uso en el código
 };
 
 
@@ -417,7 +420,7 @@ bool CreateBotsViaBatch(int startFrom, int botCount, int minLevel, int maxLevel,
 bool CreateMultipleBotsAdvanced_StoredProc(int botCount, int startFrom, int gateNumber,
     int mapNumber, int mapX, int mapY, int minLevel, int maxLevel, int selectedClass,
     int phamViTrain, int moveRange, int timeReturn, int tuNhatItem, int tuDongReset,
-    int partyMode, int pvpMode, int postKhiDie, int enabledConfigs)
+    int partyMode, int pvpMode, int postKhiDie, int enabledConfigs, int botStayCity, int timeForCity)
 {
     LogAdd(LOG_BLACK, (char*)"[CreateBots] ===== START (Safe Transaction Version) =====");
     LogAdd(LOG_BLACK, (char*)"[CreateBots] Count=%d, StartFrom=%d", botCount, startFrom);
@@ -582,6 +585,8 @@ bool CreateMultipleBotsAdvanced_StoredProc(int botCount, int startFrom, int gate
         bot.partyMode = partyMode;
         bot.pvpMode = pvpMode;
         bot.postKhiDie = postKhiDie;
+        bot.botStayCity = botStayCity;
+        bot.timeForCity = timeForCity;
 
         botsToCreate.push_back(bot);
     }
@@ -627,14 +632,15 @@ bool CreateMultipleBotsAdvanced_StoredProc(int botCount, int startFrom, int gate
             "GateNumber=\"%d\" Map=\"%d\" MapX=\"%d\" MapY=\"%d\" "
             "PhamViTrain=\"%d\" MoveRange=\"%d\" TimeReturn=\"%d\" "
             "TuNhatItem=\"%d\" TuDongReset=\"%d\" "
-            "PartyMode=\"%d\" PVPMode=\"%d\" PostKhiDie=\"%d\" />\n",
+            "PartyMode=\"%d\" PVPMode=\"%d\" PostKhiDie=\"%d\" "
+            "BotStayCity=\"%d\" TimeForCity=\"%d\" />\n",
             bot.account, bot.charName,
             bot.mainSkill, bot.secondarySkill,
             bot.buff1, bot.buff2, bot.buff3,
             bot.gateNumber, bot.mapNumber, bot.mapX, bot.mapY,
             bot.phamViTrain, bot.moveRange, bot.timeReturn,
             bot.tuNhatItem, bot.tuDongReset,
-            bot.partyMode, bot.pvpMode, bot.postKhiDie
+            bot.partyMode, bot.pvpMode, bot.postKhiDie, bot.botStayCity, bot.timeForCity
         );
     }
 

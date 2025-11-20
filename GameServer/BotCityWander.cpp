@@ -188,11 +188,11 @@ void TeleportBotToCity(int aIndex)
 void TeleportBotToHunting(int aIndex)
 {
 	if (!gObjIsConnectedGP(aIndex)) return;
-	
+
 	LPOBJ lpObj = &gObj[aIndex];
 	OFFEXP_DATA* pBotData = s_FakeOnline.GetOffExpInfo(lpObj);
 	if (!pBotData) return;
-	
+
 	// Save old city position for logging
 	int oldMap = lpObj->Map;
 	int oldX = lpObj->X;
@@ -200,131 +200,265 @@ void TeleportBotToHunting(int aIndex)
 
 	LogAdd(LOG_RED, "[BotCityWander] ========== %s RETURNING TO HUNTING ==========", lpObj->Name);
 	LogAdd(LOG_RED, "[BotCityWander] Current position: Map=%d (%d,%d)", oldMap, oldX, oldY);
-	LogAdd(LOG_RED, "[BotCityWander] Target hunting coords: Map=%d (%d,%d)",
-		pBotData->Map, pBotData->MapX, pBotData->MapY);
 
-	// CRITICAL FIX: Force bot to spawn EXACTLY 40 tiles away in a random direction
-		// This MUST trigger the "return to corner" logic which requires distance >= MoveRange+5 (usually 35)
-		// Random direction: 0=North, 1=South, 2=East, 3=West
-	int direction = rand() % 4;
-	int offsetX = 0;
-	int offsetY = 0;
+	// CRITICAL: Get gate info - this is the ONLY way to get correct hunting coordinates
+	GATE_INFO gateInfo = { 0 };
+	int returnX = pBotData->MapX;  // Fallback
+	int returnY = pBotData->MapY;  // Fallback
+	int returnMap = pBotData->Map; // Fallback
+	bool usingGateInfo = false;
 
-	switch (direction)
+	if (gGate.GetInfo(pBotData->GateNumber, &gateInfo))
 	{
-		// Force larger offset if too close
-	case 0: offsetY = -40; break; // North
-	case 1: offsetY = +40; break; // South  
-	case 2: offsetX = +40; break; // East
-	case 3: offsetX = -40; break; // West
+		// SUCCESS: Use gate's exact coordinates
+		returnX = gateInfo.X;
+		returnY = gateInfo.Y;
+		returnMap = gateInfo.Map;
+		usingGateInfo = true;
+
+		LogAdd(LOG_GREEN, "[BotCityWander] %s using Gate %d: Map=%d (%d,%d)",
+			lpObj->Name, pBotData->GateNumber, returnMap, returnX, returnY);
+	}
+	else
+	{
+		// FAILED: Gate not found, use XML config as last resort
+		LogAdd(LOG_RED, "[BotCityWander] ERROR: Gate %d not found! Using XML config: Map=%d (%d,%d)",
+			pBotData->GateNumber, returnMap, returnX, returnY);
 	}
 
-
-	int returnX = pBotData->MapX + offsetX;
-	int returnY = pBotData->MapY + offsetY;
-	int actualDist = (int)sqrt((float)(offsetX * offsetX + offsetY * offsetY));
-
-	LogAdd(LOG_BLUE, "[BotCityWander] %s teleporting to (%d,%d) [offset: %+d,%+d, dist:%d, dir:%d]",
-		lpObj->Name, returnX, returnY, offsetX, offsetY, actualDist, direction);
-
-	// Teleport directly to hunting coordinates (NOT gate, since bot is not at gate!)
-	gObjTeleport(aIndex, pBotData->Map, returnX, returnY);
+	// Teleport to hunting position
+	gObjTeleport(aIndex, returnMap, returnX, returnY);
 
 	// Get current time for all timers
 	DWORD currentTime = GetTickCount();
 
-	// Restore bot state after teleport (gObjTeleport sets OBJECT_DELCMD temporarily)
+	// Restore bot state after teleport
 	lpObj->State = OBJECT_PLAYING;
 	lpObj->Teleport = 0;
 	lpObj->Rest = 0;
 	lpObj->DieRegen = 0;
 	lpObj->RegenOk = 0;
-	// 2. Reset movement path completely
+
+	// Reset movement path completely
 	lpObj->PathCount = 0;
 	lpObj->PathCur = 0;
 	lpObj->PathStartEnd = 0;
 	memset(lpObj->PathX, 0, sizeof(lpObj->PathX));
 	memset(lpObj->PathY, 0, sizeof(lpObj->PathY));
 	memset(lpObj->PathDir, 0, sizeof(lpObj->PathDir));
-	
-	// CRITICAL: Reset city mode AFTER teleport
+
+	// Reset city mode
 	lpObj->IsFakeInCityMode = false;
 	lpObj->IsFakeCityModeStartTime = currentTime;
-	// CRITICAL FIX: Set IsFakeRegen = FALSE first to trigger movement initialization!
-	// Bot will detect it's far from monsters and start wandering
 	lpObj->IsFakeRegen = false;
-	// CRITICAL FIX: Reset ALL movement timers so bot can move again!
 
-	// 5. CRITICAL FIX: Set movement timers to ZERO or PAST values to allow IMMEDIATE movement!
-	// RestoreFakeOnline sets these to 0, NOT GetTickCount()!
-	lpObj->IsFakeTimeLag = 0;                          // Was 0 in RestoreFakeOnline
-	lpObj->m_OfflineMoveDelay = 0;                     // Was 0 in RestoreFakeOnline  
-	lpObj->m_OfflineTimeResetMove = currentTime - 5000; // Allow move immediately
-	lpObj->AttackCustomDelay = currentTime - 31000;    // Allow attack immediately
+	// Reset movement timers
+	lpObj->IsFakeTimeLag = 0;
+	lpObj->m_OfflineMoveDelay = 0;
+	lpObj->m_OfflineTimeResetMove = currentTime - 5000;
+	lpObj->AttackCustomDelay = currentTime - 31000;
 
-	// 6. Reset combat state
+	// Reset combat state
 	lpObj->AttackCustom = 0;
 	lpObj->IsAttackState = 0;
 
-	LogAdd(LOG_GREEN, "[BotCityWander] %s successfully returned to HUNTING at Map=%d (%d,%d)",
-		lpObj->Name, lpObj->Map, lpObj->X, lpObj->Y);
-	LogAdd(LOG_RED, "[BotCityWander] ========================================");
-	
-	// Refresh viewport
+	// Force viewport refresh
+	gObjViewportListDestroy(aIndex);
+	gObjViewportListCreate(aIndex);
+	gObjViewportListProtocolCreate(lpObj);
 
+	LogAdd(LOG_GREEN, "[BotCityWander] %s returned to %s at Map=%d (%d,%d)",
+		lpObj->Name, usingGateInfo ? "GATE" : "CONFIG", lpObj->Map, lpObj->X, lpObj->Y);
+	LogAdd(LOG_RED, "[BotCityWander] ========================================");
 }
+// NPC positions in Lorencia safe zone
+struct NPC_POSITION {
+	int x;
+	int y;
+	const char* name;
+};
+
+static NPC_POSITION g_NPCPositions[] = {
+	{131, 136, "Potion Girl Amy"},
+	{116, 141, "Hanzo the Blacksmith"},
+	{123, 135, "Lumen the Barmaid"},
+	{119, 111, "Pasi the Mage"},
+	{115, 118, "Moss"},
+	{147, 110, "Baul"},
+	{132, 161, "Chaos Card"},
+	{147, 146, "Mirage"},
+	{125, 146, "Wandering Merchant Alex"}
+};
+static const int g_NPCCount = 9;
 
 // Make bot wander in city
 void BotWanderInCity(int aIndex)
 {
 	if (!gObjIsConnectedGP(aIndex)) return;
-	
+
 	LPOBJ lpObj = &gObj[aIndex];
-	
+
 	// Only wander every 3 seconds
 	if (GetTickCount() < lpObj->m_OfflineMoveDelay + 3000) return;
 
-	// Try to find a walkable spot nearby (similar to hunting movement)
-	for (int attempt = 0; attempt < 10; attempt++)
+	// 50% chance to walk to NPC, 50% chance to stand still or random walk
+	int behavior = rand() % 100;
+
+	if (behavior < 50) // 50% - Walk to NPC position
 	{
-		// Random walk in a small area (like city wandering)
-		int moveRange = 3;
-		int maxRange = moveRange * 2 + 1;
+		// Select random NPC
+		int npcIndex = rand() % g_NPCCount;
+		int targetX = g_NPCPositions[npcIndex].x;
+		int targetY = g_NPCPositions[npcIndex].y;
 
-		int offsetX = (GetLargeRand() % maxRange) - moveRange; // -3 to +3
-		int offsetY = (GetLargeRand() % maxRange) - moveRange;
+		// Check if already near NPC (within 2 tiles)
+		int distToNPC = (int)sqrt((float)((lpObj->X - targetX) * (lpObj->X - targetX) +
+			(lpObj->Y - targetY) * (lpObj->Y - targetY)));
 
-		int newX = lpObj->X + offsetX;
-		int newY = lpObj->Y + offsetY;
+		if (distToNPC <= 2)
+		{
+			// Already near NPC, just stand still
+			lpObj->m_OfflineMoveDelay = GetTickCount();
+			LogAdd(LOG_BLUE, "[BotCityWander] %s standing near %s at (%d,%d)",
+				lpObj->Name, g_NPCPositions[npcIndex].name, lpObj->X, lpObj->Y);
+			return;
+		}
 
-		// Clamp to map bounds
-		if (newX < 0 || newY < 0 || newX > 255 || newY > 255) continue;
+		// NATURAL MOVEMENT: 50% short steps (1-2 tiles), 50% long steps (3-5 tiles)
+		int moveDistance = (rand() % 100 < 50) ? (1 + rand() % 2) : (3 + rand() % 3);
 
-		// Check map attributes (ONLY accept attribute=0, completely clean)
-		BYTE attr = gMap[lpObj->Map].GetAttr(newX, newY);
+		// Walk towards NPC position
+		int stepX = lpObj->X;
+		int stepY = lpObj->Y;
 
-		// Only walk on completely clean tiles (no flags set)
-// Only walk on tiles WITHOUT blocking flags
+		// Move multiple steps closer (more natural)
+		for (int step = 0; step < moveDistance; step++)
+		{
+			if (stepX < targetX) stepX++;
+			else if (stepX > targetX) stepX--;
+
+			if (stepY < targetY) stepY++;
+			else if (stepY > targetY) stepY--;
+
+			// Stop if we reached target
+			if (stepX == targetX && stepY == targetY) break;
+		}
+
+		// Validate the step
+		BYTE attr = gMap[lpObj->Map].GetAttr(stepX, stepY);
 		bool hasNoMove = (attr & 0x04) != 0;
 		bool hasWater = (attr & 0x10) != 0;
 		bool hasNoGround = (attr & 0x08) != 0;
 
-		if (!hasNoMove && !hasWater && !hasNoGround)
+		if (!hasNoMove && !hasWater && !hasNoGround && IsInSafeZoneArea(lpObj->Map, stepX, stepY))
 		{
-			// Check if still in safe zone
-			if (IsInSafeZoneArea(lpObj->Map, newX, newY))
-			{
-				
-				lpObj->m_OfflineMoveDelay = GetTickCount();
-				FakeAnimationMove(aIndex, newX, newY, false);
-				return;
+			lpObj->m_OfflineMoveDelay = GetTickCount();
+
+			// CRITICAL FIX: Use gObjMoveGate-style direct position update
+			// This is what makes bots visible to players!
+			gMap[lpObj->Map].DelStandAttr(lpObj->X, lpObj->Y);
+			lpObj->X = stepX;
+			lpObj->Y = stepY;
+			lpObj->TX = stepX;
+			lpObj->TY = stepY;
+			lpObj->OldX = stepX;
+			lpObj->OldY = stepY;
+			lpObj->PathCount = 0;
+			lpObj->PathCur = 0;
+			gMap[lpObj->Map].SetStandAttr(stepX, stepY);
+
+			// Send movement packet to all nearby players
+			PMSG_MOVE_SEND pMsg;
+			pMsg.header.set(PROTOCOL_CODE1, sizeof(pMsg));
+			pMsg.index[0] = SET_NUMBERHB(lpObj->Index);
+			pMsg.index[1] = SET_NUMBERLB(lpObj->Index);
+			pMsg.x = (BYTE)stepX;
+			pMsg.y = (BYTE)stepY;
+			pMsg.dir = lpObj->Dir << 4;
+
+			for (int n = 0; n < MAX_VIEWPORT; n++) {
+				if (lpObj->VpPlayer2[n].type == OBJECT_USER) {
+					if (lpObj->VpPlayer2[n].state != OBJECT_EMPTY &&
+						lpObj->VpPlayer2[n].state != OBJECT_DIECMD &&
+						lpObj->VpPlayer2[n].state != OBJECT_DIED) {
+						DataSend(lpObj->VpPlayer2[n].index, (BYTE*)&pMsg, pMsg.header.size);
+					}
+				}
 			}
+
+			LogAdd(LOG_BLUE, "[BotCityWander] %s walking to %s (%d,%d) -> (%d,%d)",
+				lpObj->Name, g_NPCPositions[npcIndex].name, targetX, targetY, stepX, stepY);
+			return;
 		}
 	}
-	
+	else // 50% - Stand still or small random walk
+	{
+		// 30% chance to actually move, 20% just stand
+		if ((rand() % 100) < 30)
+		{
+			// Small random walk nearby
+			for (int attempt = 0; attempt < 10; attempt++)
+			{
+				int moveRange = 2; // Smaller range for natural city movement
+				int maxRange = moveRange * 2 + 1;
 
-	// If we couldn't find a good spot, don't move this cycle
-		// Bot will try again in 3 seconds
+				int offsetX = (GetLargeRand() % maxRange) - moveRange;
+				int offsetY = (GetLargeRand() % maxRange) - moveRange;
+
+				int newX = lpObj->X + offsetX;
+				int newY = lpObj->Y + offsetY;
+
+				if (newX < 0 || newY < 0 || newX > 255 || newY > 255) continue;
+
+				BYTE attr = gMap[lpObj->Map].GetAttr(newX, newY);
+				bool hasNoMove = (attr & 0x04) != 0;
+				bool hasWater = (attr & 0x10) != 0;
+				bool hasNoGround = (attr & 0x08) != 0;
+
+				if (!hasNoMove && !hasWater && !hasNoGround && IsInSafeZoneArea(lpObj->Map, newX, newY))
+				{
+					lpObj->m_OfflineMoveDelay = GetTickCount();
+
+					// CRITICAL FIX: Direct position update with packet send
+					gMap[lpObj->Map].DelStandAttr(lpObj->X, lpObj->Y);
+					lpObj->X = newX;
+					lpObj->Y = newY;
+					lpObj->TX = newX;
+					lpObj->TY = newY;
+					lpObj->OldX = newX;
+					lpObj->OldY = newY;
+					lpObj->PathCount = 0;
+					lpObj->PathCur = 0;
+					gMap[lpObj->Map].SetStandAttr(newX, newY);
+
+					// Send movement packet
+					PMSG_MOVE_SEND pMsg;
+					pMsg.header.set(PROTOCOL_CODE1, sizeof(pMsg));
+					pMsg.index[0] = SET_NUMBERHB(lpObj->Index);
+					pMsg.index[1] = SET_NUMBERLB(lpObj->Index);
+					pMsg.x = (BYTE)newX;
+					pMsg.y = (BYTE)newY;
+					pMsg.dir = lpObj->Dir << 4;
+
+					for (int n = 0; n < MAX_VIEWPORT; n++) {
+						if (lpObj->VpPlayer2[n].type == OBJECT_USER) {
+							if (lpObj->VpPlayer2[n].state != OBJECT_EMPTY &&
+								lpObj->VpPlayer2[n].state != OBJECT_DIECMD &&
+								lpObj->VpPlayer2[n].state != OBJECT_DIED) {
+								DataSend(lpObj->VpPlayer2[n].index, (BYTE*)&pMsg, pMsg.header.size);
+							}
+						}
+					}
+
+					LogAdd(LOG_BLUE, "[BotCityWander] %s random walk to (%d,%d)", lpObj->Name, newX, newY);
+					return;
+				}
+			}
+		}
+
+		// If no movement, just update timer and stand still
+		lpObj->m_OfflineMoveDelay = GetTickCount();
+		LogAdd(LOG_BLUE, "[BotCityWander] %s standing still at (%d,%d)", lpObj->Name, lpObj->X, lpObj->Y);
+	}
 }
-
 #endif // USE_FAKE_ONLINE

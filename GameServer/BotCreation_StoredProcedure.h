@@ -36,7 +36,7 @@ bool CreateMultipleBotsAdvanced_StoredProc(int botCount, int startFrom, int gate
     int minLevel, int maxLevel, int selectedClass,
     int phamViTrain, int moveRange, int timeReturn,
     int tuNhatItem, int tuDongReset, int partyMode,
-    int pvpMode, int postKhiDie, int enabledConfigs);
+    int pvpMode, int postKhiDie, int enabledConfigs, int botStayCity, int timeForcity);
 
 // Clean bot accounts from database (accounts starting with "Bot")
 bool CleanBotAccounts();

@@ -1174,7 +1174,7 @@ INT_PTR CALLBACK ConfigClassDialogProc(HWND hDlg, UINT message, WPARAM wParam, L
 // Redirect old function to new implementation
 bool CreateMultipleBotsAdvanced(int botCount, int startFrom, int gateNumber, int mapNumber, int mapX, int mapY,
 	int minLevel, int maxLevel, int selectedClass, int phamViTrain, int moveRange, int timeReturn,
-	int tuNhatItem, int tuDongReset, int partyMode, int pvpMode, int postKhiDie, int enabledConfigs)
+	int tuNhatItem, int tuDongReset, int partyMode, int pvpMode, int postKhiDie, int enabledConfigs, int botStayCity, int timeForCity)
 {
 	LogAdd(LOG_BLACK, (char*)"[CreateBots] ===== START =====");
 	LogAdd(LOG_BLACK, (char*)"[CreateBots] Count=%d, StartFrom=%d, EnabledConfigs=%d", botCount, startFrom, enabledConfigs);
@@ -1322,14 +1322,15 @@ bool CreateMultipleBotsAdvanced(int botCount, int startFrom, int gateNumber, int
 			"GateNumber=\"%d\" Map=\"%d\" MapX=\"%d\" MapY=\"%d\" "
 			"PhamViTrain=\"%d\" MoveRange=\"%d\" TimeReturn=\"%d\" "
 			"TuNhatItem=\"%d\" TuDongReset=\"%d\" "
-			"PartyMode=\"%d\" PVPMode=\"%d\" PostKhiDie=\"%d\" />\n",
+			"PartyMode=\"%d\" PVPMode=\"%d\" PostKhiDie=\"%d\" "
+			"BotStayCity=\"%d\" TimeForCity=\"%d\" />\n",
 			account, charName,
 			selectedClassConfig->mainSkill, selectedClassConfig->secondarySkill,
 			selectedClassConfig->buff1, selectedClassConfig->buff2, selectedClassConfig->buff3,
 			gateNumber, mapNumber, finalMapX, finalMapY,
 			phamViTrain, moveRange, timeReturn,
 			tuNhatItem, tuDongReset,
-			partyMode, pvpMode, postKhiDie
+			partyMode, pvpMode, postKhiDie, botStayCity, timeForCity
 		);
 
 		// Get hex data
@@ -1412,6 +1413,10 @@ INT_PTR CALLBACK CreateBotsDialogProc(HWND hDlg, UINT message, WPARAM wParam, LP
 		CheckDlgButton(hDlg, IDC_CHECK_TUNHATITEM, BST_CHECKED);
 		CheckDlgButton(hDlg, IDC_CHECK_TUDONGRESET, BST_UNCHECKED);
 		CheckDlgButton(hDlg, IDC_CHECK_POSTKHIDIE, BST_CHECKED);
+
+		// NEW: BotStayCity and TimeForCity defaults
+		CheckDlgButton(hDlg, IDC_CHECK_BOTSTAYCITY, BST_UNCHECKED);
+		SetDlgItemInt(hDlg, IDC_EDIT_TIMEFORCITY, 2, FALSE);
 
 		// Config checkboxes
 		CheckDlgButton(hDlg, IDC_CHECK_CONFIG1, BST_CHECKED);
@@ -1653,6 +1658,11 @@ INT_PTR CALLBACK CreateBotsDialogProc(HWND hDlg, UINT message, WPARAM wParam, LP
 			int tuDongReset = (IsDlgButtonChecked(hDlg, IDC_CHECK_TUDONGRESET) == BST_CHECKED) ? 1 : 0;
 			int postKhiDie = (IsDlgButtonChecked(hDlg, IDC_CHECK_POSTKHIDIE) == BST_CHECKED) ? 1 : 0;
 
+			// NEW: Get BotStayCity and TimeForCity values
+			int botStayCity = (IsDlgButtonChecked(hDlg, IDC_CHECK_BOTSTAYCITY) == BST_CHECKED) ? 1 : 0;
+			int timeForCity = GetDlgItemInt(hDlg, IDC_EDIT_TIMEFORCITY, &bSuccess, FALSE);
+			if (!bSuccess) timeForCity = 2; // Default value
+
 			int partyMode = SendMessage(hComboPartyMode, CB_GETCURSEL, 0, 0);
 			int pvpMode = SendMessage(hComboPVPMode, CB_GETCURSEL, 0, 0);
 
@@ -1725,7 +1735,7 @@ INT_PTR CALLBACK CreateBotsDialogProc(HWND hDlg, UINT message, WPARAM wParam, LP
 			// Call creation function
 			if (CreateMultipleBotsAdvanced_StoredProc(botCount, startFrom, gateNumber, mapNumber, mapX, mapY,
 				minLevel, maxLevel, selectedClass, phamViTrain, moveRange, timeReturn,
-				tuNhatItem, tuDongReset, partyMode, pvpMode, postKhiDie, enabledConfigs))
+				tuNhatItem, tuDongReset, partyMode, pvpMode, postKhiDie, enabledConfigs, botStayCity, timeForCity))
 			{
 				int configCount = 0;
 				for (int i = 0; i < 7; i++)
