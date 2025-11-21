@@ -1,0 +1,989 @@
+; BotPhrases.txt - Português
+; Frases que os bots dizem durante o jogo
+; Formato: #CATEGORIA, probabilidade
+; Depois as frases, uma por linha
+; Sistema de probabilidade otimizado para pelo menos 1 frase por categoria por hora
+
+; Probabilidades base para categorias dinâmicas
+#MAP_BASE_PROB,20
+#CLASS_BASE_PROB,15
+
+; --- CATEGORIAS GERAIS ---
+#GENERAL,8
+Bom dia a todos
+Olá comunidade
+Alguém por aqui?
+Saudações guerreiros
+Como vai tudo?
+Treinando duro
+Procurando ação
+Como estão todos?
+Pronto para aventura
+Aqui e pronto
+Que bom servidor
+Alguém ativo?
+Presente no mapa
+Farmando tranquilo
+Tem gente nova?
+Estou conectado
+Boa energia hoje
+Quem está online?
+Saudações de casa
+Vamos treinar
+Alguém fala português?
+Como está a comunidade
+Acabei de chegar
+Como está o server?
+Tudo bem por aqui
+Vamos com tudo
+Alguém para conversar?
+Boa tarde pessoal
+Ativo no jogo
+E aí?
+Aqui firme
+Tudo tranquilo?
+Sempre presente
+Tem brasileiros?
+Saudações cordiais
+
+#NEAR_REAL_PLAYER,18
+Olá amigo!
+E aí?
+Saudações!
+Ei, como você está?
+Oi!
+Tudo bem?
+Olá companheiro
+O que te traz aqui?
+Prazer em te ver
+Bem-vindo!
+Como vai?
+Que surpresa te ver!
+Tudo certo?
+Ei, o que faz?
+Olá colega
+Vem sempre?
+E aí guerreiro!
+Precisa de algo?
+Boa sorte amigo
+Vai ficar?
+Oi mano!
+É novo?
+De onde você é?
+Ei, bom equipamento
+Qual seu nível?
+Que armas boas!
+Vem farmar?
+Oi, me ouve?
+Boa classe!
+Joga sempre?
+
+#IN_PARTY,22
+Excelente party!
+Vamos time!
+Bom trabalho todos
+Continuem assim!
+Grande equipe!
+Juntos somos mais fortes
+Prontos para mais?
+Perfeito, vamos continuar
+Vamos por mais EXP
+Bom ritmo pessoal
+Boa coordenação
+Isso é trabalho em equipe!
+Party lendária
+Continuamos mais um pouco?
+Excelente sincronia
+Todos fazem bom trabalho
+Vamos por esse boss!
+Party eficiente
+Gosto deste grupo
+Continuem farmando!
+Boa liderança
+Alguém precisa de buff?
+Party de qualidade
+Todos cooperando bem
+Vamos por mais!
+Ninguém fica para trás
+Boa química de equipe
+Continuamos dominando!
+Party equilibrada
+Repetimos amanhã?
+Todos dão 100%
+Party comprometida
+
+#PVP,28
+Boa luta!
+Isso foi intenso
+Linda batalha
+Você é forte!
+Grande combate
+Respeito guerreiro
+Impressionante!
+Quase me ganhou
+Bom duelo
+Isso foi épico
+Boa técnica
+Me fez suar!
+Luta justa
+Você é bom rival
+Combo tremendo!
+Quase me matou
+Boa estratégia
+Que reflexos!
+Combate equilibrado
+Bom timing!
+Respeito sua skill
+Quase perfeito!
+Duelo memorável
+Que equipamento!
+Boa defesa
+Quase ganhava!
+PVP de respeito
+Quero revanche!
+Bom uso de skills
+Você é rápido!
+Combate limpo
+Duelo honrável
+Me pegou bem!
+Outra luta?
+Boa experiência
+
+#TRADE,25
+Procuro {item_required}, me troque!
+Preciso {item_required}, bom negócio esperando!
+Compro {item_required} por {item_reward}!
+Troco {item_required} -> {item_reward}!
+WTB: {item_required} = {item_reward}
+Alguém tem {item_required}?
+Preciso {item_required}, tenho {item_reward}!
+{item_required} procurado, {item_reward} oferecido!
+Troque seu {item_required} aqui!
+Trade rápido: {item_required} -> {item_reward}
+Compro {item_required} urgente
+Vendo {item_reward} barato
+Alguém troca {item_required}?
+Bom preço por {item_required}
+Troco {item_required} por {item_reward}
+Ofereço bom negócio por {item_required}
+Trade justo: {item_required}
+Quem vende {item_required}?
+Procuro {item_required} desesperadamente
+Trade honesto aqui
+Alguém precisa {item_reward}?
+Compro {item_required} na hora
+Trade ganha-ganha: {item_required}
+Trocam joias?
+Procuro itens bons
+Alguém vende {item_required}?
+Bom preço garantido
+Trade justo sempre
+Quem tem {item_required} extra?
+Troco vários itens
+
+#MORNING,12
+Bom dia!
+Ótimo começo de dia
+Manhã perfeita para treinar
+Pronto para o dia
+Energia no máximo
+Bom dia a todos!
+Manhã produtiva
+Começando com tudo
+Novo dia, novas metas!
+Bom dia comunidade
+Iniciando o grind
+Manhã de farm
+Dia perfeito!
+Bom dia guerreiros
+Café e MU, perfeito
+Começando a jornada
+Boa manhã!
+Começando cedo
+Dia de vitória
+Vamos lá!
+Manhã épica vem
+
+#AFTERNOON,12
+Boa tarde
+Tarde produtiva
+Tempo de treinar mais
+Ainda há tempo
+Mantendo a energia
+Tarde de ação
+Boa tarde!
+Metade do dia
+Continuamos firmes
+Tarde perfeita
+Como vai a tarde?
+Tarde de farm
+Produtivo até agora
+Continuemos treinando!
+Tarde tranquila
+Hora de subir nível
+Boa tarde pessoal!
+Tarde de grind
+Continuamos ativos
+Algum evento tarde?
+Tarde lendária
+
+#NIGHT,12
+Boa noite
+Noite de aventuras
+A noite é jovem
+Hora de ação
+Treino noturno
+Boa noite!
+Noite épica
+Horário nobre
+A noite é nossa!
+Noite de farm
+Quem mais acordado?
+Noite lendária
+Boa noite guerreiros
+Noite produtiva
+Continuamos acordados!
+Noite de vitória
+Virar a noite?
+Noite de grind
+Boa noite comunidade!
+Noite intensa
+Hora dos eventos
+
+; --- FRASES ESPECÍFICAS POR CLASSE ---
+#CLASS_0,15
+Meu Nova está carregando! Corram, noobs!
+Meu cajado é puro poder, amigo.
+Evil Spirit ou Aquabeam? Que dilema.
+Meus feitiços são ferozes!
+Teleport é meu hobby, ok?
+Sinta meu Ice Storm, palhaço!
+Magia está no meu sangue.
+Meteor cai com fúria!
+Chama de destruição!
+Ice arrow congela tudo!
+Dark Wizard supremo aqui
+Meu mana nunca acaba
+Viu meu Flame Strike?
+Soul Barrier sempre ativo
+Energy master class
+Sou pura magia!
+Wizard desde o início
+Meu poder é ilimitado
+Feitiços de elite
+Mago lendário!
+Classe mágica dominante
+Quem precisa de espadas?
+Nova one-shot vindo
+Ice Storm área massiva
+Meteor crítico sempre
+Teleport estratégico
+Mana shield ativado
+DW para sempre!
+Wizard nunca morre
+Magia > Força física
+
+#CLASS_16,15
+Pelo fio da espada, camarada!
+Meu Twisting Slash te deixa tonto!
+Um combo? Prepare-se para a dor!
+Esta armadura viu mil batalhas.
+Um BK nunca recua! Nunca!
+Death Stab! Direto no coração!
+Meu cavalo é mais rápido que seu medo.
+Força é meu segundo nome, lembre-se!
+Dragon Slayer? Moleza para mim!
+Minha lenda se forja com cada vitória.
+Blade Knight imparável
+Espada e escudo, combinação perfeita
+Tanque de primeira linha
+Meus combos doem!
+BK nunca desiste
+Guerreiro de elite
+Defesa impenetrável
+Death Stab crítico!
+Cavaleiro de honra
+Sou a muralha!
+BK desde season 1
+Classe tanque master
+Minha armadura é lendária
+Combos infinitos
+Cyclone devastador!
+Espírito guerreiro forte
+PVP BK imbatível
+Poder de corte máximo!
+Mestre da espada aqui
+Cavaleiro do reino
+
+#CLASS_32,15
+Minhas flechas nunca erram o alvo.
+Agilidade é minha força.
+Multishot pronta para disparar!
+Precisão élfica é incomparável.
+Ice Arrow! Congelado no lugar!
+Da floresta trago justiça.
+Meu arco canta a canção da vitória.
+Velocidade e precisão combinadas.
+Disparo penetrante a caminho!
+Natureza guia minhas flechas.
+Elf arqueira suprema
+Velocidade é minha vantagem
+Triple Shot pronto!
+Arqueira élfica de elite
+Minhas flechas são letais
+Elf desde sempre
+Disparo penetrante crítico
+Nunca erro alvo!
+Agilidade máxima
+Energy elf poderosa
+Ice Arrow congela!
+Arqueira lendária
+Distância é minha aliada
+Multishot área!
+Elf caçadora master
+Floresta é meu lar
+Precisão perfeita
+Chuva de flechas vindo!
+Elf arqueira para sempre
+Poder da natureza flui
+
+#CLASS_48,15
+Magic Gladiator pronto para ação!
+Espada e magia em perfeita harmonia.
+Twisting Slash com poder mágico!
+O melhor de dois mundos.
+Minha espada crepita com energia.
+Fire Slash corta e queima!
+Classe duelista, sempre pronto.
+Cyclone devasta tudo!
+Death Stab com aumento mágico!
+Mago corpo a corpo dominando!
+MG híbrido supremo
+Magia + Espada = Vitória
+Power Slash mágico!
+Gladiador invencível
+Mago corpo a corpo master
+Fire Slash queima!
+Combo MG letal
+Dualidade perfeita
+Spiral Slash!
+Guerreiro mágico elite
+Versatilidade é chave
+MG para PVP!
+Classe híbrida melhor
+Cyclone + Magia!
+Gladiador lendário
+Melhor dos dois!
+MG desde início
+Fusão guerreiro mago
+MG imparável!
+Poder mágico corpo a corpo
+
+#CLASS_64,15
+Dark Lord comandando exércitos!
+Meu corvo traz morte de cima.
+Fire Burst abrindo caminho!
+Liderança é meu dom.
+Dano crítico é minha especialidade.
+Cavalo escuro entrando em batalha!
+Comande suas forças, destrua seus inimigos!
+Fire Scream ecoa pelo campo de batalha!
+Senhor da escuridão e poder!
+Meus pets fazem o trabalho sujo.
+Dark Lord supremo
+Exército de pets imparável
+Dano crítico alto!
+Senhor da escuridão
+Comando master class
+Carga de cavalo escuro!
+Coleção de pets completa
+Fire Burst área!
+Liderança DL forte
+Ataque de corvo mortal!
+Lord desde sempre
+Especialista em crítico
+Invocação Dark Spirit!
+Comando todas forças
+Poder Lord máximo!
+Ataque de pets coordenado
+DL para caça de boss
+Eco Fire Scream!
+Senhor do reino
+Mestre das trevas!
+
+#CLASS_80,15
+Summoner chamando forças antigas!
+Minhas invocações lutam ao meu lado.
+Explosão de poder elemental!
+Magia flui pelas minhas veias.
+Chuva de meteoros chegando!
+Maestria de feitiços na máxima expressão.
+Magia antiga desperta!
+Chain lightning atinge todos!
+Invocando forças da natureza!
+Minha magia não conhece limites.
+Summoner mestre dimensão
+Invocações em todo lugar!
+Poder elemental supremo
+Explosão massiva!
+Exército de invocações pronto
+Transbordamento de magia
+Feitiços antigos!
+Classe elite Summoner
+Poder dimensional!
+Invocações nunca morrem
+Maestria mágica!
+Summoner para farming
+Chain lightning!
+Mestre elemental
+Impulso de invocação!
+Força da natureza forte
+Summoner supremo!
+Controle dimensional
+Magia infinita!
+Melhores builds de invocação
+
+#CLASS_96,15
+Rage Fighter desencadeando fúria!
+Meus punhos atravessam armadura!
+Maestria em armas corpo a corpo!
+Dragon Roar sacudindo a terra!
+Phoenix shot queimando brilhante!
+Especialista corpo a corpo pronto!
+Experiência em combate incomparável!
+Dragon Slayer em minhas mãos!
+Armas duplas, dano duplo!
+Espírito lutador nunca morre!
+RF modo rage ativo
+Punhos de fúria!
+Mestre de armas classe
+Poder Dragon Roar!
+Especialista combate próximo
+Fênix ascendendo!
+RF rei corpo a corpo
+Mestre empunhadura dupla!
+Rage nunca termina
+Espírito lutador!
+Build tanque RF
+Quebrador de combo!
+Mestre artes marciais
+RF elite!
+Armas de punho mortais
+RF imparável!
+Vencedor combate próximo
+Modo rage ligado!
+Lutador para sempre
+Punhos lendários!
+
+#CLASS_112,15
+Grow Lancer avançando!
+Minha lança perfura todas defesas!
+Spiral Slash devastando inimigos!
+Combate montado é minha arte!
+Dragon Spear liberado!
+Cavaleiro do reino!
+Avançando com força total!
+Golpe de lança crítico!
+Domínio de cavalaria!
+Meu corcel e eu somos um!
+GL mestre cavalaria
+Penetração de lança!
+Combate montado pro
+Spiral devastador!
+Classe elite lanceiro
+Dragon Spear crítico!
+Carga GL mortal
+Mestre da lança!
+Dominação cavalaria
+Cavaleiro montado!
+GL para PVP
+Combo de lança!
+Guerreiro montado
+GL imparável!
+Lanceiro lendário
+Ataque de carga!
+Cavaleiro de honra
+Poder GL máximo!
+Especialista cavalaria
+Lança nunca erra!
+
+; --- FRASES ESPECÍFICAS POR MAPA ---
+#MAP_0,20
+Lorencia, coração do reino.
+Campos de treinamento sempre ocupados aqui.
+Lugar pacífico para começar jornada.
+Fonte traz memórias.
+Aqui nascem lendas.
+Lar doce lar em Lorencia.
+Muros do castelo nos protegem.
+Mercado de Lorencia é o melhor.
+Tantos guerreiros começando aqui.
+Início de cada aventura.
+Lorencia nunca muda
+Mapa inicial perfeito
+Nostalgia em Lorencia
+Praça principal ativa
+Cidade capital!
+Lorencia sempre viva
+Treinamento básico aqui
+Zona amigável para iniciantes
+Minha cidade favorita!
+Memórias de Lorencia
+Cidade segura sempre
+Mercado movimentado
+Fonte central!
+Ponto inicial todos
+Comunidade Lorencia forte
+Muros castelo protegem
+Treinamento pacífico!
+Cidade dos começos
+Base Lorencia
+Zona segura!
+
+#MAP_1,20
+Entrando Dungeon... respeito devido.
+Ar aqui embaixo pesado e antigo.
+Ecos de batalhas passadas ressoam.
+Passo falso aqui pode ser último.
+Luz do sol não chega aqui.
+Devo ficar alerta nestes corredores.
+Energia escura emana das paredes.
+Este lugar reivindicou muitos aventureiros.
+Escuridão aqui é quase tangível.
+Descendo profundezas da terra.
+Dungeon escura sempre
+Treinamento subterrâneo aqui
+Escuridão em todo lugar!
+Desafio Dungeon aceito
+Mobs difíceis aqui
+Exploração de caverna!
+Boas memórias Dungeon
+Labirinto subterrâneo complexo
+Atmosfera escura!
+Vibrações Dungeon antiga
+Cuidado nas esquinas
+Monstros espreitando!
+Farm Dungeon eficiente
+Tesouro subterrâneo
+Energia escura!
+Sensação Dungeon clássica
+Monstros reaparecem rápido
+Aventura Dungeon!
+Reino subterrâneo
+Navegação labirinto!
+
+#MAP_2,20
+Devias, terra de oportunidades.
+Minas guardam grandes tesouros.
+Território perigoso mas gratificante.
+Gigantes vagam estas terras.
+Praça Devias sempre cheia.
+Perfeito para treinamento nível médio.
+Cuidado com PKs aqui!
+Ricos terrenos de caça em Devias.
+Ponte conecta dois mundos.
+Devias nunca dorme.
+Devias cidade mineradora
+Zona de mineração ativa!
+Mercado Devias bom
+Treinamento nível médio
+Território gigantes!
+Devias sempre ocupada
+Marco famoso ponte
+Aviso zona PK!
+Oportunidades Devias
+Praça central lotada
+Tesouros mineração!
+Bom local farm
+Comunidade Devias grande
+Caça gigantes!
+Perfeito meio jogo
+Devias lendária
+Travessia ponte!
+Cidade nunca dorme
+Memórias Devias
+Caça tesouros!
+
+#MAP_3,20
+Noria, meu lugar favorito.
+Cidade portuária tem charme.
+Brisa marinha e aventura.
+Monstros aqui são duros.
+Mercado Noria é único.
+Campos treinamento costeiros.
+Farol guia caminho.
+Marinheiros e guerreiros se unem aqui.
+Porta para maiores desafios.
+Beleza de Noria incomparável.
+Noria porto lindo
+Cidade costeira!
+Mercado Noria único
+Brisa marinha fresca
+Farol guiando!
+Treinamento Noria bom
+Vibrações cidade portuária
+Reunião marinheiros!
+Noria pacífica
+Área praia agradável
+Vista oceano!
+Monstros costeiros
+Comunidade Noria
+Atividades portuárias!
+Início viagem marítima
+Noria lendária
+Marco farol!
+Porto movimentado
+Memórias Noria
+Cidade marítima!
+
+#MAP_4,20
+Torre Perdida alcançando céu.
+Cada andar traz novos desafios.
+Subindo rumo grandeza.
+Monstros elite guardam níveis.
+Vista daqui incrível.
+Torre Perdida testa limites.
+Estrutura antiga cheia segredos.
+Andares superiores, maiores recompensas.
+Topo é objetivo final.
+Torre de batalhas infinitas.
+Lost Tower subindo
+Desafio torre!
+Cada andar mais difícil
+Monstros elite aqui
+Torre céu!
+Lost Tower lendária
+Andar por andar
+Vistas incríveis!
+Segredos torre muitos
+Objetivo cume final
+Treinamento torre!
+Andares mais altos melhores
+Lost Tower icônica
+Aventura escalada!
+Torre de lendas
+Progressão andares
+Memórias torre!
+Céu alcançando alto
+Lost Tower clássica
+Objetivo andar topo!
+
+#MAP_7,20
+Atlans é perigosa, cuidado.
+Cidade submarina mistérios.
+Atlanteanos guardam território.
+Respirar sob água sensação estranha.
+Ruínas civilização antiga.
+Desafios alto nível esperam.
+Atlans guarda itens lendários.
+Profundezas ocultam grande poder.
+Não para fracos coração.
+Tesouros submersos por todo lado.
+Atlans cidade subaquática
+Atlanteanos defendendo!
+Aventura submarina
+Zona alto nível
+Ruínas antigas!
+Atlans perigosa
+Respiração subaquática
+Segredos mar profundo!
+Guerreiros atlanteanos
+Tesouros submersos
+Atlans lendária!
+Cidade fundo oceano
+Apenas jogadores avançados
+Combate subaquático!
+Mistérios Atlans
+Civilização antiga
+Mergulho profundo!
+Monstros marinhos difíceis
+Atlans épica
+Caça tesouros!
+
+#MAP_8,20
+Deserto Tarkan escaldante.
+Areia e monstros por todo lado.
+Território Rei Lagarto.
+Sobrevivência deserto difícil.
+Oásis traz breve alívio.
+Calor Tarkan insuportável.
+Antiga civilização deserto.
+Cavernas ocultas dunas.
+Homens lagarto patrulham areias.
+Guerreiros deserto prosperam aqui.
+Deserto Tarkan quente
+Areia em todo lugar!
+Rei Lagarto governa
+Modo sobrevivência deserto
+Alívio oásis!
+Tarkan escaldante
+Guerreiros deserto
+Ruínas antigas!
+Dunas areia altas
+Tarkan desafiador
+Patrulha homens lagarto!
+Calor deserto extremo
+Tarkan lendária
+Exploração caverna!
+Civilização deserto
+Tempestade areia vindo
+Memórias Tarkan!
+Paraíso oásis
+Aventura deserto
+Caça lagartos!
+
+#MAP_10,20
+Icarus voando alto.
+Reino celestial oportunidades.
+Asas abertas, voando livre.
+Batalhas aéreas intensas.
+Icarus guarda tesouros especiais.
+Voando entre nuvens.
+Maestria navegação aérea.
+Fortaleza celestial à vista.
+Vista Icarus impressionante.
+Domínio céu explorado.
+Icarus reino céu
+Voando alto!
+Asas necessárias aqui
+Combate aéreo intenso
+Cidade nuvens!
+Icarus paraíso
+Fortaleza céu forte
+Monstros voadores!
+Icarus lendária
+Domínio paraíso
+Navegação aérea!
+Tesouros céu
+Icarus linda
+Aventura voadora!
+Reino nuvens
+Batalhas céu épicas
+Memórias Icarus!
+Portal paraíso
+Liberdade voadora
+Reino céu!
+
+#MAP_30,20
+Kalima 1, portas inferno.
+Demônios espreitam cada canto.
+Desafio masmorra cronometrada.
+Monstros dourados drops sortudos.
+Kalima testa party.
+Sobreviva ao ataque!
+Mal antigo reside aqui.
+Portal não durará sempre.
+Kalima recompensa corajosos.
+Forças escuras concentradas aqui.
+Kalima portas inferno
+Demônios em todo lugar!
+Desafio masmorra cronometrada
+Mobs dourados sortudos
+Kalima intensa!
+Party necessária
+Portal inferno aberto
+Mal antigo!
+Recompensas Kalima boas
+Pressão limite tempo
+Caça demônios!
+Kalima lendária
+Contagem regressiva portal
+Sobreviva ataque!
+Forças escuras fortes
+Memórias Kalima
+Aventura inferno!
+Drops dourados raros
+Kalima épica
+Matador demônios!
+
+#MAP_34,20
+Vale Aida de provas.
+Centro missões aventureiros.
+NPC Sophia nos guia.
+Cânion cheio monstros.
+Aida oferece grandes missões.
+Campos treinamento lendas.
+Perfeito caça party.
+Desafios Aida justos.
+Vale ressoa gritos batalha.
+Aida recompensa persistência.
+Vale Aida missões
+Centro missões!
+NPC Sophia útil
+Monstros cânion muitos
+Treinamento Aida!
+Vale missões
+Caça party boa
+Desafios justos!
+Aida lendária
+Ecos vale
+Cânion monstros!
+Recompensas Aida
+Conclusão missões
+Aventura vale!
+Comunidade Aida
+Campos treinamento
+Mestre missões!
+Vale provas
+Memórias Aida
+Exploração cânion!
+
+#MAP_37,20
+Fortaleza Crywolf sob cerco!
+Defender altar crucial!
+Lobos atacando sem piedade!
+Balgass deve ser parado!
+Recompensas conclusão contrato.
+Defesa fortaleza em ação.
+Evento Crywolf intenso!
+Protegendo estátua juntos.
+Invasão lobos em andamento!
+Unidos defendemos Crywolf!
+Evento defesa Crywolf
+Invasão lobos!
+Proteção altar vital
+Luta boss Balgass
+Cerco fortaleza!
+Crywolf intensa
+Recompensas contrato boas
+Defesa estátua!
+Matilhas lobos atacando
+Crywolf lendária
+Defesa unida!
+Altar deve sobreviver
+Memórias Crywolf
+Coordenação evento!
+Batalha fortaleza
+Modo matador lobos
+Trabalho equipe Crywolf!
+Defesa bem-sucedida
+Invasão parada
+Vitória Crywolf!
+
+#MAP_51,20
+Elbeland, terra gigantes.
+Monstros alto nível vagam aqui.
+Terrenos caça elite.
+Bosses Elbeland difíceis.
+Desafios território congelado.
+Gelo e perigo combinados.
+Recompensas Elbeland lendárias.
+Gigantes guardam terra.
+Frio extremo, desafio extremo.
+Elbeland testa verdadeiros guerreiros.
+Elbeland terra congelada
+Gigantes vagando!
+Zona alto nível
+Terrenos caça elite
+Território gelo!
+Bosses Elbeland difíceis
+Desafios congelados
+Frio extremo!
+Gigantes guardando
+Elbeland lendária
+Monstros gelo!
+Área avançada
+Recompensas Elbeland
+Matador gigantes!
+Terra desolada congelada
+Perigo gelo
+Elbeland épica!
+Apenas guerreiros verdadeiros
+Território gigantes
+Aventura gelo!
+
+#MAP_63,20
+Raklion covil dragão.
+Selupan espera desafiantes.
+Evento invasão dragões!
+Ovos devem ser destruídos!
+Raklion território dragões.
+Preparação luta boss necessária.
+Escamas dragão como recompensas.
+Horda Raklion vindo!
+Derrotar Selupan requer trabalho equipe.
+Título matador dragões espera!
+Raklion covil dragão
+Selupan aguarda!
+Evento invasão dragão
+Destruição ovos vital
+Território dragão!
+Luta boss épica
+Recompensa escamas dragão
+Horda Raklion!
+Trabalho equipe necessário
+Título matador dragões
+Raklion lendária!
+Caça dragões
+Coordenação evento
+Boss Selupan!
+Ninho dragão
+Recompensas Raklion
+Evento invasão!
+Ovos dragão
+Memórias Raklion
+Batalha épica!
+
+#MAP_79,20
+Ruínas Kanturu poder.
+Boss Pesadelo aparece aqui.
+Evento Kanturu lendário!
+Relíquias antigas descobertas.
+Mão Maya controla reino.
+Refinaria melhorias itens.
+Torre Kanturu ergue alta.
+Núcleo deve ser protegido!
+Evento elite jogadores top.
+Recompensas Kanturu supremas.
+Ruínas Kanturu poder
+Boss Pesadelo!
+Evento lendário
+Relíquias antigas
+Mão Maya!
+Melhorias refinaria
+Torre Kanturu alta
+Proteção núcleo!
+Evento elite
+Recompensas supremas
+Kanturu lendária!
+Exploração ruínas
+Evento intenso
+Jogadores top!
+Memórias Kanturu
+Poder concentrado
+Torre elevando!
+Poder antigo
+Kanturu épica
+Acesso refinaria!
+
+#MAP_80,20
+Mapa Silencioso treinamento pacífico.
+Local tranquilo farming.
+Sem distrações, só farming.
+Joia oculta subir nível.
+Monstros reaparecem rapidamente.
+Eficiência silenciosa em ação.
+Paraíso treinamento solo.
+Local secreto descoberto.
+Farming Zen otimizado.
+Pacífico mas produtivo.
+Mapa Silencioso pacífico
+Grind tranquilo!
+Sem distrações
+Local joia oculta
+Reaparecimento rápido!
+Eficiência silenciosa
+Paraíso treinamento solo
+Local secreto!
+Farming Zen
+Paz produtiva
+Grind silencioso!
+Subir nível pacífico
+Monstros rápidos
+Farming eficiente!
+Memórias silenciosas
+Local solo perfeito
+Otimizar Zen!
+Produtividade tranquila
+Tesouro oculto
+Poder pacífico!

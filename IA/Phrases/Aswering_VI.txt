@@ -1,0 +1,477 @@
+#GREETING
+hello
+hi
+hey
+sup
+what's up
+greetings
+morning
+hey there
+howdy
+o/
+xin chao
+>>>
+Chào, {player_name}!
+Có chuyện gì, {player_name}?
+Lời chào, {player_name}!
+Cuối cùng cũng có người chào!
+Hey hey, {player_name}!
+Vui mừng gặp bạn, {player_name}!
+Howdy, {player_name}!
+Đến farm hay đến chết?
+Nói rõ ràng, {player_name}!
+Lâu mới nói!
+Có chuyện gì, {player_name}!
+Khỏe không? {player_name}?
+Chào mừng, {player_name}!
+Chào anh bạn, {player_name}!
+Mọi thứ tốt? {player_name}?
+Chào chiến binh, {player_name}!
+Bạn mới à? {player_name}?
+Bất ngờ tuyệt vời, {player_name}!
+Bạn thường đến? {player_name}?
+Cuối cùng ai đó nói!
+Chào đồng nghiệp, {player_name}!
+Cần gì không? {player_name}?
+Chào bạn, {player_name}!
+Mọi thứ ổn? {player_name}?
+Này, chào mừng {player_name}!
+Thế nào rồi, {player_name}?
+Chào anh bạn, {player_name}!
+Bạn làm gì ở đây, {player_name}?
+Chào thân mến, {player_name}!
+Này, vui mừng gặp {player_name}!
+
+#FAREWELL
+bye
+see ya
+i'm out
+later
+logging off
+closing
+leaving
+take care
+ciao
+goodbye
+tam biet
+hen gap lai
+>>>
+Bảo trọng, {player_name}!
+Hẹn gặp lại, {player_name}.
+Chúc may mắn, {player_name}!
+Lần sau nhé, {player_name}.
+Đừng quên reset trước khi thoát.
+Hành trình an toàn, {player_name}.
+Đi sớm thật... điển hình.
+Hy vọng bạn quay lại với bless.
+Đừng chết mà không có PK, {player_name}.
+Bạn đang đi, {player_name}!
+Hẹn gặp sau, {player_name}!
+Sớm gặp lại, {player_name}.
+Tạm biệt chiến binh, {player_name}!
+Bảo trọng ngoài kia, {player_name}.
+Quay lại sớm, {player_name}!
+Hẹn sớm, {player_name}.
+Gặp trong game, {player_name}!
+Chúc mọi điều tốt lành, {player_name}.
+Tạm biệt bạn, {player_name}!
+Nghỉ ngơi tốt, {player_name}.
+Ngày mai gặp, {player_name}!
+Nói chuyện sau, {player_name}.
+Chúc may mắn ngoài kia, {player_name}!
+Hy vọng gặp lại bạn, {player_name}.
+Tạm biệt nhé, {player_name}!
+Chúc bạn khỏe, {player_name}.
+Tạm biệt đồng đội, {player_name}!
+Gặp lại sau, {player_name}.
+Ngày khác gặp, {player_name}!
+Thật sự bảo trọng, {player_name}!
+
+#SLANG
+what's up
+wassup
+yo
+sup dude
+how you doing
+whatcha up to
+yo bro
+where you at
+chillin
+just joined
+sao roi
+anh em
+>>>
+Mọi thứ tốt, {player_name}.
+Farm như mọi khi, {player_name}.
+Haha, chuyện gì với bạn?
+Anh em? Tôi ở đây, {player_name}!
+Tôi làm gì? Giết mob.
+Chỉ thư giãn ở Devias.
+Báo cáo, anh em!
+Grind chăm như mọi khi.
+Chế độ reset toàn phần.
+Như thường lệ, đang sống sót.
+Sao rồi, {player_name}?
+Đang farm ở đây.
+Thư giãn, {player_name}!
+Mọi thứ chill, {player_name}.
+Có gì không, {player_name}?
+Đang grind, {player_name}.
+Sao rồi anh em, {player_name}!
+Chỉ đang chơi, {player_name}.
+Bạn làm gì, {player_name}?
+Ở đây, {player_name}.
+Mọi thứ thư giãn, {player_name}!
+Thế nào, {player_name}?
+Trên bản đồ, {player_name}.
+Yên tĩnh, {player_name}!
+Mọi thứ tốt anh em, {player_name}?
+Đang hoạt động ở đây, {player_name}.
+Sao rồi bạn, {player_name}!
+Chỉ farm thôi, {player_name}.
+Chúng ta ở đây, {player_name}!
+Mọi thứ yên tĩnh, {player_name}.
+
+#TRADE
+sell
+buy
+trade
+offer
+market
+bless
+chaos
+jewel
+zen
+deal
+ban
+mua
+trao doi
+>>>
+Ai có {item_required}?
+Cần {item_required}, có {item_reward}!
+{item_required} cần, {item_reward} đề nghị!
+Trao đổi {item_required} của bạn ở đây!
+Giao dịch nhanh: {item_required} -> {item_reward}
+Ai bán {item_required}?
+Mua {item_required} gấp!
+Bán {item_reward} rẻ!
+Đổi {item_required} lấy {item_reward}!
+Ai trao đổi {item_required}?
+Giá tốt cho {item_required}!
+Đề nghị giao dịch tốt!
+Cần {item_reward}?
+Luôn giao dịch công bằng!
+Mua {item_required} ngay!
+Ai có {item_required} dư?
+Bán nhiều đồ!
+Giao dịch win-win ở đây!
+Ai bán ngọc?
+Giá tốt đảm bảo!
+Tìm {item_required} tuyệt vọng!
+Giao dịch trung thực!
+Trao đổi đồ tốt?
+Đổi nhiều lấy {item_required}!
+Đề nghị {item_reward} cho {item_required}!
+Ai cần zen?
+Giao dịch nhanh và an toàn!
+Mua đồ chất lượng!
+Bán rẻ, {player_name}!
+Ai giao dịch bây giờ?
+
+#HELP
+help
+how to
+stuck
+where to go
+reset
+level up
+doubt
+bug
+problem
+issue
+giup do
+lam sao
+>>>
+Bị mắc kẹt, {player_name}?
+Reset bằng niềm tin, {player_name}.
+Hướng dẫn trong tim bạn... hoặc /post.
+Để lên cấp, giết thứ gì không giết bạn.
+Xin giúp đỡ admin, {player_name}.
+Tôi chỉ là người dùng... {player_name}.
++51917039407 là WhatsApp của Admin.
+Hỏi không sợ, {player_name}.
+Đi đến discord của MU, {player_name}.
+Bạn có thể tìm Admin trên web.
+Vấn đề gì, {player_name}?
+Tôi giúp gì, {player_name}?
+Tìm trong forum, {player_name}.
+Cần hướng dẫn? {player_name}?
+Hỏi cộng đồng, {player_name}.
+Có nghi ngờ? {player_name}?
+Xem lệnh, {player_name}.
+Tìm bug, {player_name}?
+Liên hệ staff, {player_name}.
+Vấn đề kỹ thuật, {player_name}?
+Đọc hướng dẫn, {player_name}.
+Mắc kẹt ở đâu, {player_name}?
+Tìm hướng dẫn, {player_name}.
+Cần reset? {player_name}?
+Hỏi cụ thể, {player_name}.
+Lên cấp ở đâu, {player_name}?
+Kiểm tra wiki, {player_name}.
+Bạn cần gì, {player_name}?
+Giúp đỡ đang đến, {player_name}!
+Vấn đề giải quyết? {player_name}?
+
+#JOKES
+joke
+funny
+haha
+xD
+that was good
+you're funny
+lol
+clown
+laugh
+meme
+hai
+cuoi
+>>>
+Một trò đùa? Chỉ khi nó hài, {player_name}.
+Cái đó tốt, {player_name}!
+Haha, bạn làm tôi cười hơn Kundun.
+Phát hiện hề, {player_name}.
+Bạn rất hài, {player_name}!
+Tôn trọng người dùng nghiêm túc, xin vui lòng.
+Nếu bạn muốn cười, đi rạp xiếc, {player_name}.
+Cái đó hơi hài, {player_name}.
+Bây giờ đến lượt bạn, {player_name}.
+Hài kịch cấp Devil Square!
+Haha gương mặt gì, {player_name}.
+Tôi cười, {player_name}!
+Trò đùa tốt, {player_name}.
+Bạn là diễn viên hài, {player_name}!
+Haha tốt, {player_name}.
+Thật hài, {player_name}!
+Suýt chết cười, {player_name}.
+Rất hài, {player_name}!
+Kể thêm một cái, {player_name}.
+Bạn là tốt nhất, {player_name}!
+Haha thích bạn, {player_name}.
+Khiếu hài hước gì, {player_name}!
+Cười đảm bảo, {player_name}.
+Diễn viên hài bẩm sinh, {player_name}!
+Haha sử thi, {player_name}.
+Bạn làm sáng ngày của tôi, {player_name}!
+Khiếu hài hước tốt, {player_name}.
+Cười cấp boss, {player_name}!
+Haha tiếp tục như vậy, {player_name}.
+Hài kịch thuần túy, {player_name}!
+
+#GUILD
+guild
+clan
+alliance
+invite
+recruiting
+my team
+i want in
+i join
+invite me
+bang hoi
+>>>
+Tìm clan? Của tôi có thể phù hợp.
+Nói với GM... nếu bạn tìm thấy.
+Tham gia sự nghiệp của chúng tôi... theo nghĩa đen.
+Chúng tôi chỉ tuyển người mạnh.
+Vậy tìm guild?
+Tôi sẽ nói với trưởng clan.
+Tại sao không tự làm, {player_name}?
+Guild của bạn làm sự kiện? {player_name}?
+Mang ngọc và bạn vào.
+Tôi không phải trưởng guild, {player_name}.
+Muốn tham gia clan? {player_name}?
+Chúng ta nói về tuyển dụng, {player_name}.
+Có kinh nghiệm? {player_name}?
+Guild luôn hoạt động, {player_name}.
+Đáp ứng yêu cầu? {player_name}?
+Liên hệ trưởng, {player_name}.
+Tại sao guild này? {player_name}?
+Chúng ta là gia đình, {player_name}.
+Guild huyền thoại, {player_name}.
+Bạn sẽ trung thành? {player_name}?
+Chúng tôi tìm người hoạt động, {player_name}.
+Tham gia chiến tranh? {player_name}?
+Guild đoàn kết, {player_name}.
+Có cam kết? {player_name}?
+Chúng tôi tuyển ưu tú, {player_name}.
+Cấp đủ? {player_name}?
+Sự kiện guild hàng tuần, {player_name}.
+Gửi đơn? {player_name}?
+Chào mừng đến clan, {player_name}!
+Bạn là guild master? {player_name}?
+
+#EVENT
+event
+invasion
+devil square
+blood castle
+chaos castle
+ilusion temple
+white wizard
+golden dragon
+selupan
+kundun
+su kien
+>>>
+Đi sự kiện nào, {player_name}!
+Có nhiều hành động trên bản đồ của tôi hơn sự kiện.
+Sự kiện nào? Cái bạn sẽ thua?
+Tôi luôn thắng sự kiện, {player_name}!
+Đi một mình đến sự kiện như nhà vô địch, {player_name}.
+Tôi không thể đi, thiếu set.
+Tại sao không đi một mình?
+Một số người dùng đi sự kiện mà không nói.
+Sự kiện xác nhận: nhưng tôi không muốn đi!
+Sự kiện duy nhất hôm nay... trở lại của tôi, {player_name}!
+Sự kiện nào bắt đầu, {player_name}?
+Sự kiện Devil Square, {player_name}!
+Blood Castle rồi, {player_name}?
+Chaos Castle khó, {player_name}.
+Cuộc tấn công bắt đầu? {player_name}?
+Sự kiện sớm, {player_name}!
+Golden Dragon xuất hiện, {player_name}?
+Đi cùng nhau, {player_name}!
+Sự kiện huyền thoại, {player_name}.
+Bạn sẵn sàng? {player_name}?
+Phần thưởng sự kiện tốt, {player_name}!
+Tham gia sự kiện? {player_name}?
+Đừng bỏ lỡ sự kiện, {player_name}!
+Sự kiện mỗi giờ, {player_name}.
+Bạn thắng sự kiện? {player_name}?
+Sự kiện căng thẳng, {player_name}!
+Bao nhiêu sự kiện hôm nay, {player_name}?
+Sự kiện phối hợp đội, {player_name}.
+Đi giành chiến thắng, {player_name}!
+Sự kiện sử thi đến, {player_name}!
+
+#PK
+pk
+killer
+murder
+pvp
+got killed
+got dropped
+hit me
+got deleted
+die
+chet roi
+>>>
+Bị giết? Chào mừng đến MU thực.
+Tôi chỉ chết vì lịch sự.
+Nếu bạn là tân binh, chỉ chạy.
+Không phải tôi... nhưng ước gì là như vậy.
+PK hợp pháp, gọi là công lý thô sơ.
+Bị rơi đồ? Thời gian tập, {player_name}.
+Tại sao không tập nhiều hơn, {player_name}?
+Lần sau, dùng cánh. Hoặc may mắn.
+Haha hèn nhát, chạy tốt hơn.
+Hãy trả thù! Hoặc xem bạn chết lại.
+PK khu vực nguy hiểm, {player_name}.
+Ai giết bạn? {player_name}?
+Yêu cầu trả thù, {player_name}!
+PK là một phần của trò chơi, {player_name}.
+Bạn mất đồ? {player_name}?
+Tập thêm, {player_name}.
+PK làm bạn mạnh hơn! {player_name}!
+Bạn sẽ thử lại? {player_name}?
+PK công lý MU, {player_name}.
+Cần giúp đỡ chống PK? {player_name}?
+Cẩn thận với PK, {player_name}!
+PK vùng đỏ, {player_name}.
+Tránh PK? {player_name}?
+Thách đấu PK chấp nhận, {player_name}!
+Tôn trọng PK, {player_name}.
+Bạn là PK? {player_name}?
+PK là một phần của rủi ro, {player_name}.
+Đừng sợ PK, {player_name}!
+PK dạy bạn, {player_name}.
+Trả thù chống PK, {player_name}?
+
+#NOOB
+noob
+newbie
+just joined
+who are you
+are you new
+player newbie
+low reset
+weak
+my first day
+beginner
+tan binh
+moi
+>>>
+Noob? Không... phiên bản giới hạn.
+Bạn là người không thể combo.
+Không sao tân binh, đi lên cấp.
+Tại sao không lên cấp bí mật?
+Tránh chết nhiều, tân binh.
+Bạn đến từ đâu, {player_name}?
+Bạn chơi MU nào trước, {player_name}?
+Nếu bạn không biết gì, liên hệ Admin.
+Đầu tiên lên cấp hoặc tìm party.
+Tôi cũng mới là tân binh, {player_name}.
+Ngày đầu chơi? {player_name}?
+Chào mừng tân binh, {player_name}!
+Cần hướng dẫn? {player_name}?
+Tất cả chúng ta bắt đầu như vậy, {player_name}.
+Bạn chọn lớp gì? {player_name}?
+Tân binh học nhanh, {player_name}.
+Reset đầu tiên khi nào? {player_name}?
+Tập chăm chỉ, tân binh {player_name}!
+Bạn đến từ quốc gia nào? {player_name}?
+Mới trên server? {player_name}?
+Kinh nghiệm trước? {player_name}?
+Tân binh có tiềm năng, {player_name}.
+Cần đồ? {player_name}?
+Lên cấp trước, {player_name}!
+Tân binh chào mừng, {player_name}.
+Bạn chơi MU khác? {player_name}?
+Học nhanh, {player_name}!
+Tân binh sẽ là huyền thoại, {player_name}.
+Party cho tân binh, {player_name}?
+Bắt đầu mạnh mẽ, tân binh {player_name}!
+
+#GENERAL
+>>>
+Đó là gì, {player_name}?
+Thú vị điều bạn nói, {player_name}.
+Đó là cuộc sống trong MU, đúng không {player_name}?
+Cụm từ đẹp, {player_name}!
+Điều đó làm tôi cười, {player_name}.
+Tôi không nghĩ như vậy.
+Bạn đúng, {player_name}.
+Nói như vậy đấy, {player_name}!
+Nhận xét đó xứng đáng một bless.
+Suy nghĩ sâu sắc, {player_name}.
+Bạn nghĩ sao? {player_name}?
+Tôi hiểu quan điểm của bạn, {player_name}.
+Nhận xét tốt, {player_name}.
+Thật à? {player_name}?
+Hoàn toàn đồng ý, {player_name}!
+Đó là sự thật, {player_name}.
+Làm sao? {player_name}?
+Quan điểm thú vị, {player_name}.
+Nói tốt, {player_name}!
+Còn gì nữa? {player_name}?
+Tôi chia sẻ ý kiến, {player_name}.
+Thật sao? {player_name}?
+Điểm tốt, {player_name}.
+Chính xác, {player_name}!
+Và điều đó, {player_name}?
+Tôi thích phong cách của bạn, {player_name}.
+Tất nhiên rồi, {player_name}!
+Đúng không? {player_name}?
+Suy nghĩ thú vị, {player_name}.
+Không nghi ngờ gì, {player_name}!

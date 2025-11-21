@@ -1,0 +1,508 @@
+; BotPhrases.txt - Filipino/Tagalog
+; Mga salita na sinasabi ng bot sa laro
+; Format: #KATEGORYA, posibilidad
+; Pagkatapos ay mga salita, isa bawat linya
+; Sistema ng posibilidad na na-optimize para sa hindi bababa sa 1 salita bawat kategorya bawat oras
+
+; Base probability para sa dynamic categories
+#MAP_BASE_PROB,20
+#CLASS_BASE_PROB,15
+
+; --- PANGKALAHATANG KATEGORYA ---
+#GENERAL,8
+Magandang araw sa lahat
+Kumusta komunidad
+May tao ba dito?
+Kumusta mga mandirigma
+Kamusta naman?
+Nagsasanay ng mabuti
+Naghahanap ng aksyon
+Kamusta kayong lahat?
+Handa na para sa pakikipagsapalaran
+Nandito at handa na
+Magandang server
+May aktibo ba?
+Nandito sa mapa
+Tahimik na nag-farm
+May bagong tao ba?
+Nakakonekta ako
+Magandang enerhiya ngayong araw
+Sino ang online?
+Kumusta mula sa bahay
+Tara mag-training
+May nagsasalita ng Filipino?
+Kamusta ang komunidad
+Kakarating ko lang
+Kamusta ang server?
+Okay lang dito
+Tara full force
+May makakausap ba?
+Magandang hapon sa lahat
+Aktibo sa laro
+Ano ba?
+Nandito at matatag
+Tahimik ba lahat?
+Laging nandito
+May Pilipino ba?
+Mainit na pagbati
+
+#NEAR_REAL_PLAYER,18
+Kumusta kaibigan!
+Ano ba?
+Pagbati!
+Hoy, kumusta ka?
+Kumusta!
+Okay ka ba?
+Kumusta kasama
+Ano ang dala mo dito?
+Saya makita ka
+Welcome!
+Kamusta ka?
+Gulat ako makita ka!
+Okay ka ba?
+Hoy, ano ginagawa mo?
+Kumusta ka kasamahan
+Madalas ka ba dito?
+Hoy, astig na mandirigma!
+Kailangan mo ba ng tulong?
+Good luck kaibigan
+Mananatili ka ba?
+Kumusta pare!
+Bago ka ba?
+Taga-saan ka?
+Hoy, magandang gamit
+Ilang level ka na?
+Ang ganda ng armas!
+Nag-farm ka ba?
+Kumusta, rinig mo ako?
+Magandang class!
+Lagi ka bang naglalaro?
+
+#IN_PARTY,22
+Magandang party!
+Tara team!
+Magaling lahat
+Tuloy lang!
+Magaling na team!
+Mas malakas tayo magkasama
+Handa pa ba?
+Perpekto, tuloy lang
+Tara kumuha ng more EXP
+Magandang pace guys
+Magandang koordinasyon
+Ito ang teamwork!
+Legendary party
+Tuloy pa ba tayo?
+Magaling na synchronization
+Lahat ay gumagawa ng mabuti
+Tara sa boss na yan!
+Efficient na party
+Gusto ko ang grupo na to
+Tuloy ang farm!
+Magaling na leadership
+May kailangan ba ng buff?
+Quality party
+Lahat ay nag-cooperate
+Tara pa!
+Walang maiiwanan
+Magandang team chemistry
+Tuloy ang domination!
+Balanced party
+Uulitin bukas?
+Lahat ay 100% effort
+Committed party
+
+#PVP,28
+Magandang laban!
+Sobrang intense
+Magandang labanan
+Malakas ka!
+Magaling na combat
+Respeto mandirigma
+Impressive!
+Halos natalo mo ako
+Magaling na duel
+Epic yun
+Magaling na technique
+Pinagpawisan mo ako!
+Fair fight
+Magaling na kalaban ka
+Grabe ang combo!
+Halos napatay mo ako
+Magaling na strategy
+Ang galing ng reflexes!
+Balanced na combat
+Good timing!
+Respeto sa skill mo
+Halos perfect!
+Memorable duel
+Anong gamit mo!
+Magaling na defense
+Halos nanalo ako!
+Respetong PVP
+Gusto ko ng revenge!
+Magaling gamitin ang skills
+Mabilis ka!
+Malinis na laban
+Honorable duel
+Nahuli mo ako ng mabuti!
+Isa pa?
+Magaling na experience
+
+#TRADE,25
+Naghahanap ng {item_required}, trade mo!
+Kailangan {item_required}, magandang deal naghihintay!
+Bumibili ng {item_required} para sa {item_reward}!
+Trade {item_required} -> {item_reward}!
+WTB: {item_required} = {item_reward}
+May {item_required} ba?
+Kailangan {item_required}, meron {item_reward}!
+{item_required} wanted, {item_reward} offered!
+Trade ang {item_required} mo dito!
+Mabilis na trade: {item_required} -> {item_reward}
+Bumibili ng {item_required} urgent
+Nagbebenta ng {item_reward} mura
+May nagtrade ba ng {item_required}?
+Magandang presyo para sa {item_required}
+Palit {item_required} para sa {item_reward}
+Nag-offer ng magandang deal para sa {item_required}
+Fair trade: {item_required}
+Sino nagbebenta ng {item_required}?
+Desperadong naghahanap ng {item_required}
+Honest trade dito
+May kailangan ba ng {item_reward}?
+Bibili ng {item_required} agad
+Win-win trade: {item_required}
+Nagtrade ba ng jewels?
+Naghahanap ng magandang items
+May nagbebenta ba ng {item_required}?
+Garantisadong magandang presyo
+Laging fair trade
+Sino may extra {item_required}?
+Nagtrade ng iba't ibang items
+
+#MORNING,12
+Magandang umaga!
+Magaling na simula ng araw
+Perpektong umaga para mag-training
+Handa para sa araw
+Energy sa maximum
+Magandang umaga sa lahat!
+Produktibong umaga
+Simula ng lahat
+Bagong araw, bagong layunin!
+Magandang umaga sa komunidad
+Simula ng grind
+Umaga ng farm
+Perpektong araw!
+Magandang umaga mga mandirigma
+Kape at MU, perpekto
+Simula ng journey
+Magandang umaga!
+Maagahan na simula
+Araw ng tagumpay
+Tara na!
+Epic na umaga darating
+
+#AFTERNOON,12
+Magandang hapon
+Produktibong hapon
+Oras para mag-train pa
+May oras pa
+Maintain ang energy
+Hapon ng aksyon
+Magandang hapon!
+Kalagitnaan ng araw
+Tuloy lang tayo
+Perpektong hapon
+Kamusta ang hapon?
+Hapon ng farm
+Produktibo hanggang ngayon
+Tuloy ang training!
+Tahimik na hapon
+Oras para umakyat ng level
+Magandang hapon sa lahat!
+Hapon ng grind
+Tuloy ang aktibo
+May event ba ngayong hapon?
+Legendary na hapon
+
+#NIGHT,12
+Magandang gabi
+Gabi ng adventure
+Ang gabi ay bata pa
+Oras ng aksyon
+Night training
+Magandang gabi!
+Epic na gabi
+Prime time
+Ang gabi ay sa atin!
+Gabi ng farm
+Sino pa ang gising?
+Legendary na gabi
+Magandang gabi mga mandirigma
+Produktibong gabi
+Tuloy ang gising!
+Gabi ng tagumpay
+Magdamag?
+Gabi ng grind
+Magandang gabi komunidad!
+Intense na gabi
+Oras ng event
+
+; --- CLASS-SPECIFIC PHRASES ---
+#CLASS_0,15
+Ang Nova ko ay nag-charge! Takbo, mga noob!
+Ang staff ko ay pure power, kaibigan.
+Evil Spirit o Aquabeam? Mahirap pumili.
+Ang mga spell ko ay matindi!
+Teleport ay hobby ko, okay?
+Damhin ang Ice Storm ko, clown!
+Magic ay nasa dugo ko.
+Meteor ay bumabagsak na may galit!
+Apoy ng pagkawasak!
+Ice arrow ay nagyeyelo ng lahat!
+Dark Wizard supreme dito
+Ang mana ko ay hindi nauubos
+Nakita mo ang Flame Strike ko?
+Soul Barrier laging active
+Energy master class
+Ako ay pure magic!
+Wizard mula simula
+Ang lakas ko ay walang hangganan
+Elite spells
+Legendary na wizard!
+Magic class ay nangingibabaw
+Sino ang kailangan ng espada?
+Nova one-shot paparating
+Ice Storm malaking area
+Meteor laging critical
+Strategic teleport
+Mana shield activated
+DW forever!
+Wizard hindi namamatay
+Magic > Physical na lakas
+
+#CLASS_16,15
+Sa talim ng espada, kasamahan!
+Ang Twisting Slash ko ay nakakalula!
+Combo? Maghanda para sa sakit!
+Ang armor na ito ay nakakita ng libong labanan.
+Ang BK ay hindi umaatras! Kailanman!
+Death Stab! Diretso sa puso!
+Ang kabayo ko ay mas mabilis kaysa sa takot mo.
+Lakas ay aking pangalawang pangalan, tandaan!
+Dragon Slayer? Madali para sa akin!
+Ang aking alamat ay hinuhubog sa bawat tagumpay.
+Blade Knight unstoppable
+Espada at kalasag, perpektong kombinasyon
+Front line tank
+Ang combo ko ay masakit!
+BK hindi sumusuko
+Elite mandirigma
+Impenetrable defense
+Death Stab critical!
+Karangalang kabalyero
+Ako ang pader!
+BK mula season 1
+Tank class master
+Ang armor ko ay legendary
+Walang hanggang combo
+Devastating Cyclone!
+Malakas na warrior spirit
+PVP BK unbeatable
+Maximum cutting power!
+Sword master dito
+Kabalyero ng kaharian
+
+#CLASS_32,15
+Ang mga pana ko ay hindi sumusuway sa target.
+Bilis ay aking lakas.
+Multishot handa nang pumutok!
+Elven precision ay walang kapantay.
+Ice Arrow! Nayelo sa lugar!
+Mula sa gubat ay nagdadala ako ng hustisya.
+Ang busog ko ay kumakanta ng awit ng tagumpay.
+Bilis at precision pinagsama.
+Penetrating shot paparating!
+Kalikasan ay gumagabay sa aking pana.
+Elf archer supreme
+Bilis ay aking advantage
+Triple Shot ready!
+Elite elf archer
+Ang mga pana ko ay nakamamatay
+Elf magpakailanman
+Penetrating shot critical
+Hindi kailanman sumusuway sa target!
+Maximum agility
+Energy elf malakas
+Ice Arrow nagyeyelo!
+Legendary archer
+Distansya ay aking kasosyo
+Multishot area!
+Elf hunter master
+Gubat ay aking tahanan
+Perfect precision
+Arrow rain paparating!
+Elf archer forever
+Natural power dumadaloy
+
+#CLASS_48,15
+Magic Gladiator handa para sa aksyon!
+Espada at magic sa perpektong harmony.
+Twisting Slash na may magical power!
+Ang pinakamahusay sa dalawang mundo.
+Ang espada ko ay kumakalatog sa energy.
+Fire Slash ay gumugupit at sumusunog!
+Duelist class, laging handa.
+Cyclone ay sumisira ng lahat!
+Death Stab na may magical enhancement!
+Melee mage ay nangingibabaw!
+MG hybrid supreme
+Magic + Sword = Victory
+Magical Power Slash!
+Invincible gladiator
+Melee mage master
+Fire Slash sumusunog!
+MG combo deadly
+Perpektong duality
+Spiral Slash!
+Magical warrior elite
+Versatility ay susi
+MG para sa PVP!
+Best hybrid class
+Cyclone + Magic!
+Legendary gladiator
+Best ng pareho!
+MG mula simula
+Warrior mage fusion
+MG unstoppable!
+Magical melee power
+
+#CLASS_64,15
+Dark Lord na nag-command ng mga army!
+Ang uwak ko ay nagdadala ng kamatayan mula sa itaas.
+Fire Burst nag-clear ng daan!
+Leadership ay aking kaloob.
+Critical damage ay aking specialty.
+Dark horse pumapasok sa labanan!
+Command ang forces mo, sirain ang kalaban!
+Fire Scream umaalaala sa battlefield!
+Lord ng kadiliman at kapangyarihan!
+Ang mga pet ko ay gumagawa ng dirty work.
+Dark Lord supreme
+Pet army unstoppable
+Mataas na critical damage!
+Lord ng kadiliman
+Command master class
+Dark horse charge!
+Pet collection complete
+Fire Burst area!
+DL leadership malakas
+Raven attack deadly!
+Lord magpakailanman
+Critical specialist
+Dark Spirit summon!
+Command lahat ng forces
+Lord power maximum!
+Coordinated pet attack
+DL para sa boss hunting
+Fire Scream echo!
+Lord ng kaharian
+Master ng kadiliman!
+
+#CLASS_80,15
+Summoner tumatawag ng sinaunang lakas!
+Ang summons ko ay lumalaban sa aking tabi.
+Explosion ng elemental power!
+Magic ay dumadaloy sa aking ugat.
+Meteor rain paparating!
+Spell mastery sa pinakamataas na antas.
+Sinaunang magic ay bumabangon!
+Chain lightning ay tumatama sa lahat!
+Tumatawag ng forces ng kalikasan!
+Ang magic ko ay walang hangganan.
+Summoner dimension master
+Summons nasaan-saan!
+Supreme elemental power
+Malaking explosion!
+Summon army ready
+Magic overflow
+Ancient spells!
+Elite Summoner class
+Dimensional power!
+Summons hindi namamatay
+Magical mastery!
+Summoner para sa farming
+Chain lightning!
+Elemental master
+Summon boost!
+Malakas na natural force
+Supreme Summoner!
+Dimensional control
+Infinite magic!
+Best summon builds
+
+#CLASS_96,15
+Rage Fighter naglalabas ng galit!
+Ang suntok ko ay tumatagos sa armor!
+Mastery sa melee weapons!
+Dragon Roar ay umuuga ng lupa!
+Phoenix shot sumusunog ng maliwanag!
+Melee specialist handa!
+Walang kapantay na combat experience!
+Dragon Slayer sa aking mga kamay!
+Dual weapons, double damage!
+Fighter spirit ay hindi namamatay!
+RF rage mode active
+Suntok ng galit!
+Weapon master class
+Dragon Roar power!
+Close combat specialist
+Phoenix rising!
+RF melee king
+Dual wield master!
+Rage ay hindi natatapos
+Fighter spirit!
+RF tank build
+Combo breaker!
+Martial arts master
+Elite RF!
+Fist weapons deadly
+RF unstoppable!
+Close combat winner
+Rage mode on!
+Fighter forever
+Legendary fists!
+
+#CLASS_112,15
+Grow Lancer tumatakbo pasulong!
+Ang sibat ko ay tumatagos sa lahat ng defense!
+Spiral Slash sinisira ang kalaban!
+Mounted combat ay aking sining!
+Dragon Spear released!
+Kabalyero ng kaharian!
+Tumatakbo ng buong lakas!
+Lance strike critical!
+Cavalry domination!
+Ang kabayo ko at ako ay isa!
+GL cavalry master
+Lance penetration!
+Mounted combat pro
+Devastating Spiral!
+Elite lancer class
+Dragon Spear critical!
+GL charge deadly
+Lance master!
+Cavalry domination
+Mounted knight!
+GL para sa PVP
+Lance combo!
+Mounted warrior
+GL unstoppable!
+Legendary lancer
+Charge attack!
+Karangalang kabalyero
+GL power maximum!
+Cavalry specialist
+Lance hindi sumusuway!
